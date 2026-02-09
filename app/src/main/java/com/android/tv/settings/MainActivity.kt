@@ -1,6 +1,8 @@
 package com.android.tv.settings
 
+import android.net.wifi.WifiConfiguration
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -33,6 +35,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -90,6 +93,9 @@ sealed class Destinations(val route: String) {
     object WifiConnectScreen : Destinations("wifi_connect_screen/{ssid}") {
         fun createRoute(ssid: String) = "wifi_connect_screen/$ssid"
     }
+    object WifiDetailScreen : Destinations("wifi_detail_screen/{ssid}") {
+        fun createRoute(ssid: String) = "wifi_detail_screen/$ssid"
+    }
 }
 
 
@@ -100,20 +106,26 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
 
     val names = stringArrayResource(R.array.docks)
     //val icons = integerArrayResource(R.array.dockicons);
-    val startDestination = 0;
+    val startDestination = 2;
     var selectedDestination by rememberSaveable { mutableIntStateOf( startDestination) }
     val tintcolor = Color(0xFF4577FF)
     Scaffold(
-
+        containerColor = Color(0xffeceeef),
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
 
-                modifier = modifier.padding(0.dp),
+                modifier = modifier.padding(0.dp).background(color = Color(0xffeceeef)),
                 title = { Text("设置", fontSize = 17.sp) },
                 navigationIcon = {
                     IconButton(onClick = {
-                        //navController.popBackStack()
+
+                        if (navController.previousBackStackEntry != null) {
+                            Log.d("navback", navController.previousBackStackEntry!!.id)
+                            navController.popBackStack()
+                        } else {
+                            // 已经是第一个页面了
+                        }
                     /* 在这里处理返回事件 */ }) {
                         Icon(
 
@@ -176,7 +188,7 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .background(Color(0xFFF0F0F0)) // 内容区域背景色
+                    .background(Color(0x7AFFFFFF) ) // 内容区域背景色
                     .padding(contentPadding)
             ) {
                 when (selectedDestination) {
@@ -184,7 +196,7 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                     1 -> {
                         NavHost(navController = navController, startDestination = Destinations.WifiScreen.route) {
                             composable(Destinations.WifiScreen.route) {
-                                WifiManagerScreen(navController = navController)
+                                WifiManagerScreen(navController = navController,)
                             }
                             composable(Destinations.AddWifiScreen.route) {
                                 AddWifiNetworkScreen(onBack = { navController.popBackStack() })
@@ -196,8 +208,19 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                                 val ssid = it.arguments?.getString("ssid") ?: ""
                                 WifiConnectScreen(ssid = ssid, onBack = { navController.popBackStack() })
                             }
+                            composable(
+                                Destinations.WifiDetailScreen.route,
+                                arguments = listOf(navArgument("ssid") { type = NavType.StringType })
+                            ) {
+                                val ssid = it.arguments?.getString("ssid") ?: ""
+                                WifiDetailScreen (ssid = ssid, onBack = { navController.popBackStack() })
+                            }
                         }
                     }
+                    2->{
+                        BlueToothScreen(modifier,navController)
+                    }
+
                     else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(text = "${names[selectedDestination]} 页面")
                     }
@@ -280,6 +303,6 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
 @Composable
 fun WifiManagerScreenPreview() {
     设置Theme {
-        //WifiManagerScreen(navController = rememberNavController())
+        NavigationRailExample()
     }
 }
