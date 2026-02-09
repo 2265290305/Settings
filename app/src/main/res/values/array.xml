@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="docks">
+        <item>个人中心</item>
+        <item>无线网络</item>
+        <item>蓝牙设置</item>
+        <item>声音与显示</item>
+        <item>屏保设置</item>
+        <item>节能设置</item>
+        <item>实验室</item>
+        <item>隐私设置</item>
+        <item>存储设置</item>
+        <item>本机信息</item>
+        <item>一键检测</item>
+    </string-array>
+    <array name="dockicons">
+        <item>@drawable/account</item>
+    </array>
+</resources>
