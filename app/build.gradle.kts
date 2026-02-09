@@ -5,37 +5,21 @@ plugins {
 
 android {
     namespace = "com.android.tv.settings"
-    compileSdk {
-        version = release(36) {
-            minorApiLevel = 1
-        }
-    }
+    compileSdk = 28
+
     signingConfigs {
         create("release") {
-            storeFile = file("keystore/release.jks")
-            storePassword = "store_password"
-            keyAlias = "key_alias"
-            keyPassword = "key_password"
+            storeFile = file("android.jks")
+            storePassword = "android"
+            keyAlias = "android"
+            keyPassword = "android"
         }
     }
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
-        }
-    }
-    buildTypes {
-        getByName("degug") {
-            isMinifyEnabled = false
-            signingConfig = signingConfigs.getByName("release")
-        }
-    }
+
     defaultConfig {
-        namespace = "com.android.tv.settings"
         applicationId = "com.android.tv.settings"
-        //applicationId = "com.oplus.engineernetwork"
         minSdk = 24
-        targetSdk = 28
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -49,6 +33,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
+        }
+        debug {
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     compileOptions {
@@ -59,6 +47,7 @@ android {
         compose = true
     }
 }
+
 
 dependencies {
     implementation(libs.androidx.core.ktx)
@@ -72,6 +61,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
+    implementation(files("libs/classes.jar"))
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)

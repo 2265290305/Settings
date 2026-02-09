@@ -51,9 +51,11 @@ import androidx.compose.ui.unit.sp
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.android.tv.settings.ui.theme.设置Theme
 
 class MainActivity : ComponentActivity() {
@@ -85,6 +87,9 @@ sealed class Destinations(val route: String) {
     object Detail : Destinations("detail")
     object WifiScreen : Destinations("wifi_screen")
     object AddWifiScreen : Destinations("add_wifi_screen")
+    object WifiConnectScreen : Destinations("wifi_connect_screen/{ssid}") {
+        fun createRoute(ssid: String) = "wifi_connect_screen/$ssid"
+    }
 }
 
 
@@ -95,7 +100,7 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
 
     val names = stringArrayResource(R.array.docks)
     //val icons = integerArrayResource(R.array.dockicons);
-    val startDestination = 1;
+    val startDestination = 0;
     var selectedDestination by rememberSaveable { mutableIntStateOf( startDestination) }
     val tintcolor = Color(0xFF4577FF)
     Scaffold(
@@ -183,6 +188,13 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                             }
                             composable(Destinations.AddWifiScreen.route) {
                                 AddWifiNetworkScreen(onBack = { navController.popBackStack() })
+                            }
+                            composable(
+                                Destinations.WifiConnectScreen.route,
+                                arguments = listOf(navArgument("ssid") { type = NavType.StringType })
+                            ) {
+                                val ssid = it.arguments?.getString("ssid") ?: ""
+                                WifiConnectScreen(ssid = ssid, onBack = { navController.popBackStack() })
                             }
                         }
                     }
