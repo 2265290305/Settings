@@ -12,6 +12,7 @@ import android.net.NetworkRequest
 import android.net.wifi.ScanResult
 import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
+import android.util.Log
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -23,7 +24,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -70,13 +73,31 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
             @Suppress("DEPRECATION")
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
-                    scanResults = wifiManager?.scanResults ?: emptyList()
-
-                    savedNetworks = wifiManager?.configuredNetworks ?: emptyList()
+                    scanResults = wifiManager?.scanResults?.filter { it.SSID.isNotBlank() } ?: emptyList()
+                    savedNetworks = wifiManager?.configuredNetworks?.filter { it.SSID.isNotBlank() } ?: emptyList()
+                    Log.d("wifis",wifiManager?.configuredNetworks.toString())
                     isScanning = false
                 }
             }
         }
+    }
+
+    val (inRangeSavedNetworks, otherAvailableNetworks) = remember(savedNetworks, scanResults) {
+
+        val inRange = savedNetworks
+            .filter { savedNet ->
+                scanResults.any { scan ->
+                    scan.SSID == savedNet.SSID.trim('"')
+                }
+            }
+            .distinctBy { it.SSID.trim('"') }
+
+        val others = scanResults.filter {   it.SSID.isNotBlank() }
+            .groupBy { it.SSID }
+            .map { (_, list) ->
+                list.maxBy { it.level }   // 取信号最强的
+            }
+        inRange to others
     }
 
     val networkCallback = remember {
@@ -122,7 +143,8 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Card(
@@ -150,90 +172,97 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
         }
 
         if (isChecked) {
-            if (savedNetworks.isNotEmpty()) {
+            if (inRangeSavedNetworks.isNotEmpty()) {
                 Text("我的网络", fontSize = 16.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp))
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                 ) {
-                    LazyColumn {
-                        items(savedNetworks) { network ->
-                            @Suppress("DEPRECATION")
-                            Row(
-                                modifier = Modifier
-                                    .clickable { navController.navigate(Destinations.WifiConnectScreen.createRoute(network.SSID)) }
-                                    .padding(horizontal = 16.dp, vertical = 20.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(network.SSID.trim('"'), fontSize = 16.sp)
-                                Spacer(Modifier.weight(1f))
-                                val isConnected = connectedSsid == "\"${network.SSID.trim('"')}\""
-                                Text(if (isConnected) "已连接" else "已保存", color = if (isConnected) Color(0xFF4577FF) else Color.Gray, fontSize = 14.sp)
-                                Icon(painter = painterResource(id = R.drawable.ic_info), contentDescription = "Info", tint = if (isConnected) Color(0xFF4577FF) else Color.Gray)
-                            }
-                        }
-                    }
-                }
-            }
+                    Column {
+                        inRangeSavedNetworks.forEach { network ->
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("可用Wi-Fi网络", fontSize = 16.sp)
-                TextButton(onClick = { 
-                    isScanning = true
-                    wifiManager?.startScan() 
-                }) {
-                    Text("刷新", color = Color(0xFF4577FF))
-                    //Icon(painter = painterResource(R.drawable.refresh), contentDescription = "刷新", tint = Color(0xFF4577FF))
-                }
-            }
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-            ) {
-                if (isScanning) {
-                    Box(modifier = Modifier.fillMaxWidth().padding(16.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    LazyColumn {
-                        items(scanResults) { result ->
-                            @Suppress("DEPRECATION")
-                            Row(
-                                modifier = Modifier
-                                    .clickable { navController.navigate(Destinations.WifiConnectScreen.createRoute(result.SSID)) }
-                                    .padding(horizontal = 16.dp, vertical = 20.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(if (result.SSID.isEmpty()) "隐藏WIFI" else result.SSID, fontSize = 16.sp)
-                                Spacer(Modifier.weight(1f))
-                                if (result.capabilities.contains("WEP") || result.capabilities.contains("WPA")) {
-                                    Icon(painter = painterResource(id = R.drawable.lock), contentDescription = "Secured")
+                                Row(
+                                    modifier = Modifier
+                                        .clickable { navController.navigate(Destinations.WifiConnectScreen.createRoute( network.SSID)) }
+                                        .padding(horizontal = 16.dp, vertical = 20.dp)
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(network.SSID.trim('"'), fontSize = 16.sp)
+                                    Spacer(Modifier.weight(1f))
+                                    val isConnected = connectedSsid == "\"${network.SSID.trim('"')}\""
+                                    Text(if (isConnected) "已连接" else "已保存", color = if (isConnected) Color(0xFF4577FF) else Color.Gray, fontSize = 14.sp)
+                                    Icon(painter = painterResource(id = R.drawable.ic_info), contentDescription = "Info", tint = if (isConnected) Color(0xFF4577FF) else Color.Gray)
                                 }
                             }
-                        }
-                        item {
 
-                            Row(
-                                modifier = Modifier
-                                    .clickable { navController.navigate(Destinations.AddWifiScreen.route) }
-                                    .padding(horizontal = 16.dp, vertical = 20.dp)
-                                    .fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text("手动添加Wi-Fi网络", fontSize = 16.sp)
-                                Spacer(Modifier.weight(1f))
-                                Icon(painter = painterResource(id = R.drawable.arrow_right), contentDescription = null, tint = Color.Gray)
+
+                    }
+                }
+            }
+
+            if (otherAvailableNetworks.isNotEmpty()) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("可用Wi-Fi网络", fontSize = 16.sp)
+                    TextButton(onClick = {
+                        isScanning = true
+                        wifiManager?.startScan()
+                    }) {
+                        Text("刷新", color = Color(0xFF4577FF))
+                        //Icon(painter = painterResource(R.drawable.refresh), contentDescription = "刷新", tint = Color(0xFF4577FF))
+                    }
+                }
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
+                ) {
+                    if (isScanning) {
+                        Box(modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp), contentAlignment = Alignment.Center) {
+                            CircularProgressIndicator()
+                        }
+                    } else {
+                         Column {
+                            otherAvailableNetworks.forEach { result ->
+                                @Suppress("DEPRECATION")
+                                Row(
+                                    modifier = Modifier
+                                        .clickable {
+                                            navController.navigate(Destinations.WifiConnectScreen.createRoute(result.SSID)) }
+                                        .padding(horizontal = 16.dp, vertical = 20.dp)
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(result.SSID, fontSize = 16.sp)
+                                    Spacer(Modifier.weight(1f))
+                                    if (result.capabilities.contains("WEP") || result.capabilities.contains("WPA")) {
+                                        Icon(painter = painterResource(id = R.drawable.lock), contentDescription = "Secured")
+                                    }
+                                }
                             }
+
+
+                                Row(
+                                    modifier = Modifier
+                                        .clickable { navController.navigate(Destinations.AddWifiScreen.route) }
+                                        .padding(horizontal = 16.dp, vertical = 20.dp)
+                                        .fillMaxWidth(),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text("手动添加Wi-Fi网络", fontSize = 16.sp)
+                                    Spacer(Modifier.weight(1f))
+                                    Icon(painter = painterResource(id = R.drawable.arrow_right), contentDescription = null, tint = Color.Gray)
+                                }
+
                         }
                     }
                 }

@@ -1,5 +1,6 @@
 package com.android.tv.settings
 
+import android.net.wifi.WifiConfiguration
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -198,6 +199,10 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                             }
                         }
                     }
+                    2->{
+                        BlueToothScreen(modifier,navController)
+                    }
+
                     else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(text = "${names[selectedDestination]} 页面")
                     }
