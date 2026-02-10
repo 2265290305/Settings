@@ -54,7 +54,7 @@ fun WifiDetailScreen(ssid: String, onBack: () -> Unit) {
         mutableStateOf(wifiManager?.scanResults)
     }
 
-    val currentScanResult = scanResults?.find { it.SSID == ssid }
+    val currentScanResult = scanResults?.find { it.SSID.trim('"') == ssid.trim('"') }
 
     val signalStrength = when (currentScanResult?.level) {
         in -50..0 -> "极强"
