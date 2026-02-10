@@ -1,6 +1,5 @@
 package com.android.tv.settings
 
-import android.net.wifi.WifiConfiguration
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -35,7 +34,6 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBarColors
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -126,7 +124,7 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                         } else {
                             // 已经是第一个页面了
                         }
-                    /* 在这里处理返回事件 */ }) {
+                        /* 在这里处理返回事件 */ }) {
                         Icon(
 
 
@@ -220,7 +218,9 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                     2->{
                         BlueToothScreen(modifier,navController)
                     }
-
+                    3->{
+                        SoundAndDisplayScreen()
+                    }
                     else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(text = "${names[selectedDestination]} 页面")
                     }
