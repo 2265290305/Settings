@@ -21,9 +21,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -60,8 +61,8 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
     val connectivityManager = if (LocalInspectionMode.current) null else context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
     var isChecked by remember { mutableStateOf(wifiManager?.isWifiEnabled ?: true) }
-    var scanResults by remember { mutableStateOf<List<ScanResult>>(emptyList()) }
-    var savedNetworks by remember { mutableStateOf<List<WifiConfiguration>>(emptyList()) }
+    var rawScanResults by remember { mutableStateOf<List<ScanResult>>(emptyList()) }
+    var rawSavedNetworks by remember { mutableStateOf<List<WifiConfiguration>>(emptyList()) }
     var isScanning by remember { mutableStateOf(false) }
     var connectedSsid by remember { mutableStateOf<String?>(null) }
 
@@ -70,21 +71,38 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
             @Suppress("DEPRECATION")
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
-                    scanResults = wifiManager?.scanResults ?: emptyList()
-
-                    savedNetworks = wifiManager?.configuredNetworks ?: emptyList()
+                    rawScanResults = wifiManager?.scanResults?.filter { it.SSID.isNotBlank() } ?: emptyList()
+                    rawSavedNetworks = wifiManager?.configuredNetworks?.filter { it.SSID.isNotBlank() } ?: emptyList()
                     isScanning = false
                 }
             }
         }
     }
 
+    // Process raw lists to get clean lists for UI
+    val (savedNetworks, availableNetworks) = remember(rawSavedNetworks, rawScanResults) {
+        val distinctSaved = rawSavedNetworks.distinctBy { it.SSID.trim('"') }.sortedBy { it.SSID.trim('"')!=(wifiManager?.connectionInfo?.ssid?.trim('"')) }
+        val savedSsids = distinctSaved.map { it.SSID.trim('"') }.toSet()
+
+        val available = rawScanResults
+            .filter { it.SSID.trim('"') !in savedSsids }
+            .groupBy { it.SSID } // Group by SSID to remove duplicates from scan
+            .mapNotNull { (_, group) -> group.maxByOrNull { it.level } }
+        // Get the one with best signal
+
+        distinctSaved to available
+    }
+
+
+
+
     val networkCallback = remember {
         object : ConnectivityManager.NetworkCallback() {
             override fun onAvailable(network: Network) {
                 val networkCapabilities = connectivityManager?.getNetworkCapabilities(network)
                 if (networkCapabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true) {
-                    val wifiInfo = connectivityManager.getNetworkCapabilities(network)?.transportInfo as android.net.wifi.WifiInfo?
+                    @Suppress("DEPRECATION")
+                    val wifiInfo = wifiManager?.connectionInfo
                     connectedSsid = wifiInfo?.ssid
                 }
             }
@@ -122,7 +140,8 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         Card(
@@ -157,19 +176,18 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
                 ) {
-                    LazyColumn {
-                        items(savedNetworks) { network ->
-                            @Suppress("DEPRECATION")
+                    Column  {
+                        savedNetworks.forEach { network ->
                             Row(
                                 modifier = Modifier
-                                    .clickable { navController.navigate(Destinations.WifiConnectScreen.createRoute(network.SSID)) }
+                                    .clickable { navController.navigate(Destinations.WifiDetailScreen.createRoute(network.SSID)) }
                                     .padding(horizontal = 16.dp, vertical = 20.dp)
                                     .fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(network.SSID.trim('"'), fontSize = 16.sp)
                                 Spacer(Modifier.weight(1f))
-                                val isConnected = connectedSsid == "\"${network.SSID.trim('"')}\""
+                                val isConnected = connectedSsid?.trim('"') == network.SSID.trim('"')
                                 Text(if (isConnected) "已连接" else "已保存", color = if (isConnected) Color(0xFF4577FF) else Color.Gray, fontSize = 14.sp)
                                 Icon(painter = painterResource(id = R.drawable.ic_info), contentDescription = "Info", tint = if (isConnected) Color(0xFF4577FF) else Color.Gray)
                             }
@@ -204,9 +222,8 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
                         CircularProgressIndicator()
                     }
                 } else {
-                    LazyColumn {
-                        items(scanResults) { result ->
-                            @Suppress("DEPRECATION")
+                    Column {
+                        availableNetworks.forEach { result ->
                             Row(
                                 modifier = Modifier
                                     .clickable { navController.navigate(Destinations.WifiConnectScreen.createRoute(result.SSID)) }
@@ -214,14 +231,14 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
                                     .fillMaxWidth(),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Text(if (result.SSID.isEmpty()) "隐藏WIFI" else result.SSID, fontSize = 16.sp)
+                                Text(result.SSID, fontSize = 16.sp)
                                 Spacer(Modifier.weight(1f))
                                 if (result.capabilities.contains("WEP") || result.capabilities.contains("WPA")) {
                                     Icon(painter = painterResource(id = R.drawable.lock), contentDescription = "Secured")
                                 }
                             }
                         }
-                        item {
+
 
                             Row(
                                 modifier = Modifier
@@ -234,7 +251,7 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
                                 Spacer(Modifier.weight(1f))
                                 Icon(painter = painterResource(id = R.drawable.arrow_right), contentDescription = null, tint = Color.Gray)
                             }
-                        }
+
                     }
                 }
             }
