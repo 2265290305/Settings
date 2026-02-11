@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.设置" parent="android:Theme.DeviceDefault.NoActionBar" />
+    <style name="Theme.设置" parent="android:Theme.DeviceDefault.NoActionBar.Fullscreen" >
+        <item name="android:windowBackground">@color/topbar</item>
+        <item name="android:colorForeground">@color/topbar</item>
+        <item name="android:colorBackground">@color/topbar</item>
+    </style>
 </resources>

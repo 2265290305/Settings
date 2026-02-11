@@ -29,7 +29,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.NavigationRailDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
@@ -42,7 +41,9 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.font.FontWeight
@@ -104,16 +105,16 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
 
     val names = stringArrayResource(R.array.docks)
     //val icons = integerArrayResource(R.array.dockicons);
-    val startDestination = 2;
+    val startDestination = 1;
     var selectedDestination by rememberSaveable { mutableIntStateOf( startDestination) }
-    val tintcolor = Color(0xFF4577FF)
+    //val tintcolor = Color(0xFF4577FF)
     Scaffold(
-        containerColor = Color(0xffeceeef),
+        //containerColor = colorResource(R.color.topbar),
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
 
-                modifier = modifier.padding(0.dp).background(color = Color(0xffeceeef)),
+                modifier = modifier.padding(0.dp).background(color = colorResource(R.color.topbar)),
                 title = { Text("设置", fontSize = 17.sp) },
                 navigationIcon = {
                     IconButton(onClick = {
@@ -140,7 +141,7 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
         Row(Modifier.fillMaxSize()) {
             Surface(
                 modifier = Modifier.fillMaxHeight(),
-                color = NavigationRailDefaults.ContainerColor // 保持和 NavigationRail 一样的背景色
+                //color = NavigationRailDefaults.ContainerColor // 保持和 NavigationRail 一样的背景色
             ) {
                 Column(
                     modifier = Modifier
@@ -150,12 +151,12 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                 ) {
                     names.forEachIndexed { index, destination ->
                         val isSelected = selectedDestination == index
-                        val contentColor = if (isSelected) tintcolor else Color.Unspecified
+                        //val contentColor = if (isSelected) tintcolor else Color.Unspecified
 
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .width(150.dp)
+                                .width(180.dp)
                                 .height(53.dp)
                                 .clickable(
                                     onClick = { selectedDestination = index },
@@ -171,23 +172,26 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                             Icon(
                                 painter = painterResource(R.drawable.account),
                                 contentDescription = "",
-                                tint = contentColor // 2. 手动控制图标颜色
+                                //tint = contentColor // 2. 手动控制图标颜色
                             )
                             Spacer(Modifier.width(5.dp))
                             Text(
                                 text = destination,
-                                color = contentColor // 3. 手动控制文字颜色
+                                //color = contentColor // 3. 手动控制文字颜色
                             )
                         }
                     }
                 }
             }
-            Box(
+            Card (
+                colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor)),
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxHeight()
-                    .background(Color(0x7AFFFFFF) ) // 内容区域背景色
-                    .padding(contentPadding)
+                    //.fillMaxSize(1f)
+                    .clip(shape = RoundedCornerShape(46.dp))
+                    //.background(colorResource(R.color.black) ) // 内容区域背景色
+                    .padding(top = contentPadding.calculateTopPadding())
             ) {
                 when (selectedDestination) {
                     0 -> PersonalCenterScreen()
@@ -220,6 +224,12 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                     }
                     3->{
                         SoundAndDisplayScreen()
+                    }
+                    5->{
+                        HdmiSettingsScreen()
+                    }
+                    6->{
+                        RebootScreen {  }
                     }
                     else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Text(text = "${names[selectedDestination]} 页面")
