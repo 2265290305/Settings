@@ -58,7 +58,11 @@ fun HdmiSettingsScreen(modifier: Modifier = Modifier) {
         // Card 1: Auto screen off
 
             Row(
-                modifier = Modifier.padding(16.dp),
+                modifier = Modifier.padding(16.dp).clickable(
+                    onClick = {
+                        showDialog = true
+                    }
+                ),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Column(modifier = Modifier.weight(1f)) {

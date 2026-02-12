@@ -177,7 +177,7 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
             }
             if (savedNetworks.isNotEmpty()) {
                 Text("我的网络", fontSize = 16.sp, modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp))
-                    Column  {
+                    Column(verticalArrangement = Arrangement.spacedBy(10.dp))  {
 
                         savedNetworks.forEach { network ->
                             Row(
