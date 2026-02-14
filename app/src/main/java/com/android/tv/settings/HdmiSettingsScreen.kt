@@ -2,6 +2,7 @@ package com.android.tv.settings
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -236,49 +237,64 @@ fun AutoScreenOffDialog(
     onDismiss: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
-        Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.CenterEnd){
-        Card(
-            modifier = Modifier.fillMaxHeight(1f).fillMaxWidth(0.8f),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onDismiss() },
+            contentAlignment = Alignment.CenterEnd
         ) {
+            Card(
+                modifier = Modifier
+                    .fillMaxHeight(1f)
+                    .fillMaxWidth(0.8f)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { /* consume */ },
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
 
 
 
-            Column (modifier = Modifier.padding(vertical = 16.dp)) {
-                Text(
-                    text = "自动熄屏时间",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier
-                        .padding(start = 24.dp, end = 24.dp, bottom = 8.dp)
-                        .align(Alignment.CenterHorizontally)
-                )
-                Divider()
-                options.forEachIndexed { index, option ->
-                    Row(
+                Column (modifier = Modifier.padding(vertical = 16.dp)) {
+                    Text(
+                        text = "自动熄屏时间",
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onOptionSelected(option) }
-                            .padding(horizontal = 24.dp, vertical = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(text = option, modifier = Modifier.weight(1f), fontSize = 16.sp)
-                        if (option == selectedOption) {
-                            Text(
-                                text = "✓",
-                                color = Color(0xFF4356B6),
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp
-                            )
+                            .padding(start = 24.dp, end = 24.dp, bottom = 8.dp)
+                            .align(Alignment.CenterHorizontally)
+                    )
+                    Divider()
+                    options.forEachIndexed { index, option ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onOptionSelected(option) }
+                                .padding(horizontal = 24.dp, vertical = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(text = option, modifier = Modifier.weight(1f), fontSize = 16.sp)
+                            if (option == selectedOption) {
+                                Text(
+                                    text = "✓",
+                                    color = Color(0xFF4356B6),
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp
+                                )
+                            }
                         }
-                    }
-                    if (index < 2 || index==3) {
-                        Divider(modifier = Modifier.padding(horizontal = 24.dp))
+                        if (index < 2 || index==3) {
+                            Divider(modifier = Modifier.padding(horizontal = 24.dp))
+                        }
                     }
                 }
             }
-        }}
+        }
     }
 }
 
@@ -293,11 +309,25 @@ fun HdmiResolutionDialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
     ) {
-        Box(modifier = Modifier.fillMaxWidth(1f), contentAlignment = Alignment.CenterEnd) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onDismiss() },
+            contentAlignment = Alignment.CenterEnd
+        ) {
             Card(
                 modifier = Modifier
                     .fillMaxHeight(1f)
-                    .fillMaxWidth(0.8f),
+                    .fillMaxWidth(0.8f)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { /* consume */ },
+                // Consume clicks on the panel so only background taps dismiss.
+                // (List rows still handle clicks inside the Card.)
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = Color.White)
             ) {

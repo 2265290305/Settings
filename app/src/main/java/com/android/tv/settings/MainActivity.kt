@@ -497,7 +497,7 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
 
     val names = stringArrayResource(R.array.docks)
     //val icons = integerArrayResource(R.array.dockicons);
-    val startDestination = 5;
+    val startDestination = 8;
     var selectedDestination by rememberSaveable { mutableIntStateOf( startDestination) }
 
     val navRailWidth = 180.dp
@@ -626,6 +626,15 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                         }
                         6->{
                             RebootScreen {  }
+                        }
+                        7->{
+                            LabScreen()
+                        }
+                        8->{
+                            PrivacyScreen()
+                        }
+                        9->{
+                            StorageSettingsScreen()
                         }
                         else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(text = "${names[selectedDestination]} 页面")
