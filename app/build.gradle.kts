@@ -3,6 +3,14 @@ plugins {
     alias(libs.plugins.kotlin.compose)
 }
 
+val accountProfileQueryUrl = (project.findProperty("ACCOUNT_PROFILE_QUERY_URL") as String?)
+    ?: "https://api.example.com/account/profile"
+val accountProfileUpdateUrl = (project.findProperty("ACCOUNT_PROFILE_UPDATE_URL") as String?)
+    ?: "https://api.example.com/account/profile/update"
+val accountAuthToken = (project.findProperty("ACCOUNT_AUTH_TOKEN") as String?)
+    ?: ""
+fun esc(value: String) = value.replace("\\", "\\\\").replace("\"", "\\\"")
+
 android {
     namespace = "com.android.tv.settings"
     compileSdk = 36
@@ -22,6 +30,9 @@ android {
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
+        buildConfigField("String", "ACCOUNT_PROFILE_QUERY_URL", "\"${esc(accountProfileQueryUrl)}\"")
+        buildConfigField("String", "ACCOUNT_PROFILE_UPDATE_URL", "\"${esc(accountProfileUpdateUrl)}\"")
+        buildConfigField("String", "ACCOUNT_AUTH_TOKEN", "\"${esc(accountAuthToken)}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -45,6 +56,7 @@ android {
     }
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 }
 
@@ -63,6 +75,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
     implementation(libs.androidx.constraintlayout)
     implementation(libs.androidx.ui.graphics)
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("io.coil-kt:coil-svg:2.7.0")
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
