@@ -67,7 +67,7 @@ fun RebootScreen(onBack: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF0F2F5))
+            .background(colorResource(R.color.cardcolor))
             .padding(24.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(16.dp)

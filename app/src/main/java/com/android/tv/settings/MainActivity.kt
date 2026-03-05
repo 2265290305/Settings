@@ -12,6 +12,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -497,7 +498,7 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
 
     val names = stringArrayResource(R.array.docks)
     //val icons = integerArrayResource(R.array.dockicons);
-    val startDestination = 8;
+    val startDestination = 3;
     var selectedDestination by rememberSaveable { mutableIntStateOf( startDestination) }
 
     val navRailWidth = 180.dp
@@ -635,6 +636,14 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                         }
                         9->{
                             StorageSettingsScreen()
+                        }
+                        10->{
+                            LocalInfoScreen()
+                        }
+                        11->{
+                            OneKeyCheckScreen(
+                                onOpenNetworkSettings = { selectedDestination = 1 }
+                            )
                         }
                         else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                             Text(text = "${names[selectedDestination]} 页面")
@@ -777,12 +786,13 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
+            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Card(
             shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFECECED))
+            colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor))
         ) {
             Column(
                 modifier = Modifier
@@ -877,7 +887,7 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
 
         Card(
             shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFECECED))
+            colors = CardDefaults.cardColors(containerColor = Color.White)
         ) {
             Column(
                 modifier = Modifier
@@ -896,15 +906,11 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
                         contentAlignment = Alignment.Center
                     ) {
                         // 项目暂未接入二维码资源，先保留占位区
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clip(RoundedCornerShape(8.dp))
-                                .background(Color(0xFFECF2FF)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text("二维码", color = Color(0xFF3B63C9), fontSize = 28.sp, fontWeight = FontWeight.Bold)
-                        }
+
+                            Image(painterResource(R.drawable.qrcode), contentDescription = "")
+                            //Icon(painterResource(R.drawable.qrcode), contentDescription = "")
+                            //Text("二维码", color = Color(0xFF3B63C9), fontSize = 28.sp, fontWeight = FontWeight.Bold)
+                        
                     }
                 }
                 Spacer(Modifier.height(12.dp))

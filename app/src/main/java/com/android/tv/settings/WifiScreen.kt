@@ -68,6 +68,7 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
     var rawSavedNetworks by remember { mutableStateOf<List<WifiConfiguration>>(emptyList()) }
     var isScanning by remember { mutableStateOf(false) }
     var connectedSsid by remember { mutableStateOf<String?>(null) }
+    var connectedRssi by remember { mutableStateOf<Int?>(null) }
 
     val wifiScanReceiver = remember {
         object : BroadcastReceiver() {
@@ -76,6 +77,8 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
                 if (intent.action == WifiManager.SCAN_RESULTS_AVAILABLE_ACTION) {
                     rawScanResults = wifiManager?.scanResults?.filter { it.SSID.isNotBlank() } ?: emptyList()
                     rawSavedNetworks = wifiManager?.configuredNetworks?.filter { it.SSID.isNotBlank() } ?: emptyList()
+                    val rssi = wifiManager?.connectionInfo?.rssi
+                    connectedRssi = if (rssi == null || rssi == -127) null else rssi
                     isScanning = false
                 }
             }
@@ -83,17 +86,36 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
     }
 
     // Process raw lists to get clean lists for UI
-    var (savedNetworks, availableNetworks) = remember(rawSavedNetworks, rawScanResults) {
-        val distinctSaved = rawSavedNetworks.distinctBy { it.SSID.trim('"') }.sortedBy { it.SSID.trim('"')!=(wifiManager?.connectionInfo?.ssid?.trim('"')) }
-        val savedSsids = distinctSaved.map { it.SSID.trim('"') }.toSet()
+    var (savedNetworks, availableNetworks, scanBestLevelBySsid) = remember(rawSavedNetworks, rawScanResults, wifiManager) {
+        val bestBySsid: Map<String, Int> = rawScanResults
+            .filter { it.SSID.isNotBlank() }
+            .groupBy { it.SSID.trim('"') }
+            .mapNotNull { (ssid, group) ->
+                group.maxOfOrNull { it.level }?.let { level -> ssid to level }
+            }
+            .toMap()
 
+        // 我的网络：仅显示附近(扫描可见)的已保存网络，并按信号强度降序排序。
+        val nearbySaved = rawSavedNetworks
+            .distinctBy { it.SSID.trim('"') }
+            .mapNotNull { cfg ->
+                val ssid = cfg.SSID.trim('"')
+                val level = bestBySsid[ssid] ?: return@mapNotNull null
+                cfg to level
+            }
+            .sortedByDescending { it.second }
+            .map { it.first }
+
+        val nearbySavedSsids = nearbySaved.map { it.SSID.trim('"') }.toSet()
+
+        // 可用网络：去除已保存网络后按信号强度降序。
         val available = rawScanResults
-            .filter { it.SSID.trim('"') !in savedSsids }
-            .groupBy { it.SSID } // Group by SSID to remove duplicates from scan
+            .filter { it.SSID.isNotBlank() && it.SSID.trim('"') !in nearbySavedSsids }
+            .groupBy { it.SSID.trim('"') }
             .mapNotNull { (_, group) -> group.maxByOrNull { it.level } }
-        // Get the one with best signal
+            .sortedByDescending { it.level }
 
-        distinctSaved to available
+        Triple(nearbySaved, available, bestBySsid)
     }
 
 
@@ -107,11 +129,14 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
                     @Suppress("DEPRECATION")
                     val wifiInfo = wifiManager?.connectionInfo
                     connectedSsid = wifiInfo?.ssid
+                    val rssi = wifiInfo?.rssi
+                    connectedRssi = if (rssi == null || rssi == -127) null else rssi
                 }
             }
 
             override fun onLost(network: Network) {
                 connectedSsid = null
+                connectedRssi = null
             }
         }
     }
@@ -180,6 +205,9 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
                     Column(verticalArrangement = Arrangement.spacedBy(10.dp))  {
 
                         savedNetworks.forEach { network ->
+                            val savedSsid = network.SSID.trim('"')
+                            val isConnected = connectedSsid?.trim('"') == savedSsid
+                            val signalLevel = scanBestLevelBySsid[savedSsid] ?: if (isConnected) connectedRssi else null
                             Row(
                                 modifier = Modifier
                                     .clickable { navController.navigate(Destinations.WifiDetailScreen.createRoute(network.SSID)) }
@@ -190,11 +218,13 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Spacer(modifier= Modifier.width(10.dp))
-                                Icon(painter = painterResource(R.drawable.wifi4), contentDescription ="wifi4")
+                                Icon(
+                                    painter = painterResource(wifiSignalIconRes(signalLevel, isConnected)),
+                                    contentDescription = "wifi_signal"
+                                )
                                 Spacer(modifier = Modifier.width(10.dp))
-                                Text(network.SSID.trim('"'), fontSize = 16.sp)
+                                Text(savedSsid, fontSize = 16.sp)
                                 Spacer(Modifier.weight(1f))
-                                val isConnected = connectedSsid?.trim('"') == network.SSID.trim('"')
                                 Text(if (isConnected) "已连接" else "已保存", color = if (isConnected) Color(0xFF4577FF) else Color.Gray, fontSize = 14.sp)
                                 Icon(painter = painterResource(id = R.drawable.ic_info), contentDescription = "Info", tint = if (isConnected) Color(0xFF4577FF) else Color.Gray)
                             }
@@ -249,7 +279,10 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Spacer(modifier= Modifier.width(10.dp))
-                                Icon(painter = painterResource(R.drawable.wifi4), contentDescription = "wifi4")
+                                Icon(
+                                    painter = painterResource(wifiSignalIconRes(result.level, isConnected = false)),
+                                    contentDescription = "wifi_signal"
+                                )
                                 Spacer(modifier= Modifier.width(10.dp))
                                 Text(result.SSID, fontSize = 16.sp)
                                 Spacer(Modifier.weight(1f))
@@ -278,6 +311,23 @@ fun WifiManagerScreen(modifier: Modifier = Modifier, navController: NavControlle
         }
     }
 }
+
+private fun wifiSignalIconRes(rssi: Int?, isConnected: Boolean): Int {
+    val level = when {
+        rssi == null -> 1
+        rssi >= -50 -> 4
+        rssi >= -60 -> 3
+        rssi >= -75 -> 2
+        else -> 1
+    }
+    return when (level) {
+        4 -> if (isConnected) R.drawable.wifib4 else R.drawable.wifi4
+        3 -> if (isConnected) R.drawable.wifib3 else R.drawable.wifi3
+        2 -> if (isConnected) R.drawable.wifib2 else R.drawable.wifi2
+        else -> if (isConnected) R.drawable.wifib1 else R.drawable.wifi1
+    }
+}
+
 @Preview(
     name = "993dp x 851dp",
     showBackground = true,
