@@ -61,15 +61,18 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -498,7 +501,7 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
 
     val names = stringArrayResource(R.array.docks)
     //val icons = integerArrayResource(R.array.dockicons);
-    val startDestination = 3;
+    val startDestination = 0;
     var selectedDestination by rememberSaveable { mutableIntStateOf( startDestination) }
 
     val navRailWidth = 180.dp
@@ -657,6 +660,22 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
 }
 
 @Composable
+fun getUserinfo(){
+    var url = Uri.parse("content://cn.com.chinatelecom.account.android/userinfo")
+    var cursor = LocalContext.current.contentResolver.query(url,null,null,null)
+    if(cursor!=null && cursor.extras!=null){
+        val bundle = cursor.extras
+        val title = bundle.getString("title")
+        val userTags = bundle.getString("userTags")
+        val summary = bundle.getString("summary")
+        val icon = bundle.getString("icon")
+        Log.i("huna","title"+title)
+
+
+    }
+}
+
+@Composable
 fun PersonalCenterScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
     val appContext = context.applicationContext
@@ -680,6 +699,7 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
         "file:///android_asset/avatars/avatar_10.svg",
         "file:///android_asset/avatars/avatar_11.svg"
     )
+    val userinfo = getUserinfo()
     val svgLoader = rememberSvgLoader()
 
     LaunchedEffect(Unit) {
@@ -708,7 +728,7 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
         }
     }
 
-    if (showEditPage) {
+    if (showEditPage|| LocalInspectionMode.current) {
         EditAccountInfoScreen(
             currentNickname = nickname,
             currentAvatarIndex = avatarIndex,
@@ -934,36 +954,47 @@ private fun EditAccountInfoScreen(
     var draftAvatarIndex by remember(currentAvatarIndex) { mutableIntStateOf(currentAvatarIndex) }
     var showAvatarDialog by remember { mutableStateOf(false) }
     var showNicknameDialog by remember { mutableStateOf(false) }
-
+    Dialog(
+        onDismissRequest = onBack,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        )
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorResource(R.color.topbar))
+        ) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 18.dp)
+
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.height(100.dp) .background(colorResource(R.color.topbar))) {
             Icon(
                 painter = painterResource(R.drawable.back),
                 contentDescription = "返回",
                 modifier = Modifier.clickable { onBack() }
             )
             Spacer(Modifier.weight(1f))
-            Text("修改账号信息", fontSize = 44.sp / 2, fontWeight = FontWeight.Bold, color = Color(0xFF1E2025))
+            Text("修改账号信息", fontSize = 28.sp , fontWeight = FontWeight.Bold, color = Color(0xFF1E2025))
             Spacer(Modifier.weight(1f))
             Spacer(Modifier.width(36.dp))
         }
-        Spacer(Modifier.height(14.dp))
+
         Card(
             shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = Color(0xFFECECED)),
-            modifier = Modifier.fillMaxWidth()
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).height(400.dp)
         ) {
-            Column(modifier = Modifier.padding(horizontal = 24.dp, vertical = 22.dp)) {
+            Column(modifier = Modifier.padding(top = 45.dp)) {
                 Box(
                     modifier = Modifier
-                        .size(150.dp)
+                        .width(250.dp)
+                        .height(180.dp)
                         .align(Alignment.CenterHorizontally)
                         .clip(RoundedCornerShape(75.dp))
-                        .background(Color(0xFFD8D8DC)),
+                        .background(colorResource(R.color.cardcolor)),
                     contentAlignment = Alignment.Center
                 ) {
                     AsyncImage(
@@ -972,15 +1003,17 @@ private fun EditAccountInfoScreen(
                             .build(),
                         imageLoader = svgLoader,
                         contentDescription = "Avatar",
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier.width(180.dp).height(180.dp),
                         contentScale = ContentScale.Crop
                     )
                 }
-                Spacer(Modifier.height(12.dp))
+                Spacer(Modifier.height(45.dp))
                 Row(
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .clickable { showAvatarDialog = true },
+                        .clickable { showAvatarDialog = true
+
+                                   },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text("点击更换头像", color = Color(0xFF4A7CFF), fontSize = 16.sp)
@@ -1038,8 +1071,10 @@ private fun EditAccountInfoScreen(
         }
         Spacer(Modifier.height(18.dp))
     }
+        }
+    }
 
-    if (showAvatarDialog) {
+    if (showAvatarDialog || LocalInspectionMode.current) {
         AvatarPickerDialog(
             avatars = avatarAssets,
             selectedIndex = draftAvatarIndex,
@@ -1072,47 +1107,64 @@ private fun AvatarPickerDialog(
 ) {
     val svgLoader = rememberSvgLoader()
     var localSelection by remember(selectedIndex) { mutableIntStateOf(selectedIndex) }
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            modifier = Modifier.width(820.dp)
+    Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true)) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onDismiss() },
+            contentAlignment = Alignment.CenterEnd
         ) {
-            Column(modifier = Modifier.padding(horizontal = 30.dp, vertical = 24.dp)) {
-                Text(
-                    "选择头像",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color(0xFF1D2026),
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(16.dp))
 
-                for (row in 0 until 3) {
-                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        for (col in 0 until 4) {
-                            val index = row * 4 + col
-                            if (index < avatars.size) {
-                                val avatar = avatars[index]
-                                AvatarItem(
-                                    avatarAsset = avatar,
-                                    imageLoader = svgLoader,
-                                    selected = index == localSelection,
-                                    onClick = { localSelection = index }
-                                )
-                            } else {
-                                Spacer(Modifier.size(118.dp))
+            Card(
+                shape = RoundedCornerShape(20.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+                modifier = Modifier.fillMaxHeight(1f).fillMaxWidth(0.8f)
+            ) {
+                Column(modifier = Modifier.padding(horizontal = 30.dp, vertical = 24.dp)) {
+                    Text(
+                        "选择头像",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1D2026),
+                        modifier = Modifier.fillMaxWidth(),
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(16.dp))
+
+                    for (row in 0 until 3) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            for (col in 0 until 4) {
+                                val index = row * 4 + col
+                                if (index < avatars.size) {
+                                    val avatar = avatars[index]
+                                    AvatarItem(
+                                        avatarAsset = avatar,
+                                        imageLoader = svgLoader,
+                                        selected = index == localSelection,
+                                        onClick = { localSelection = index }
+                                    )
+                                } else {
+                                    Spacer(Modifier.size(118.dp))
+                                }
                             }
                         }
+                        Spacer(Modifier.height(16.dp))
                     }
-                    Spacer(Modifier.height(16.dp))
-                }
 
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                    SecondaryPillButton(text = "取消", onClick = onDismiss)
-                    Spacer(Modifier.width(24.dp))
-                    PrimaryPillButton(text = "确定", onClick = { onConfirm(localSelection) })
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        SecondaryPillButton(text = "取消", onClick = onDismiss)
+                        Spacer(Modifier.width(24.dp))
+                        PrimaryPillButton(text = "确定", onClick = { onConfirm(localSelection) })
+                    }
                 }
             }
         }
@@ -1183,7 +1235,7 @@ private fun NicknameDialog(
                             onValueChange = { if (it.length <= maxLen) input = it },
                             modifier = Modifier.weight(1f),
                             singleLine = true,
-                            textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp, color = Color(0xFF23252A))
+                            textStyle = TextStyle(fontSize = 16.sp, color = Color(0xFF23252A))
                         )
                         Text("${input.length}/$maxLen", color = Color(0xFF8A8F99), fontSize = 16.sp)
                     }
@@ -1240,7 +1292,8 @@ private fun PrimaryPillButton(text: String, enabled: Boolean = true, onClick: ()
     }
 }
 
-@Preview(showBackground = true)
+@Preview(showBackground = true, widthDp = 1280,
+    heightDp = 720,)
 @Composable
 fun WifiManagerScreenPreview() {
     设置Theme {

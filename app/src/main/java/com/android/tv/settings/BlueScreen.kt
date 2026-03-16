@@ -3,6 +3,7 @@ package com.android.tv.settings
 import android.annotation.SuppressLint
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
@@ -33,6 +34,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -133,17 +135,28 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
         if (bleConnectedDevice?.address == address) return true
 
         val manager = Blm ?: return false
+        
+        // 尝试通过多个 Profile 检查
         val profiles = intArrayOf(
             BluetoothProfile.A2DP,
             BluetoothProfile.HEADSET,
             BluetoothProfile.GATT,
-            4 // HID_HOST
+            4, // HID_HOST
+            BluetoothProfile.GATT_SERVER
         )
-        return profiles.any { profile ->
+        
+        val connectedByManager = profiles.any { profile ->
             runCatching {
                 manager.getConnectedDevices(profile).any { it.address == address }
             }.getOrDefault(false)
         }
+        if (connectedByManager) return true
+
+        // 终极手段：通过反射检查连接状态（ACTION_ACL_CONNECTED 可能漏掉初始状态）
+        return runCatching {
+            val isConnectedMethod = device.javaClass.getDeclaredMethod("isConnected")
+            isConnectedMethod.invoke(device) as Boolean
+        }.getOrDefault(false)
     }
 
     fun markConnected(device: BluetoothDevice?) {
@@ -170,11 +183,18 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
         }.getOrDefault(false)
     }
 
-    fun isLikelyBleRemote(device: BluetoothDevice): Boolean {
-        if (!isBleDevice(device)) return false
+    fun isLikelyRemote(device: BluetoothDevice): Boolean {
         val display = displayDeviceName(device).lowercase()
         val remoteKeywords = listOf("remote", "remoter", "controller", "rc", "遥控", "蓝牙遥控", "电信蓝牙遥控")
-        return remoteKeywords.any { display.contains(it) }
+        if (remoteKeywords.any { display.contains(it) }) return true
+        
+        val btClass = device.bluetoothClass
+        if (btClass != null) {
+            val devClass = btClass.deviceClass
+            // 0x0500 is PERIPHERAL class (keyboards, mice, remotes)
+            if ((devClass and 0x0500) == 0x0500) return true
+        }
+        return false
     }
 
     fun addClassicDevice(device: BluetoothDevice) {
@@ -216,50 +236,56 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
         Blm?.adapter?.bondedDevices?.let {
             pairedDevices.clear()
             pairedDevices.addAll(it)
+            // 同步已配对设备中的连接状态
+            it.forEach { device ->
+                if (isDeviceConnectedNow(device)) {
+                    markConnected(device)
+                }
+            }
         }
     }
 
     fun updateConnectedDevice() {
+        // 更新 A2DP
         Blm?.adapter?.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                 if (profile == BluetoothProfile.A2DP) {
-                    val devices = proxy.connectedDevices
-                    if (devices.isNotEmpty()) {
-                        connectedDevice = devices[0]
-                        cacheDeviceName(devices[0])
-                        markConnected(devices[0])
+                    proxy.connectedDevices.forEach { device ->
+                        connectedDevice = device
+                        cacheDeviceName(device)
+                        markConnected(device)
                     }
                     Blm.adapter.closeProfileProxy(profile, proxy)
                 }
             }
-
             override fun onServiceDisconnected(profile: Int) {}
         }, BluetoothProfile.A2DP)
+
+        // 特别更新 HID 遥控器状态
+        Blm?.adapter?.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
+            override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                proxy.connectedDevices.forEach { device ->
+                    markConnected(device)
+                }
+                Blm.adapter.closeProfileProxy(profile, proxy)
+            }
+            override fun onServiceDisconnected(profile: Int) {}
+        }, 4) // HID_HOST
     }
 
     val bleGattCallback = remember {
         object : BluetoothGattCallback() {
             override fun onConnectionStateChange(gatt: BluetoothGatt, status: Int, newState: Int) {
-                Log.d("BlueToothScreen", "onConnectionStateChange status=$status newState=$newState addr=${gatt.device.address}")
                 mainHandler.post {
                     when (newState) {
                         BluetoothProfile.STATE_CONNECTED -> {
                             bleConnectedDevice = gatt.device
-                            bleConnectingAddress = null
                             markConnected(gatt.device)
                             gatt.discoverServices()
                         }
                         BluetoothProfile.STATE_DISCONNECTED -> {
-                            if (bleConnectedDevice?.address == gatt.device.address) {
-                                bleConnectedDevice = null
-                            }
-                            if (bleConnectingAddress == gatt.device.address) {
-                                bleConnectingAddress = null
-                            }
+                            if (bleConnectedDevice?.address == gatt.device.address) bleConnectedDevice = null
                             markDisconnected(gatt.device)
-                            if (activeGatt === gatt) {
-                                activeGatt = null
-                            }
                             gatt.close()
                         }
                     }
@@ -273,134 +299,107 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             override fun onScanResult(callbackType: Int, result: ScanResult) {
                 result.device?.let { addDiscoveredDevice(it) }
             }
-
-            override fun onBatchScanResults(results: MutableList<ScanResult>) {
-                results.forEach { it.device?.let { device -> addDiscoveredDevice(device) } }
-            }
         }
     }
 
     fun stopScan() {
         Blm?.adapter?.let { adapter ->
-            if (adapter.isDiscovering) {
-                adapter.cancelDiscovery()
-            }
+            if (adapter.isDiscovering) adapter.cancelDiscovery()
             adapter.bluetoothLeScanner?.stopScan(bleScanCallback)
         }
         scanTimeoutJob?.cancel()
-        scanTimeoutJob = null
         isScanning = false
     }
 
-    fun connectBleDevice(device: BluetoothDevice) {
+    fun connectHidProfile(device: BluetoothDevice) {
+        val adapter = Blm?.adapter ?: return
+        adapter.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
+            @SuppressLint("DiscouragedPrivateApi")
+            override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                runCatching {
+                    val method = proxy.javaClass.getMethod("connect", BluetoothDevice::class.java)
+                    method.isAccessible = true
+                    method.invoke(proxy, device)
+                }
+                mainHandler.postDelayed({ adapter.closeProfileProxy(profile, proxy) }, 2000)
+            }
+            override fun onServiceDisconnected(profile: Int) {}
+        }, 4)
+    }
+
+    fun connectDevice(device: BluetoothDevice) {
         if (device.bondState == BluetoothDevice.BOND_NONE) {
             pendingBleConnectAddress = device.address
             pendingPairDevice = device
-            pairRequestCode = null
             showPairDialog = true
             return
         }
         stopScan()
-        bleConnectingAddress = device.address
-        bleConnectedDevice = null
-        activeGatt?.close()
-        activeGatt = null
-        activeGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            device.connectGatt(context, false, bleGattCallback, BluetoothDevice.TRANSPORT_LE)
-        } else {
-            device.connectGatt(context, false, bleGattCallback)
+        if (isLikelyRemote(device)) connectHidProfile(device)
+        if (isBleDevice(device)) {
+            bleConnectingAddress = device.address
+            activeGatt?.close()
+            activeGatt = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                device.connectGatt(context, false, bleGattCallback, BluetoothDevice.TRANSPORT_LE)
+            } else {
+                device.connectGatt(context, false, bleGattCallback)
+            }
+        }
+    }
+
+    fun disconnectDevice(device: BluetoothDevice) {
+        if (isBleDevice(device)) {
+            if (bleConnectedDevice?.address == device.address) {
+                activeGatt?.disconnect()
+            }
+        }
+        val adapter = Blm?.adapter ?: return
+        intArrayOf(4, BluetoothProfile.A2DP).forEach { profileId ->
+            adapter.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
+                @SuppressLint("DiscouragedPrivateApi")
+                override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                    runCatching {
+                        val method = proxy.javaClass.getMethod("disconnect", BluetoothDevice::class.java)
+                        method.isAccessible = true
+                        method.invoke(proxy, device)
+                    }
+                    mainHandler.postDelayed({ adapter.closeProfileProxy(profile, proxy) }, 1000)
+                }
+                override fun onServiceDisconnected(profile: Int) {}
+            }, profileId)
         }
     }
 
     val bluetoothReceiver = remember {
         object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
-                btname = Blm?.adapter?.name ?: ""
-
                 when (intent.action) {
                     BluetoothDevice.ACTION_FOUND -> {
-                        val device: BluetoothDevice? =
-                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                        device?.let {
-                            addDiscoveredDevice(it)
-                        }
+                        val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        device?.let { addDiscoveredDevice(it) }
                     }
                     BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
-                        if (scanTimeoutJob == null) {
-                            isScanning = false
-                        }
+                        if (scanTimeoutJob == null) isScanning = false
                     }
                     BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
                         val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                        when (intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, BluetoothDevice.ERROR)) {
-                            BluetoothDevice.BOND_BONDED -> {
-                                Toast.makeText(context, "Paired with ${device?.name}", Toast.LENGTH_SHORT).show()
-                                device?.let {
-                                    discoveredClassicDevices.removeAll { it.address == device.address }
-                                    cachedBleDevices.removeAll { it.address == device.address }
-                                }
-                                if (pendingPairDevice?.address == device?.address) {
-                                    pendingPairDevice = null
-                                    pairRequestCode = null
-                                    showPairDialog = false
-                                }
-                                if (pendingBleConnectAddress == device?.address) {
-                                    showBlePairingTip = true
-                                    mainHandler.postDelayed({ showBlePairingTip = false }, 2200)
-                                    pendingBleConnectAddress = null
-                                    val target = device
-                                    if (target != null) {
-                                        val connectDelayMs = if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) 1200L else 250L
-                                        mainHandler.postDelayed({ connectBleDevice(target) }, connectDelayMs)
-                                    }
-                                }
-                                updatePairedDevices()
-                            }
-                            BluetoothDevice.BOND_NONE -> {
-                                val reason = intent.getIntExtra("android.bluetooth.device.extra.REASON", -1)
-                                Log.w("BlueToothScreen", "Pairing failed: ${device?.address}, reason=$reason")
-                                Toast.makeText(context, "Pairing failed with ${device?.name}", Toast.LENGTH_SHORT).show()
-                                if (pendingPairDevice?.address == device?.address) {
-                                    pendingPairDevice = null
-                                    pairRequestCode = null
-                                    showPairDialog = false
-                                }
-                                if (pendingBleConnectAddress == device?.address) {
-                                    pendingBleConnectAddress = null
-                                }
-                                updatePairedDevices()
+                        val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
+                        if (state == BluetoothDevice.BOND_BONDED) {
+                            updatePairedDevices()
+                            if (pendingBleConnectAddress == device?.address) {
+                                showBlePairingTip = true
+                                mainHandler.postDelayed({ showBlePairingTip = false }, 2200)
+                                device?.let { connectDevice(it) }
                             }
                         }
-                    }
-                    BluetoothDevice.ACTION_PAIRING_REQUEST -> {
-                        val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                        device?.let {
-                            cacheDeviceName(it)
-                            if (isBleDevice(it)) {
-                                addBleDeviceToCache(it)
-                            } else {
-                                addClassicDevice(it)
-                            }
-                        }
-                        val pairingKey = intent.getIntExtra(BluetoothDevice.EXTRA_PAIRING_KEY, -1)
-                        pendingPairDevice = device
-                        pendingBleConnectAddress = device?.address
-                        pairRequestCode = if (pairingKey >= 0) pairingKey.toString() else null
-                        showPairDialog = true
                     }
                     BluetoothDevice.ACTION_ACL_CONNECTED -> {
                         val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                        connectedDevice = device
-                        device?.let { cacheDeviceName(it) }
                         markConnected(device)
                         updatePairedDevices()
-                        updateConnectedDevice()
                     }
                     BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
                         val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
-                        if (connectedDevice?.address == device?.address) {
-                            connectedDevice = null
-                        }
                         markDisconnected(device)
                         updatePairedDevices()
                     }
@@ -413,18 +412,9 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
         discoveredClassicDevices.clear()
         isScanning = true
         Blm?.adapter?.let { adapter ->
-            if (adapter.isDiscovering) {
-                adapter.cancelDiscovery()
-            }
-            adapter.bluetoothLeScanner?.stopScan(bleScanCallback)
+            if (adapter.isDiscovering) adapter.cancelDiscovery()
             adapter.startDiscovery()
-            adapter.bluetoothLeScanner?.startScan(
-                null,
-                ScanSettings.Builder()
-                    .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
-                    .build(),
-                bleScanCallback
-            )
+            adapter.bluetoothLeScanner?.startScan(null, ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(), bleScanCallback)
         }
         scanTimeoutJob?.cancel()
         scanTimeoutJob = scope.launch {
@@ -438,15 +428,12 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             addAction(BluetoothDevice.ACTION_FOUND)
             addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
             addAction(BluetoothDevice.ACTION_BOND_STATE_CHANGED)
-            addAction(BluetoothDevice.ACTION_PAIRING_REQUEST)
             addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
             addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
         }
         context.registerReceiver(bluetoothReceiver, filter)
         onDispose {
             stopScan()
-            activeGatt?.close()
-            activeGatt = null
             context.unregisterReceiver(bluetoothReceiver)
         }
     }
@@ -457,17 +444,6 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             updatePairedDevices()
             updateConnectedDevice()
             startScan()
-        } else {
-            stopScan()
-            activeGatt?.close()
-            activeGatt = null
-            bleConnectedDevice = null
-            bleConnectingAddress = null
-            connectedAddresses.clear()
-            pairedDevices.clear()
-            discoveredClassicDevices.clear()
-            cachedBleDevices.clear()
-            deviceNameCache.clear()
         }
     }
 
@@ -630,6 +606,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                             Row(
                                 modifier = Modifier
                                     .clickable {
+                                        pendingBleConnectAddress = device.address
                                         pendingPairDevice = device
                                         pairRequestCode = null
                                         showPairDialog = true
@@ -653,17 +630,19 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
     }
 
     if (showBleRemoteDialog || LocalInspectionMode.current) {
-        val bleRemoteCandidates = cachedBleDevices
-            .filter { isLikelyBleRemote(it) }
+        val allDiscovered = cachedBleDevices + discoveredClassicDevices
+        val remoteCandidates = allDiscovered
+            .filter { isLikelyRemote(it) }
             .ifEmpty { cachedBleDevices }
+
         BleRemoteDialog(
-            devices = bleRemoteCandidates,
+            devices = remoteCandidates,
             isScanning = isScanning,
             pairingSuccessTipVisible = showBlePairingTip,
             displayName = ::displayDeviceName,
             connectingAddress = bleConnectingAddress,
-            connectedAddress = bleConnectedDevice?.address,
-            onPairRequest = { device -> connectBleDevice(device) },
+            connectedAddress = if (bleConnectedDevice != null) bleConnectedDevice?.address else null,
+            onPairRequest = { device -> connectDevice(device) },
             onRefresh = { startScan() },
             onDismiss = { showBleRemoteDialog = false }
         )
@@ -692,8 +671,8 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                             Toast.makeText(context, "发起配对失败，请重试", Toast.LENGTH_SHORT).show()
                             pendingBleConnectAddress = null
                         }
-                    } else if (target.bondState == BluetoothDevice.BOND_BONDED && isBleDevice(target)) {
-                        connectBleDevice(target)
+                    } else if (target.bondState == BluetoothDevice.BOND_BONDED) {
+                        connectDevice(target)
                     }
                 }
                 showPairDialog = false
@@ -702,37 +681,35 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
     }
 
     if (showDeviceOptionsDialog && selectedDevice != null) {
+        val device = selectedDevice!!
+        val isConnected = isDeviceConnectedNow(device)
         ConnectedDeviceOptionsDialog(
-            deviceName = selectedDevice?.let { displayDeviceName(it) } ?: "蓝牙设备",
+            deviceName = displayDeviceName(device),
+            isConnected = isConnected,
             onDismiss = {
                 showDeviceOptionsDialog = false
                 selectedDevice = null
             },
-            onDisconnect = {
-                val device = selectedDevice
-                if (device != null) {
-                    if (bleConnectedDevice?.address == device.address) {
-                        activeGatt?.disconnect()
-                    } else {
-                        Toast.makeText(context, "该设备请在对端断开或忽略设备", Toast.LENGTH_SHORT).show()
-                    }
+            onConnectDisconnect = {
+
+                if (isConnected) {
+                    disconnectDevice(device)
+                } else {
+                    connectDevice(device)
                 }
                 showDeviceOptionsDialog = false
                 selectedDevice = null
             },
             onForget = {
-                val device = selectedDevice
-                if (device != null) {
-                    if (bleConnectedDevice?.address == device.address) {
-                        activeGatt?.disconnect()
-                    }
-                    val removed = removeBondCompat(device)
-                    if (!removed) {
-                        Toast.makeText(context, "忽略失败，请重试", Toast.LENGTH_SHORT).show()
-                    }
-                    markDisconnected(device)
-                    updatePairedDevices()
+                if (isConnected) {
+                    disconnectDevice(device)
                 }
+                val removed = removeBondCompat(device)
+                if (!removed) {
+                    Toast.makeText(context, "忽略失败，请重试", Toast.LENGTH_SHORT).show()
+                }
+                markDisconnected(device)
+                updatePairedDevices()
                 showDeviceOptionsDialog = false
                 selectedDevice = null
             }
@@ -1069,8 +1046,9 @@ fun PairConfirmDialog(
 @Composable
 fun ConnectedDeviceOptionsDialog(
     deviceName: String,
+    isConnected: Boolean,
     onDismiss: () -> Unit,
-    onDisconnect: () -> Unit,
+    onConnectDisconnect: () -> Unit,
     onForget: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
@@ -1098,11 +1076,11 @@ fun ConnectedDeviceOptionsDialog(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clickable { onDisconnect() }
+                                .clickable { onConnectDisconnect() }
                                 .padding(horizontal = 54.dp, vertical = 34.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("取消连接", fontSize = 50.sp, color = Color(0xFF22252C), fontWeight = FontWeight.Bold)
+                            Text(if (isConnected) "取消连接" else "连接设备", fontSize = 50.sp, color = Color(0xFF22252C), fontWeight = FontWeight.Bold)
                         }
                         Spacer(
                             modifier = Modifier

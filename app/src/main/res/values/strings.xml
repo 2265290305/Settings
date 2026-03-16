@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">设置</string>
-
-
+    <string name="Manchu_Chinese">普通话</string>
+    <string name="Elite_Chinese">上海话</string>
+    <string name="Standard_Chinese">粤语</string>
 </resources>

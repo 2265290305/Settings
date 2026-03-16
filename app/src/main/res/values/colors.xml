@@ -11,4 +11,5 @@
     <color name="cardcolor">#7aFFFFFF</color>
     <color name="topbar">#ffECEEEF</color>
     <color name="textblack">#131519</color>
+    <color name="congray">#D9D7D8</color>
 </resources>
