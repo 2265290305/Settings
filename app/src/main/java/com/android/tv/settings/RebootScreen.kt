@@ -1,6 +1,9 @@
 package com.android.tv.settings
 
 import android.annotation.SuppressLint
+import android.content.Context
+import android.os.Bundle
+import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -41,6 +44,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -51,11 +55,48 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.android.tv.settings.ui.theme.设置Theme
 import kotlinx.coroutines.flow.distinctUntilChanged
+import android.net.Uri
+
+private const val REBOOT_METHOD_DEV_OPT = "DEV_OPT"
+private val REBOOT_DEVICE_INFO_URI: Uri = Uri.parse("content://com.android.zshd.deviceinfo/device_info")
+
+private fun isRebootBundleSuccess(bundle: Bundle?): Boolean {
+    if (bundle == null) return false
+    if (bundle.getBoolean("success", false)) return true
+    if (bundle.getBoolean("result", false)) return true
+    if (bundle.getInt("code", -1) == 0) return true
+    return false
+}
+
+private fun rebootNormalizeValue(value: Any?): String? {
+    val normalized = value?.toString()?.trim()
+    if (normalized.isNullOrEmpty()) return null
+    if (normalized.equals("null", ignoreCase = true)) return null
+    return normalized
+}
+
+private fun updateRebootValues(context: Context, values: Map<String, String>): Boolean {
+    val resolver = context.contentResolver
+    return runCatching {
+        val extras = Bundle().apply {
+            values.forEach { (key, value) ->
+                putString(key, value)
+            }
+        }
+        val result = resolver.call(REBOOT_DEVICE_INFO_URI, REBOOT_METHOD_DEV_OPT, null, extras)
+        isRebootBundleSuccess(result)
+            || values.all { (key, value) ->
+                rebootNormalizeValue(result?.getString(key)) == value ||
+                    rebootNormalizeValue(result?.getString("value")) == value
+            }
+    }.getOrDefault(false)
+}
 
 // Note: Despite the name, this file currently hosts the "节能设置" UI in this project.
 @SuppressLint("MissingPermission")
 @Composable
 fun RebootScreen(onBack: () -> Unit) {
+    val context = LocalContext.current.applicationContext
     var timedScreenOffEnabled by rememberSaveable { mutableStateOf(false) }
     var timedScreenOffTime by rememberSaveable { mutableStateOf("00:00/00:00") }
     var autoPowerEnabled by rememberSaveable { mutableStateOf(false) }
@@ -76,7 +117,21 @@ fun RebootScreen(onBack: () -> Unit) {
             title = "定时关屏",
             desc = "开启后，设备将在指定时间完成熄屏和亮屏操作",
             checked = timedScreenOffEnabled,
-            onCheckedChange = { timedScreenOffEnabled = it }
+            onCheckedChange = {
+                val values = buildMap {
+                    put("autoScreenCtrl", if (it) "1" else "0")
+                    if (it) {
+                        val times = parseTimeRange(timedScreenOffTime)
+                        put("screen_off_timer", "${format2(times[0])}:${format2(times[1])}")
+                        put("screen_on_timer", "${format2(times[2])}:${format2(times[3])}")
+                    }
+                }
+                if (updateRebootValues(context, values)) {
+                    timedScreenOffEnabled = it
+                } else {
+                    Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
+                }
+            }
         )
 
         if (timedScreenOffEnabled) {
@@ -91,7 +146,21 @@ fun RebootScreen(onBack: () -> Unit) {
             title = "自动开关机",
             desc = "开启后，设备插电的情况下将在指定时间自动开机和关机",
             checked = autoPowerEnabled,
-            onCheckedChange = { autoPowerEnabled = it }
+            onCheckedChange = {
+                val values = buildMap {
+                    put("autoPowerCtrl", if (it) "1" else "0")
+                    if (it) {
+                        val times = parseTimeRange(autoPowerTime)
+                        put("power_on_timer", "${format2(times[0])}:${format2(times[1])}")
+                        put("power_off_timer", "${format2(times[2])}:${format2(times[3])}")
+                    }
+                }
+                if (updateRebootValues(context, values)) {
+                    autoPowerEnabled = it
+                } else {
+                    Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
+                }
+            }
         )
 
         if (autoPowerEnabled) {
@@ -114,8 +183,18 @@ fun RebootScreen(onBack: () -> Unit) {
             initialRightHour = onH,
             initialRightMinute = onM,
             onConfirm = { lh, lm, rh, rm ->
-                timedScreenOffTime = formatTimeRange(lh, lm, rh, rm)
-                showScreenOffDialog = false
+                val newValue = formatTimeRange(lh, lm, rh, rm)
+                val values = mapOf(
+                    "screen_off_timer" to "${format2(lh)}:${format2(lm)}",
+                    "screen_on_timer" to "${format2(rh)}:${format2(rm)}",
+                    "autoScreenCtrl" to if (timedScreenOffEnabled) "1" else "0"
+                )
+                if (updateRebootValues(context, values)) {
+                    timedScreenOffTime = newValue
+                    showScreenOffDialog = false
+                } else {
+                    Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
+                }
             },
             onDismiss = { showScreenOffDialog = false }
         )
@@ -132,8 +211,18 @@ fun RebootScreen(onBack: () -> Unit) {
             initialRightHour = offH,
             initialRightMinute = offM,
             onConfirm = { lh, lm, rh, rm ->
-                autoPowerTime = formatTimeRange(lh, lm, rh, rm)
-                showPowerDialog = false
+                val newValue = formatTimeRange(lh, lm, rh, rm)
+                val values = mapOf(
+                    "power_on_timer" to "${format2(lh)}:${format2(lm)}",
+                    "power_off_timer" to "${format2(rh)}:${format2(rm)}",
+                    "autoPowerCtrl" to if (autoPowerEnabled) "1" else "0"
+                )
+                if (updateRebootValues(context, values)) {
+                    autoPowerTime = newValue
+                    showPowerDialog = false
+                } else {
+                    Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
+                }
             },
             onDismiss = { showPowerDialog = false }
         )

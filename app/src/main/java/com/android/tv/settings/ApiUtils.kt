@@ -9,7 +9,7 @@ import androidx.compose.ui.platform.LocalContext
 fun hdmiapi(): String {
     val contentResolver = LocalContext.current.contentResolver
     val resolver = contentResolver
-    val uri = Uri.parse("content://com.android.ctcc.deviceinfo/settings")
+    val uri = Uri.parse("content://com.android.zshd.deviceinfo/settings")
 
     val extras = Bundle().apply {
         putString("key", "value")

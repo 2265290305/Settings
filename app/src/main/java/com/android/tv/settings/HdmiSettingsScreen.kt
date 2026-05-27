@@ -1,5 +1,8 @@
 package com.android.tv.settings
 
+import android.content.Context
+import android.net.Uri
+import android.os.Bundle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -31,6 +34,7 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -39,6 +43,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -49,20 +54,141 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.android.tv.settings.ui.theme.设置Theme
+import org.json.JSONObject
+
+private const val METHOD_DEV_QUERY = "DEV_QUERY"
+private const val METHOD_DEV_OPT = "DEV_OPT"
+private val HDMI_SETTINGS_URI: Uri = Uri.parse("content://com.android.zshd.deviceinfo/settings")
+
+private data class HdmiScreenBorders(
+    val top: Int,
+    val down: Int,
+    val left: Int,
+    val right: Int
+)
+
+private fun hdmiNormalizeValue(value: Any?): String? {
+    val normalized = value?.toString()?.trim()
+    if (normalized.isNullOrEmpty()) return null
+    if (normalized.equals("null", ignoreCase = true)) return null
+    return normalized
+}
+
+private fun isHdmiBundleSuccess(bundle: Bundle?): Boolean {
+    if (bundle == null) return false
+    if (bundle.getBoolean("success", false)) return true
+    if (bundle.getBoolean("result", false)) return true
+    if (bundle.getInt("code", -1) == 0) return true
+    return false
+}
+
+private fun hdmiProviderCall(context: Context, method: String, key: String, value: String? = null): String? {
+    val resolver = context.contentResolver
+    return runCatching {
+        val extras = Bundle().apply {
+            putString("key", key)
+            if (value != null) {
+                putString("value", value)
+                putString(key, value)
+            } else {
+                putString(key, "")
+            }
+        }
+        val result = resolver.call(HDMI_SETTINGS_URI, method, null, extras)
+        hdmiNormalizeValue(result?.getString(key))
+            ?: hdmiNormalizeValue(result?.getString("value"))
+            ?: hdmiNormalizeValue(result?.getString("result"))
+            ?: result?.keySet()?.firstNotNullOfOrNull { bundleKey ->
+                hdmiNormalizeValue(result.get(bundleKey))
+            }
+    }.getOrNull()
+}
+
+private fun queryHdmiValue(context: Context, key: String, defaultValue: String): String {
+    return hdmiProviderCall(context, METHOD_DEV_QUERY, key) ?: defaultValue
+}
+
+private fun updateHdmiValue(context: Context, key: String, value: String): Boolean {
+    val resolver = context.contentResolver
+    return runCatching {
+        val extras = Bundle().apply {
+            putString("key", key)
+            putString("value", value)
+            putString(key, value)
+        }
+        val result = resolver.call(HDMI_SETTINGS_URI, METHOD_DEV_OPT, null, extras)
+        isHdmiBundleSuccess(result)
+            || hdmiNormalizeValue(result?.getString(key))?.let { it.equals("true", ignoreCase = true) || it == "1" } == true
+            || hdmiNormalizeValue(result?.getString("value"))?.let { it.equals("true", ignoreCase = true) || it == "1" } == true
+            || hdmiNormalizeValue(result?.getString("result"))?.let { it.equals("true", ignoreCase = true) || it == "1" } == true
+    }.getOrDefault(false)
+}
+
+private fun parseHdmiResolutionOptions(raw: String): List<String> {
+    return raw.split(",")
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+}
+
+private fun parseHdmiScreenBorders(raw: String): HdmiScreenBorders? {
+    return runCatching {
+        val json = JSONObject(raw)
+        HdmiScreenBorders(
+            top = json.optString("top", "0").toInt(),
+            down = json.optString("down", "0").toInt(),
+            left = json.optString("left", "0").toInt(),
+            right = json.optString("right", "0").toInt()
+        )
+    }.getOrNull()
+}
+
+private fun bordersToPercent(borders: HdmiScreenBorders): Int {
+    val inset = maxOf(borders.top, borders.down, borders.left, borders.right).coerceIn(0, 20)
+    return 100 - inset
+}
+
+private fun percentToBorders(percent: Int): HdmiScreenBorders {
+    val inset = (100 - percent).coerceIn(0, 20)
+    return HdmiScreenBorders(
+        top = inset,
+        down = inset,
+        left = inset,
+        right = inset
+    )
+}
 
 @Composable
 fun HdmiSettingsScreen(modifier: Modifier = Modifier) {
-    var hdmiAudioOutput by remember { mutableStateOf(false) }
+    val context = LocalContext.current.applicationContext
+    var hdmiAudioOutput by rememberSaveable { mutableStateOf(false) }
     var showDialog by remember { mutableStateOf(false) }
     val screenOffTimeOptions = listOf("永不", "1分钟", "10分钟", "20分钟", "30分钟")
-    var selectedScreenOffTime by remember { mutableStateOf("30分钟") }
+    var selectedScreenOffTime by rememberSaveable { mutableStateOf("30分钟") }
 
     var showResolutionDialog by remember { mutableStateOf(false) }
-    val resolutionOptions = listOf( "1920 x 1080","1680 x 1050", "1600 x 1200","1600 x 900","1400 x 1080",)
-    var selectedResolution by remember { mutableStateOf("1920 x 1080") }
+    var resolutionOptions by rememberSaveable { mutableStateOf(listOf("Auto")) }
+    var selectedResolution by rememberSaveable { mutableStateOf("Auto") }
 
     var showScalingScreen by rememberSaveable { mutableStateOf(false) }
     var selectedScalingPercent by rememberSaveable { mutableStateOf(100) }
+
+    LaunchedEffect(context) {
+        val availableResolutions = parseHdmiResolutionOptions(
+            queryHdmiValue(context, "getAllResolutions", "Auto")
+        )
+        val currentResolutionOptions = availableResolutions.ifEmpty { resolutionOptions }
+        resolutionOptions = currentResolutionOptions
+
+        val resolutionIndex = queryHdmiValue(context, "getResolution", "1").toIntOrNull()
+        selectedResolution = currentResolutionOptions.getOrNull((resolutionIndex ?: 1) - 1)
+            ?: currentResolutionOptions.firstOrNull()
+            ?: "Auto"
+
+        hdmiAudioOutput = queryHdmiValue(context, "getCurAudioDevice", "0") == "1"
+
+        parseHdmiScreenBorders(queryHdmiValue(context, "getScreenBorders", """{"top":"0","down":"0","left":"0","right":"0"}"""))
+            ?.let { borders -> selectedScalingPercent = bordersToPercent(borders) }
+    }
 
     Column(
         modifier = modifier
@@ -126,7 +252,11 @@ fun HdmiSettingsScreen(modifier: Modifier = Modifier) {
                 Spacer(modifier = Modifier.width(16.dp))
                 Switch(
                     checked = hdmiAudioOutput,
-                    onCheckedChange = { hdmiAudioOutput = it },
+                    onCheckedChange = {
+                        if (updateHdmiValue(context, "setCurAudioDevice", if (it) "1" else "0")) {
+                            hdmiAudioOutput = it
+                        }
+                    },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.White,
                         checkedTrackColor = Color(0xFF4356B6),
@@ -203,7 +333,10 @@ fun HdmiSettingsScreen(modifier: Modifier = Modifier) {
             options = resolutionOptions,
             selectedOption = selectedResolution,
             onOptionSelected = {
-                selectedResolution = it
+                val targetIndex = resolutionOptions.indexOf(it) + 1
+                if (targetIndex > 0 && updateHdmiValue(context, "setResolution", targetIndex.toString())) {
+                    selectedResolution = it
+                }
                 showResolutionDialog = false
             },
             onDismiss = { showResolutionDialog = false }
@@ -221,7 +354,16 @@ fun HdmiSettingsScreen(modifier: Modifier = Modifier) {
                 initialPercent = selectedScalingPercent,
                 onCancel = { showScalingScreen = false },
                 onConfirm = {
-                    selectedScalingPercent = it
+                    val borders = percentToBorders(it)
+                    val value = JSONObject()
+                        .put("top", borders.top.toString())
+                        .put("down", borders.down.toString())
+                        .put("left", borders.left.toString())
+                        .put("right", borders.right.toString())
+                        .toString()
+                    if (updateHdmiValue(context, "setScreenBorders", value)) {
+                        selectedScalingPercent = it
+                    }
                     showScalingScreen = false
                 }
             )
@@ -463,8 +605,8 @@ private fun HdmiDisplayScalingScreen(
                         Slider(
                             value = percent.toFloat(),
                             onValueChange = { percent = it.toInt() },
-                            valueRange = 80f..120f,
-                            steps = 39,
+                            valueRange = 80f..100f,
+                            steps = 19,
                             colors = SliderDefaults.colors(
                                 thumbColor = Color(0xFF4C73FF),
                                 activeTrackColor = Color(0xFF4C73FF),

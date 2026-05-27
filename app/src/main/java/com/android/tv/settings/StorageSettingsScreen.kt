@@ -1,20 +1,20 @@
 package com.android.tv.settings
 
+import android.app.usage.StorageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.net.Uri
+import android.os.Binder
 import android.os.Build
-import android.os.UserHandle
-import android.app.usage.StorageStatsManager
 import android.os.Environment
+import android.os.IBinder
+import android.os.Parcel
+import android.os.UserHandle
 import android.os.storage.StorageManager
 import android.text.format.Formatter
 import android.widget.Toast
-import android.os.Binder
-import android.os.IBinder
-import android.os.Parcel
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -316,12 +316,12 @@ fun StorageSettingsScreen(modifier: Modifier = Modifier) {
         modifier = modifier
             .fillMaxSize()
             //.background(Color(0xFFF0F2F5))
-            .padding(24.dp)
+            .padding(20.dp)
             .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         Card(
-            shape = RoundedCornerShape(32.dp),
+            shape = RoundedCornerShape(22.dp),
             colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor)),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -367,7 +367,7 @@ fun StorageSettingsScreen(modifier: Modifier = Modifier) {
         }
 
         Card(
-            shape = RoundedCornerShape(32.dp),
+            shape = RoundedCornerShape(22.dp),
             colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor)),
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -382,7 +382,7 @@ fun StorageSettingsScreen(modifier: Modifier = Modifier) {
                 if (loading) {
                     Text(text = "正在读取应用占用...", fontSize = 13.sp, color = Color(0xFF6B7280))
                 } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         items.forEachIndexed { idx, item ->
                             AppRow(
                                 item = item,

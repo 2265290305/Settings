@@ -1,10 +1,12 @@
 package com.android.tv.settings
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.net.Uri
 import android.os.Build
-import android.os.Bundle
 import android.os.Build.VERSION_CODES
+import android.os.Bundle
 import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -58,7 +60,7 @@ import java.util.Locale
 private const val DEVICE_INFO_TAG = "LocalInfo"
 private const val METHOD_DEV_QUERY = "DEV_QUERY"
 private const val METHOD_DEV_OPT = "DEV_OPT"
-private val DEVICE_INFO_URI: Uri = Uri.parse("content://com.android.ctcc.deviceinfo/device_info")
+private val DEVICE_INFO_URI: Uri = Uri.parse("content://com.android.zshd.deviceinfo/device_info")
 
 private fun normalizeValue(value: String?): String? {
     val v = value?.trim()
@@ -161,47 +163,131 @@ private data class NetSnapshot(
     val ipv6: String?
 )
 
-private fun snapshotNetworkBestEffort(): NetSnapshot {
-    val ifaces = runCatching { NetworkInterface.getNetworkInterfaces()?.toList().orEmpty() }.getOrDefault(emptyList())
-    val up = ifaces
-        .filter { runCatching { it.isUp && !it.isLoopback }.getOrDefault(false) }
-        .sortedBy { it.name }
+private fun sanitizeIpAddress(value: String?): String? {
+    return normalizeValue(value?.substringBefore('%'))
+}
 
-    fun firstMac(): String? {
-        // Prefer ethernet/wlan if present.
-        val preferred = listOf("eth0", "wlan0", "en0")
-        preferred.forEach { n ->
-            up.firstOrNull { it.name.equals(n, ignoreCase = true) }?.let { ni ->
-                formatMac(runCatching { ni.hardwareAddress }.getOrNull())?.let { return it }
+private fun isIgnoredNetworkInterface(name: String?): Boolean {
+    val normalized = name?.trim().orEmpty()
+    if (normalized.isEmpty()) return true
+    return listOf("lo", "dummy", "tun", "tap", "veth", "sit", "ip6tnl", "rmnet", "p2p").any {
+        normalized.startsWith(it, ignoreCase = true)
+    }
+}
+
+private fun networkPriority(
+    capabilities: NetworkCapabilities?,
+    interfaceName: String,
+): Int {
+    return when {
+        capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) == true -> 0
+        interfaceName.startsWith("wlan", ignoreCase = true) -> 0
+        capabilities?.hasTransport(NetworkCapabilities.TRANSPORT_ETHERNET) == true -> 1
+        interfaceName.startsWith("eth", ignoreCase = true) ||
+            interfaceName.startsWith("en", ignoreCase = true) -> 1
+        else -> 2
+    }
+}
+
+private fun selectIpv4(interfaceAddresses: List<java.net.InetAddress>): String? {
+    return interfaceAddresses
+        .filterIsInstance<Inet4Address>()
+        .firstOrNull { !it.isLoopbackAddress }
+        ?.hostAddress
+        ?.let(::sanitizeIpAddress)
+}
+
+private fun selectIpv6(interfaceAddresses: List<java.net.InetAddress>): String? {
+    val candidates = interfaceAddresses
+        .filterIsInstance<Inet6Address>()
+        .filterNot { it.isLoopbackAddress || it.isAnyLocalAddress }
+        .sortedBy {
+            when {
+                it.isLinkLocalAddress -> 2
+                it.isSiteLocalAddress -> 1
+                else -> 0
             }
         }
-        up.forEach { ni ->
-            formatMac(runCatching { ni.hardwareAddress }.getOrNull())?.let { return it }
-        }
-        return null
+    return candidates.firstOrNull()?.hostAddress?.let(::sanitizeIpAddress)
+}
+
+private fun snapshotNetworkBestEffort(context: Context): NetSnapshot {
+    data class Candidate(
+        val priority: Int,
+        val interfaceName: String,
+        val mac: String?,
+        val ipv4: String?,
+        val ipv6: String?,
+    )
+
+    fun candidateFromInterface(
+        interfaceName: String,
+        addresses: List<java.net.InetAddress>,
+        capabilities: NetworkCapabilities? = null,
+    ): Candidate? {
+        if (isIgnoredNetworkInterface(interfaceName)) return null
+        val ipv4 = selectIpv4(addresses)
+        val ipv6 = selectIpv6(addresses)
+        val mac = formatMac(
+            runCatching { NetworkInterface.getByName(interfaceName)?.hardwareAddress }.getOrNull()
+        )
+        if (ipv4 == null && ipv6 == null && mac == null) return null
+        return Candidate(
+            priority = networkPriority(capabilities, interfaceName),
+            interfaceName = interfaceName,
+            mac = mac,
+            ipv4 = ipv4,
+            ipv6 = ipv6,
+        )
     }
 
-    fun firstIp4(): String? {
-        up.forEach { ni ->
-            val addrs = runCatching { ni.inetAddresses?.toList().orEmpty() }.getOrDefault(emptyList())
-            addrs.forEach { addr ->
-                if (addr is Inet4Address && !addr.isLoopbackAddress) return addr.hostAddress
+    val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
+    val fromConnectivity = runCatching {
+        connectivityManager?.allNetworks
+            ?.mapNotNull { network ->
+                val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return@mapNotNull null
+                if (!capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) {
+                    return@mapNotNull null
+                }
+                val linkProperties = connectivityManager.getLinkProperties(network) ?: return@mapNotNull null
+                val interfaceName = linkProperties.interfaceName ?: return@mapNotNull null
+                candidateFromInterface(
+                    interfaceName = interfaceName,
+                    addresses = linkProperties.linkAddresses.map { it.address },
+                    capabilities = capabilities,
+                )
             }
-        }
-        return null
+            ?.sortedWith(compareBy<Candidate> { it.priority }.thenBy { it.interfaceName })
+            ?.firstOrNull()
+    }.getOrNull()
+    if (fromConnectivity != null) {
+        return NetSnapshot(
+            mac = fromConnectivity.mac,
+            ipv4 = fromConnectivity.ipv4,
+            ipv6 = fromConnectivity.ipv6,
+        )
     }
 
-    fun firstIp6(): String? {
-        up.forEach { ni ->
-            val addrs = runCatching { ni.inetAddresses?.toList().orEmpty() }.getOrDefault(emptyList())
-            addrs.forEach { addr ->
-                if (addr is Inet6Address && !addr.isLoopbackAddress) return addr.hostAddress
+    val fromInterfaces = runCatching {
+        NetworkInterface.getNetworkInterfaces()
+            ?.toList()
+            .orEmpty()
+            .filter { runCatching { it.isUp && !it.isLoopback }.getOrDefault(false) }
+            .mapNotNull { iface ->
+                candidateFromInterface(
+                    interfaceName = iface.name,
+                    addresses = runCatching { iface.inetAddresses?.toList().orEmpty() }.getOrDefault(emptyList()),
+                )
             }
-        }
-        return null
-    }
+            .sortedWith(compareBy<Candidate> { it.priority }.thenBy { it.interfaceName })
+            .firstOrNull()
+    }.getOrNull()
 
-    return NetSnapshot(mac = firstMac(), ipv4 = firstIp4(), ipv6 = firstIp6())
+    return NetSnapshot(
+        mac = fromInterfaces?.mac,
+        ipv4 = fromInterfaces?.ipv4,
+        ipv6 = fromInterfaces?.ipv6,
+    )
 }
 
 @Composable
@@ -245,19 +331,24 @@ fun LocalInfoScreen(modifier: Modifier = Modifier) {
                 ?: systemPropertyGet("ro.product.ctei")
         ) ?: "未知"
 
-        val net = snapshotNetworkBestEffort()
-        deviceMac = normalizeValue(
-            queryDeviceInfoBestEffort(context, listOf("deviceMac", "mac", "MAC", "deviceMac"))
-        ) ?: (net.mac ?: "未知")
-        deviceIp = normalizeValue(queryDeviceInfoBestEffort(context, listOf("ip", "ipv4", "IP", "deviceIp"))) ?: (net.ipv4 ?: "未知")
-        deviceIpv6 = normalizeValue(queryDeviceInfoBestEffort(context, listOf("ipv6", "IPv6", "deviceIpv6"))) ?: (net.ipv6 ?: "未知")
+        val net = snapshotNetworkBestEffort(context)
+        deviceMac = net.mac
+            ?: normalizeValue(queryDeviceInfoBestEffort(context, listOf("deviceMac", "mac", "MAC")))
+            ?: "未知"
+        deviceIp = net.ipv4
+            ?: normalizeValue(queryDeviceInfoBestEffort(context, listOf("ip", "ipv4", "IP", "deviceIp")))
+            ?: "未知"
+        deviceIpv6 = net.ipv6
+            ?: normalizeValue(queryDeviceInfoBestEffort(context, listOf("ipv6", "IPv6", "deviceIpv6")))
+            ?: "未知"
 
         deviceLocation = normalizeValue(
             queryDeviceInfoBestEffort(context, listOf("location", "province", "city", "area"))
         ) ?: "未知"
 
         systemVersion = normalizeValue(
-            queryDeviceInfoBestEffort(context, listOf("swVersion", "version", "systemVersion", "romVersion"))
+            systemPropertyGet("ro.build.version.incremental")
+                ?: queryDeviceInfoBestEffort(context, listOf("swVersion", "version", "systemVersion", "romVersion"))
                 ?: systemPropertyGet("ro.product.version")
         ) ?: normalizeValue(Build.VERSION.INCREMENTAL) ?: "未知"
     }
@@ -356,7 +447,9 @@ fun LocalInfoScreen(modifier: Modifier = Modifier) {
                         }
                         OutlinedButton(
                             onClick = {
-                                Toast.makeText(context, "检查更新（待接入）", Toast.LENGTH_SHORT).show()
+                                if (!context.launchRomUpgradeOrFallback()) {
+                                    Toast.makeText(context, "未找到升级入口", Toast.LENGTH_SHORT).show()
+                                }
                             },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF4C73FF))
                         ) {
@@ -392,7 +485,12 @@ fun LocalInfoScreen(modifier: Modifier = Modifier) {
                         }
                         OutlinedButton(
                             onClick = {
-                                Toast.makeText(context, "日志上报（待接入）", Toast.LENGTH_SHORT).show()
+                                val ok = context.requestLogUpload()
+                                Toast.makeText(
+                                    context,
+                                    if (ok) "已发送日志上报请求" else "日志上报失败",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF4C73FF))
                         ) {
@@ -407,7 +505,9 @@ fun LocalInfoScreen(modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            Toast.makeText(context, "恢复出厂设置（待接入）", Toast.LENGTH_SHORT).show()
+                            if (!context.openFactoryResetEntry()) {
+                                Toast.makeText(context, "未找到恢复出厂入口", Toast.LENGTH_SHORT).show()
+                            }
                         }
                 ) {
                     Row(

@@ -1,14 +1,21 @@
 package com.android.tv.settings
 
 import android.content.BroadcastReceiver
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.database.ContentObserver
+import android.database.Cursor
 import android.net.Uri
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.BorderStroke
@@ -16,6 +23,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -44,6 +52,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -57,11 +66,19 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
@@ -126,11 +143,19 @@ private const val LOGOUT_TAG = "LogoutCleanup"
 private const val ACTION_LOG_OUT = "com.telecom.smartcloud.action.log_out"
 private const val ACTION_LOG_OUT_RESULT = "com.telecom.smartcloud.action.result"
 private const val KEY_LOG_OUT_RESULT = "log_out_result"
+private const val ACTION_TV_SIGN_IN = "EAccount.ACTION_TV_SIGN_IN"
+private const val ACTION_TV_SIGN_OUT = "EAccount.ACTION_TV_SIGN_OUT"
 private const val ACTION_UNBIND = "com.ctcc.iotsdk.unbind_broadcast"
 private const val METHOD_DEV_QUERY = "DEV_QUERY"
 private const val METHOD_DEV_OPT = "DEV_OPT"
 private const val PROFILE_TAG = "PersonalInfo"
-private val PERSONAL_INFO_URI: Uri = Uri.parse("content://com.android.ctcc.deviceinfo/personalinfo")
+private const val EXTRA_FROM_SYSTEMUI_ACTIVATION =
+    "com.android.systemui.iot.extra.FROM_SYSTEMUI_ACTIVATION"
+private const val KEY_BIND_STATUS = "bindStatus"
+private val PERSONAL_INFO_URI: Uri = Uri.parse("content://com.android.zshd.deviceinfo/personalinfo")
+private val DEVICE_INFO_URI: Uri = Uri.parse("content://com.android.zshd.deviceinfo/device_info")
+private val DEV_STAT_URI: Uri = Uri.parse("content://com.android.zshd.deviceinfo/devStat")
+private val ACCOUNT_USERINFO_URI: Uri = Uri.parse("content://cn.com.chinatelecom.account.android/userinfo")
 
 private fun buildPersonalInfoUriCandidates(context: Context): List<Uri> {
     return listOf(PERSONAL_INFO_URI)
@@ -144,6 +169,14 @@ private fun currentUserIdCompat(): Int {
         // Fallback for SDKs where myUserId is hidden from compile-time stubs.
         0
     }
+}
+
+private fun systemProperty(key: String, fallback: String = ""): String {
+    return runCatching {
+        val clazz = Class.forName("android.os.SystemProperties")
+        val method = clazz.getDeclaredMethod("get", String::class.java, String::class.java)
+        method.invoke(null, key, fallback) as? String ?: fallback
+    }.getOrDefault(fallback)
 }
 
 private fun clearPackageCacheBestEffort(context: Context, packageName: String): Boolean {
@@ -185,10 +218,12 @@ private fun clearLogoutAppCaches(context: Context): List<CacheClearResult> {
 private fun sendLogoutBroadcasts(context: Context) {
     // Generic broadcasts
     context.sendBroadcast(Intent(ACTION_LOG_OUT))
+    context.sendBroadcast(Intent(ACTION_TV_SIGN_OUT))
     context.sendBroadcast(Intent(ACTION_UNBIND))
     // Explicit broadcasts for key apps to improve delivery on some builds.
     listOf("com.chinatelecom.accloudbox", "cn.dlife.smartcloud.launcher").forEach { pkg ->
         runCatching { context.sendBroadcast(Intent(ACTION_LOG_OUT).setPackage(pkg)) }
+        runCatching { context.sendBroadcast(Intent(ACTION_TV_SIGN_OUT).setPackage(pkg)) }
         runCatching { context.sendBroadcast(Intent(ACTION_UNBIND).setPackage(pkg)) }
     }
 }
@@ -208,6 +243,14 @@ private data class BackendProfile(
     val avatarPath: String?
 )
 
+private fun configuredAccountProfileQueryUrlOrNull(): String? {
+    val endpoint = BuildConfig.ACCOUNT_PROFILE_QUERY_URL.trim()
+    if (endpoint.isBlank()) return null
+    val host = runCatching { URL(endpoint).host }.getOrNull().orEmpty()
+    if (host.equals("api.example.com", ignoreCase = true)) return null
+    return endpoint
+}
+
 private fun parseBackendProfile(body: String): BackendProfile {
     val root = JSONObject(body)
     val data = when {
@@ -226,8 +269,8 @@ private fun parseBackendProfile(body: String): BackendProfile {
 
 private suspend fun fetchAccountProfileFromBackend(): Result<BackendProfile> = withContext(Dispatchers.IO) {
     runCatching {
-        val endpoint = BuildConfig.ACCOUNT_PROFILE_QUERY_URL.trim()
-        if (endpoint.isBlank()) throw IllegalStateException("未配置账号查询接口地址")
+        val endpoint = configuredAccountProfileQueryUrlOrNull()
+            ?: throw IllegalStateException("未配置账号查询接口地址")
         val connection = (URL(endpoint).openConnection() as HttpURLConnection).apply {
             requestMethod = "GET"
             connectTimeout = 10_000
@@ -417,6 +460,53 @@ private fun updatePersonalInfoByProvider(context: Context, nickname: String, ava
     return false
 }
 
+private fun updateUnifiedAccountInfoByProvider(
+    context: Context,
+    nickname: String,
+    avatarPath: String
+): Boolean {
+    val resolver = context.contentResolver
+    val candidateCalls = listOf(
+        Bundle().apply {
+            putString("nickname", nickname)
+            putString("title", nickname)
+            putString("avatarPath", avatarPath)
+            putString("avatar", avatarPath)
+            putString("icon", avatarPath)
+        },
+        Bundle().apply {
+            putString("key", "nickname")
+            putString("value", nickname)
+            putString("avatar", avatarPath)
+            putString("icon", avatarPath)
+        }
+    )
+    candidateCalls.forEach { extras ->
+        val updated = runCatching {
+            val result = resolver.call(ACCOUNT_USERINFO_URI, METHOD_DEV_OPT, null, extras)
+            isBundleSuccess(result)
+        }.getOrDefault(false)
+        if (updated) return true
+    }
+
+    val rows = runCatching {
+        resolver.update(
+            ACCOUNT_USERINFO_URI,
+            ContentValues().apply {
+                put("nickname", nickname)
+                put("title", nickname)
+                put("name", nickname)
+                put("avatarPath", avatarPath)
+                put("avatar", avatarPath)
+                put("icon", avatarPath)
+            },
+            null,
+            null
+        )
+    }.getOrDefault(0)
+    return rows > 0
+}
+
 private fun logProviderDiscovery(context: Context) {
     val pm = context.packageManager
     val auth = PERSONAL_INFO_URI.authority.orEmpty()
@@ -430,11 +520,14 @@ private suspend fun submitAccountProfileUpdate(
     avatarAssetUrl: String
 ): Result<Unit> = withContext(Dispatchers.IO) {
     runCatching {
-        // Preferred path from CTCC spec: provider DEV_OPT
-        if (updatePersonalInfoByProvider(context, nickname, avatarAssetUrl)) {
+        val personalInfoUpdated = updatePersonalInfoByProvider(context, nickname, avatarAssetUrl)
+        val unifiedAccountUpdated = updateUnifiedAccountInfoByProvider(context, nickname, avatarAssetUrl)
+        if (personalInfoUpdated || unifiedAccountUpdated) {
+            runCatching { context.contentResolver.notifyChange(PERSONAL_INFO_URI, null) }
+            runCatching { context.contentResolver.notifyChange(ACCOUNT_USERINFO_URI, null) }
             return@runCatching Unit
         }
-        throw IllegalStateException("Provider 接口不可用，请切换到支持 com.android.ctcc.deviceinfo 的设备")
+        throw IllegalStateException("Provider 接口不可用，请切换到支持 com.android.zshd.deviceinfo 的设备")
     }
 }
 
@@ -452,7 +545,19 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
-        val authority = "com.android.ctcc.deviceinfo"
+        val authority = "com.android.zshd.deviceinfo"
+        val startTarget = resolveStartTarget(intent)
+        if (intent?.getBooleanExtra(EXTRA_FROM_SYSTEMUI_ACTIVATION, false) == true &&
+            isDeviceBoundForSystemUiActivation(this)
+        ) {
+            Log.d(PROFILE_TAG, "started by SystemUI and already bound; return to launcher")
+            startActivity(Intent(Intent.ACTION_MAIN).apply {
+                addCategory(Intent.CATEGORY_HOME)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            })
+            finish()
+            return
+        }
 
         val providerInfo = packageManager.resolveContentProvider(authority, 0)
 
@@ -473,10 +578,71 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             设置Theme {
-                NavigationRailExample()
+                NavigationRailExample(startTarget = startTarget)
             }
         }
+        IotSdkBridge.start(applicationContext)
     }
+}
+
+data class StartTarget(
+    val selectedDestination: Int = 0,
+    val wifiStartRoute: String = Destinations.WifiScreen.route,
+    val fromSystemUiActivation: Boolean = false,
+)
+
+private fun resolveStartTarget(intent: Intent?): StartTarget {
+    val fromSystemUiActivation =
+        intent?.getBooleanExtra(EXTRA_FROM_SYSTEMUI_ACTIVATION, false) == true
+    return when (intent?.action) {
+        Settings.ACTION_WIFI_SETTINGS,
+        ACTION_IOT_PAGE_NET_OPTION -> StartTarget(
+            selectedDestination = 1,
+            fromSystemUiActivation = fromSystemUiActivation,
+        )
+        Settings.ACTION_BLUETOOTH_SETTINGS -> StartTarget(
+            selectedDestination = 2,
+            fromSystemUiActivation = fromSystemUiActivation,
+        )
+        ACTION_IOT_PAGE_PRIVATE -> StartTarget(
+            selectedDestination = 8,
+            fromSystemUiActivation = fromSystemUiActivation,
+        )
+        else -> StartTarget(fromSystemUiActivation = fromSystemUiActivation)
+    }
+}
+
+private fun isDeviceBoundForSystemUiActivation(context: Context): Boolean {
+    return queryBindStatusForSystemUiActivation(context) == "1"
+}
+
+private fun queryBindStatusForSystemUiActivation(context: Context): String? {
+    return queryProviderValueForSystemUiActivation(context, DEV_STAT_URI, KEY_BIND_STATUS)
+        ?: queryProviderValueForSystemUiActivation(context, DEVICE_INFO_URI, KEY_BIND_STATUS)
+}
+
+private fun queryProviderValueForSystemUiActivation(
+    context: Context,
+    uri: Uri,
+    key: String,
+): String? {
+    return runCatching {
+        val extras = Bundle().apply {
+            putString("key", key)
+            putString(key, "")
+        }
+        val result = context.contentResolver.call(uri, METHOD_DEV_QUERY, null, extras)
+        normalizeSystemUiActivationProviderValue(result?.getString(key))
+            ?: normalizeSystemUiActivationProviderValue(result?.getString("value"))
+            ?: normalizeSystemUiActivationProviderValue(result?.getString("result"))
+    }.onFailure {
+        Log.d(PROFILE_TAG, "query $key failed uri=$uri: ${it.message}")
+    }.getOrNull()
+}
+
+private fun normalizeSystemUiActivationProviderValue(value: Any?): String? {
+    val text = value?.toString()?.trim().orEmpty()
+    return text.takeIf { it.isNotEmpty() && !it.equals("null", ignoreCase = true) }
 }
 
 
@@ -485,24 +651,47 @@ sealed class Destinations(val route: String) {
     object Detail : Destinations("detail")
     object WifiScreen : Destinations("wifi_screen")
     object AddWifiScreen : Destinations("add_wifi_screen")
-    object WifiConnectScreen : Destinations("wifi_connect_screen/{ssid}") {
-        fun createRoute(ssid: String) = "wifi_connect_screen/$ssid"
+    object WifiConnectScreen : Destinations("wifi_connect_screen/{ssid}/{security}") {
+        fun createRoute(ssid: String, security: String): String {
+            return "wifi_connect_screen/${Uri.encode(ssid.normalizedWifiSsid())}/${Uri.encode(security)}"
+        }
     }
     object WifiDetailScreen : Destinations("wifi_detail_screen/{ssid}") {
-        fun createRoute(ssid: String) = "wifi_detail_screen/$ssid"
+        fun createRoute(ssid: String) = "wifi_detail_screen/${Uri.encode(ssid.normalizedWifiSsid())}"
     }
 }
 
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigationRailExample(modifier: Modifier = Modifier) {
+fun NavigationRailExample(
+    modifier: Modifier = Modifier,
+    startTarget: StartTarget = StartTarget(),
+) {
     val navController = rememberNavController()
+    val context = LocalContext.current
 
     val names = stringArrayResource(R.array.docks)
     //val icons = integerArrayResource(R.array.dockicons);
-    val startDestination = 0;
-    var selectedDestination by rememberSaveable { mutableIntStateOf( startDestination) }
+    var selectedDestination by rememberSaveable { mutableIntStateOf(startTarget.selectedDestination) }
+    val navItemFocusRequesters = remember(names.size) {
+        List(names.size) { FocusRequester() }
+    }
+    val backFocusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(names.size) {
+        navItemFocusRequesters.getOrNull(selectedDestination)?.requestFocus()
+    }
+
+    fun handleBackNavigation() {
+        if (navController.previousBackStackEntry != null) {
+            navController.popBackStack()
+            return
+        }
+        context.launchSettingsExitTarget()
+    }
+
+    BackHandler(onBack = ::handleBackNavigation)
 
     val navRailWidth = 180.dp
     //val tintcolor = Color(0xFF4577FF)
@@ -514,18 +703,29 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                 CenterAlignedTopAppBar(
                     modifier = Modifier
                         .padding(0.dp)
-                        .background(color = colorResource(R.color.topbar)),
+                        ,
+                    colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                        containerColor = colorResource(R.color.topbar)
+                    ),
                     title = { Text("设置", fontSize = 17.sp) },
                     navigationIcon = {
-                        IconButton(onClick = {
-                            if (navController.previousBackStackEntry != null) {
-                                Log.d("navback", navController.previousBackStackEntry!!.id)
-                                navController.popBackStack()
-                            } else {
-                                // 已经是第一个页面了
-                            }
-                            /* 在这里处理返回事件 */
-                        }) {
+                        IconButton(
+                            modifier = Modifier
+                                .focusRequester(backFocusRequester)
+                                .onPreviewKeyEvent {
+                                    if (it.type == KeyEventType.KeyDown &&
+                                        it.key == Key.DirectionDown
+                                    ) {
+                                        navItemFocusRequesters
+                                            .getOrNull(selectedDestination)
+                                            ?.requestFocus()
+                                        true
+                                    } else {
+                                        false
+                                    }
+                                },
+                            onClick = ::handleBackNavigation
+                        ) {
                             Icon(
                                 painter = painterResource(R.drawable.back),
                                 contentDescription = "返回"
@@ -535,28 +735,65 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                 )
             }
         ) { contentPadding ->
-            Row(Modifier.fillMaxSize()) {
+            Row(Modifier.fillMaxSize().background(colorResource(R.color.topbar))) {
                 Surface(
-                    modifier = Modifier.fillMaxHeight(),
+                    modifier = Modifier.fillMaxHeight().width(230.dp),
                     //color = NavigationRailDefaults.ContainerColor // 保持和 NavigationRail 一样的背景色
                 ) {
                     Column(
                         modifier = Modifier
+                            .background(colorResource(R.color.topbar))
                             .verticalScroll(rememberScrollState())
                             .padding(top = contentPadding.calculateTopPadding())
                             .padding(vertical = 4.dp) // 给 item 上下加一点边距
                     ) {
                         names.forEachIndexed { index, destination ->
                             val isSelected = selectedDestination == index
-                            //val contentColor = if (isSelected) tintcolor else Color.Unspecified
+                            val contentColor = if (isSelected) Color(0xFF4577FF) else Color(0xFF222222)
+                            fun selectNavItem(target: Int) {
+                                val bounded = target.coerceIn(0, names.lastIndex)
+                                selectedDestination = bounded
+                                navItemFocusRequesters.getOrNull(bounded)?.requestFocus()
+                            }
 
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
-                                    .width(navRailWidth)
+                                    .focusRequester(navItemFocusRequesters[index])
+                                    .onFocusChanged {
+                                        if (it.isFocused) {
+                                            selectedDestination = index
+                                        }
+                                    }
+                                    .onKeyEvent {
+                                        if (it.type != KeyEventType.KeyDown) {
+                                            return@onKeyEvent false
+                                        }
+                                        when (it.key) {
+                                            Key.DirectionDown -> {
+                                                selectNavItem(index + 1)
+                                                true
+                                            }
+                                            Key.DirectionUp -> {
+                                                if (index == 0) {
+                                                    backFocusRequester.requestFocus()
+                                                } else {
+                                                    selectNavItem(index - 1)
+                                                }
+                                                true
+                                            }
+                                            Key.DirectionCenter,
+                                            Key.Enter -> {
+                                                selectNavItem(index)
+                                                true
+                                            }
+                                            else -> false
+                                        }
+                                    }
+                                    .padding(start = 20.dp, end = 40.dp)
                                     .height(53.dp)
                                     .clickable(
-                                        onClick = { selectedDestination = index },
+                                        onClick = { selectNavItem(index) },
                                         indication = null, // 1. 禁用默认的点击效果（波纹）
                                         interactionSource = remember { MutableInteractionSource() }
                                     )
@@ -564,36 +801,52 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                                         color = if (isSelected) Color.White else Color.Transparent,
                                         shape = RoundedCornerShape(10.dp)
                                     )
-                                    .padding(horizontal = 16.dp)
+                                    .focusable()
                             ) {
+                                Spacer(Modifier.width(25.dp))
                                 Icon(
                                     painter = painterResource(R.drawable.account),
                                     contentDescription = "",
-                                    //tint = contentColor // 2. 手动控制图标颜色
+                                    tint = contentColor
                                 )
                                 Spacer(Modifier.width(5.dp))
                                 Text(
                                     text = destination,
-                                    //color = contentColor // 3. 手动控制文字颜色
+                                    color = contentColor
                                 )
+                                Spacer(Modifier.width(80.dp))
                             }
                         }
                     }
                 }
                 Card (
-                    colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor)),
+                    colors = CardDefaults.cardColors(containerColor = colorResource(R.color.topbar)),
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxHeight()
+                        .onPreviewKeyEvent {
+                            if (selectedDestination != 3 &&
+                                it.type == KeyEventType.KeyDown &&
+                                it.key == Key.DirectionLeft
+                            ) {
+                                navItemFocusRequesters.getOrNull(selectedDestination)?.requestFocus()
+                                true
+                            } else {
+                                false
+                            }
+                        }
                         //.fillMaxSize(1f)
                         .clip(shape = RoundedCornerShape(46.dp))
                         //.background(colorResource(R.color.black) ) // 内容区域背景色
-                        .padding(top = contentPadding.calculateTopPadding())
+                        .padding(top = contentPadding.calculateTopPadding(), end = 40.dp)
                 ) {
                     when (selectedDestination) {
                         0 -> PersonalCenterScreen()
                         1 -> {
-                            NavHost(navController = navController, startDestination = Destinations.WifiScreen.route) {
+                            NavHost(
+                                navController = navController,
+                                startDestination = startTarget.wifiStartRoute
+                            ) {
                                 composable(Destinations.WifiScreen.route) {
                                     WifiManagerScreen(navController = navController,)
                                 }
@@ -602,16 +855,24 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                                 }
                                 composable(
                                     Destinations.WifiConnectScreen.route,
-                                    arguments = listOf(navArgument("ssid") { type = NavType.StringType })
+                                    arguments = listOf(
+                                        navArgument("ssid") { type = NavType.StringType },
+                                        navArgument("security") { type = NavType.StringType }
+                                    )
                                 ) {
-                                    val ssid = it.arguments?.getString("ssid") ?: ""
-                                    WifiConnectScreen(ssid = ssid, onBack = { navController.popBackStack() })
+                                    val ssid = Uri.decode(it.arguments?.getString("ssid") ?: "")
+                                    val security = Uri.decode(it.arguments?.getString("security") ?: SECURITY_WPA_PSK)
+                                    WifiConnectScreen(
+                                        ssid = ssid,
+                                        security = security,
+                                        onBack = { navController.popBackStack() }
+                                    )
                                 }
                                 composable(
                                     Destinations.WifiDetailScreen.route,
                                     arguments = listOf(navArgument("ssid") { type = NavType.StringType })
                                 ) {
-                                    val ssid = it.arguments?.getString("ssid") ?: ""
+                                    val ssid = Uri.decode(it.arguments?.getString("ssid") ?: "")
                                     WifiDetailScreen (ssid = ssid, onBack = { navController.popBackStack() })
                                 }
                             }
@@ -620,7 +881,11 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
                             BlueToothScreen(modifier,navController)
                         }
                         3->{
-                            SoundAndDisplayScreen()
+                            SoundAndDisplayScreen(
+                                onExitLeft = {
+                                    navItemFocusRequesters.getOrNull(selectedDestination)?.requestFocus()
+                                }
+                            )
                         }
                         4->{
                             ScreenSaverSettingsScreen(modifier =modifier)
@@ -659,20 +924,59 @@ fun NavigationRailExample(modifier: Modifier = Modifier) {
     }
 }
 
-@Composable
-fun getUserinfo(){
-    var url = Uri.parse("content://cn.com.chinatelecom.account.android/userinfo")
-    var cursor = LocalContext.current.contentResolver.query(url,null,null,null)
-    if(cursor!=null && cursor.extras!=null){
-        val bundle = cursor.extras
-        val title = bundle.getString("title")
-        val userTags = bundle.getString("userTags")
-        val summary = bundle.getString("summary")
-        val icon = bundle.getString("icon")
-        Log.i("huna","title"+title)
+private data class UnifiedAccountInfo(
+    val nickname: String?,
+    val account: String?,
+    val avatarPath: String?
+)
 
-
+private fun readBundleString(bundle: Bundle?, keys: List<String>): String? {
+    if (bundle == null) return null
+    return keys.firstNotNullOfOrNull { key ->
+        bundle.get(key)?.toString()?.trim()?.takeIf { it.isNotEmpty() && it != "null" }
     }
+}
+
+private fun readCursorString(cursor: Cursor, keys: List<String>): String? {
+    val hasRow = if (cursor.position >= 0) true else cursor.moveToFirst()
+    if (!hasRow) return null
+    return keys.firstNotNullOfOrNull { key ->
+        val index = cursor.getColumnIndex(key)
+        if (index >= 0) cursor.getString(index)?.trim()?.takeIf { it.isNotEmpty() } else null
+    }
+}
+
+private fun mergeUnifiedAccountInfo(
+    primary: UnifiedAccountInfo?,
+    fallback: UnifiedAccountInfo?
+): UnifiedAccountInfo? {
+    val merged = UnifiedAccountInfo(
+        nickname = primary?.nickname ?: fallback?.nickname,
+        account = primary?.account ?: fallback?.account,
+        avatarPath = primary?.avatarPath ?: fallback?.avatarPath
+    )
+    return if (merged.nickname == null && merged.account == null && merged.avatarPath == null) {
+        null
+    } else {
+        merged
+    }
+}
+
+private fun queryUnifiedAccountInfo(context: Context): UnifiedAccountInfo? {
+    return runCatching {
+        context.contentResolver.query(ACCOUNT_USERINFO_URI, null, null, null, null)?.use { cursor ->
+            val bundle = cursor.extras
+            val nicknameKeys = listOf("title", "nickname", "name")
+            val accountKeys = listOf("summary", "account", "phone", "mobile", "userTags", "username")
+            val avatarKeys = listOf("icon", "avatar", "avatarPath", "avatarpath", "avatar_url")
+            val info = UnifiedAccountInfo(
+                nickname = readBundleString(bundle, nicknameKeys) ?: readCursorString(cursor, nicknameKeys),
+                account = readBundleString(bundle, accountKeys) ?: readCursorString(cursor, accountKeys),
+                avatarPath = readBundleString(bundle, avatarKeys) ?: readCursorString(cursor, avatarKeys)
+            )
+            if (info.nickname == null && info.account == null && info.avatarPath == null) null else info
+        }
+    }.getOrNull()
 }
 
 @Composable
@@ -683,9 +987,11 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
     var logoutInProgress by remember { mutableStateOf(false) }
     var nickname by rememberSaveable { mutableStateOf("小翼8899") }
     var avatarIndex by rememberSaveable { mutableIntStateOf(0) }
+    var avatarModel by rememberSaveable { mutableStateOf<String?>(null) }
     var showEditPage by rememberSaveable { mutableStateOf(false) }
     var profileSaving by remember { mutableStateOf(false) }
     var accountText by rememberSaveable { mutableStateOf("未获取账号") }
+    var profileVersion by remember { mutableStateOf(0) }
     val avatarAssets = listOf(
         "file:///android_asset/avatars/avatar_01.svg",
         "file:///android_asset/avatars/avatar_02.svg",
@@ -699,25 +1005,84 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
         "file:///android_asset/avatars/avatar_10.svg",
         "file:///android_asset/avatars/avatar_11.svg"
     )
-    val userinfo = getUserinfo()
     val svgLoader = rememberSvgLoader()
 
-    LaunchedEffect(Unit) {
+    DisposableEffect(appContext) {
+        val observer = object : ContentObserver(Handler(Looper.getMainLooper())) {
+            override fun onChange(selfChange: Boolean, uri: Uri?) {
+                profileVersion++
+            }
+        }
+        val accountReceiver = object : BroadcastReceiver() {
+            override fun onReceive(context: Context?, intent: Intent?) {
+                when (intent?.action) {
+                    ACTION_TV_SIGN_IN,
+                    ACTION_TV_SIGN_OUT -> profileVersion++
+                }
+            }
+        }
+        listOf(PERSONAL_INFO_URI, ACCOUNT_USERINFO_URI, DEV_STAT_URI).forEach { uri ->
+            runCatching { appContext.contentResolver.registerContentObserver(uri, true, observer) }
+        }
+        ContextCompat.registerReceiver(
+            appContext,
+            accountReceiver,
+            IntentFilter().apply {
+                addAction(ACTION_TV_SIGN_IN)
+                addAction(ACTION_TV_SIGN_OUT)
+            },
+            ContextCompat.RECEIVER_EXPORTED
+        )
+        onDispose {
+            runCatching { appContext.contentResolver.unregisterContentObserver(observer) }
+            runCatching { appContext.unregisterReceiver(accountReceiver) }
+        }
+    }
+
+    LaunchedEffect(appContext, profileVersion) {
         logProviderDiscovery(appContext)
 
-        val providerNickname = queryPersonalInfoValue(appContext, "nickname")
-        if (!providerNickname.isNullOrBlank()) {
-            nickname = providerNickname
-        }
+        val accountInfo = queryUnifiedAccountInfo(appContext)
         val providerAvatar = queryPersonalInfoValue(appContext, "avatarpath")
-        if (!providerAvatar.isNullOrBlank()) {
-            val idx = findAvatarIndex(avatarAssets, providerAvatar)
+        val providerNickname = queryPersonalInfoValue(appContext, "nickname")
+        val providerAccount = queryAccountFromPersonalInfo(appContext)
+        val backendAccountInfo = if (
+            providerNickname.isNullOrBlank() ||
+            providerAccount.isNullOrBlank() ||
+            providerAvatar.isNullOrBlank() ||
+            accountInfo == null
+        ) {
+            fetchAccountProfileFromBackend().getOrNull()?.let {
+                UnifiedAccountInfo(
+                    nickname = it.nickname,
+                    account = it.account,
+                    avatarPath = it.avatarPath
+                )
+            }
+        } else {
+            null
+        }
+        val mergedAccountInfo = mergeUnifiedAccountInfo(accountInfo, backendAccountInfo)
+        val resolvedNickname = mergedAccountInfo?.nickname
+            ?: providerNickname
+        if (!resolvedNickname.isNullOrBlank()) {
+            nickname = resolvedNickname
+        }
+
+        val resolvedAvatar = mergedAccountInfo?.avatarPath ?: providerAvatar
+        if (!resolvedAvatar.isNullOrBlank()) {
+            val accountAvatar = resolvedAvatar
+            val idx = findAvatarIndex(avatarAssets, accountAvatar)
             if (idx >= 0) {
                 avatarIndex = idx
+                avatarModel = avatarAssets[idx]
+            } else {
+                avatarModel = accountAvatar
             }
         }
 
-        val fetched = queryAccountFromPersonalInfo(appContext)
+        val fetched = mergedAccountInfo?.account
+            ?: providerAccount
         if (!fetched.isNullOrBlank()) {
             accountText = fetched
         } else {
@@ -728,7 +1093,7 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
         }
     }
 
-    if (showEditPage|| LocalInspectionMode.current) {
+    if (showEditPage) {
         EditAccountInfoScreen(
             currentNickname = nickname,
             currentAvatarIndex = avatarIndex,
@@ -745,6 +1110,7 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
                     if (result.isSuccess) {
                         nickname = newNickname
                         avatarIndex = newAvatarIndex
+                        avatarModel = avatar
                         showEditPage = false
                         Toast.makeText(appContext, "账号信息修改成功", Toast.LENGTH_SHORT).show()
                     } else {
@@ -806,28 +1172,31 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 24.dp, vertical = 20.dp),
+
+            .padding( vertical = 20.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Card(
             shape = RoundedCornerShape(22.dp),
+            modifier = Modifier.fillMaxHeight(0.5f),
             colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor))
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(10.dp)
+                    .padding(horizontal = 24.dp)
+                    ,
+                verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 Card(
                     shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.padding(top = 30.dp).height(108.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 18.dp),
+                            .fillMaxSize()
+                            .padding(horizontal = 20.dp, vertical = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Box(
@@ -839,7 +1208,7 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
                         ) {
                             AsyncImage(
                                 model = ImageRequest.Builder(LocalContext.current)
-                                    .data(avatarAssets.getOrElse(avatarIndex) { avatarAssets.first() })
+                                    .data(avatarModel ?: avatarAssets.getOrElse(avatarIndex) { avatarAssets.first() })
                                     .build(),
                                 imageLoader = svgLoader,
                                 contentDescription = "Avatar",
@@ -854,20 +1223,29 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
                             "修改",
                             color = Color(0xFF8C9097),
                             fontSize = 15.sp,
-                            modifier = Modifier.clickable { showEditPage = true }
+                            modifier = Modifier.clickable {
+                                if (!appContext.openUnifiedAccountProfileSettings()) {
+                                    Toast.makeText(appContext, "无法打开账号设置页", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         )
                         Spacer(Modifier.width(6.dp))
                         Icon(
                             painter = painterResource(R.drawable.arrow_right),
                             contentDescription = "修改",
                             tint = Color(0xFFB5B8BE),
-                            modifier = Modifier.clickable { showEditPage = true }
+                            modifier = Modifier.clickable {
+                                if (!appContext.openUnifiedAccountProfileSettings()) {
+                                    Toast.makeText(appContext, "无法打开账号设置页", Toast.LENGTH_SHORT).show()
+                                }
+                            }
                         )
                     }
                 }
 
                 Card(
                     shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.padding(vertical = 18.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White)
                 ) {
                     Row(
@@ -907,12 +1285,14 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
 
         Card(
             shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+            colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor))
+            , modifier = Modifier.fillMaxHeight(0.5F)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 26.dp),
+
+                    .padding(vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Card(
@@ -921,16 +1301,12 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(220.dp)
-                            .padding(18.dp),
+                            .fillMaxHeight()
+
+                            ,
                         contentAlignment = Alignment.Center
                     ) {
-                        // 项目暂未接入二维码资源，先保留占位区
-
-                            Image(painterResource(R.drawable.qrcode), contentDescription = "")
-                            //Icon(painterResource(R.drawable.qrcode), contentDescription = "")
-                            //Text("二维码", color = Color(0xFF3B63C9), fontSize = 28.sp, fontWeight = FontWeight.Bold)
-                        
+                        Image(painterResource(R.drawable.qrcode), contentDescription = "")
                     }
                 }
                 Spacer(Modifier.height(12.dp))
@@ -1074,7 +1450,7 @@ private fun EditAccountInfoScreen(
         }
     }
 
-    if (showAvatarDialog || LocalInspectionMode.current) {
+    if (showAvatarDialog ) {
         AvatarPickerDialog(
             avatars = avatarAssets,
             selectedIndex = draftAvatarIndex,

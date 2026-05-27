@@ -53,8 +53,9 @@ fun WifiDetailScreen(ssid: String, onBack: () -> Unit) {
     val scanResults by remember {
         mutableStateOf(wifiManager?.scanResults)
     }
+    val targetSsid = ssid.normalizedWifiSsid()
 
-    val currentScanResult = scanResults?.find { it.SSID.trim('"') == ssid.trim('"') }
+    val currentScanResult = scanResults?.find { it.SSID.normalizedWifiSsid() == targetSsid }
 
     val signalStrength = when (currentScanResult?.level) {
         in -50..0 -> "极强"
@@ -65,10 +66,10 @@ fun WifiDetailScreen(ssid: String, onBack: () -> Unit) {
 
     val security = currentScanResult?.capabilities ?: "Unknown"
     val frequency = if (currentScanResult?.frequency ?: 0 > 5000) "5GHz" else "2.4GHz"
-    val isConnected = ssid?.trim('"') == connectionInfo?.ssid?.trim('"')
-    Log.d("wifiequal",ssid?.trim('"')+connectionInfo?.ssid);
+    val isConnected = targetSsid == connectionInfo?.ssid.normalizedWifiSsid()
+    Log.d("wifiequal", "$targetSsid:${connectionInfo?.ssid}")
     var showForgetDialog by remember { mutableStateOf(false) }
-    val config = wifiManager?.configuredNetworks?.find { it.SSID.trim('"') == ssid.trim('"') }
+    val config = wifiManager?.configuredNetworks?.firstOrNull { it.SSID.normalizedWifiSsid() == targetSsid }
 
     if (showForgetDialog) {
         Dialog(onDismissRequest = { showForgetDialog = false }) {
@@ -141,7 +142,7 @@ fun WifiDetailScreen(ssid: String, onBack: () -> Unit) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Text("网络名称")
                     Spacer(modifier = Modifier.weight(1f))
-                    Text(ssid, color = colorResource(R.color.textgray))
+                    Text(targetSsid, color = colorResource(R.color.textgray))
                 }
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
@@ -190,12 +191,12 @@ fun WifiDetailScreen(ssid: String, onBack: () -> Unit) {
                 colors= transparent,
                 onClick = {
                     if(isConnected){
-                        config?.networkId?.let { wifiManager?.disableNetwork(it) }
-                        wifiManager?.disconnect()
+                        config?.networkId?.let { runCatching { wifiManager?.disableNetwork(it) } }
+                        runCatching { wifiManager?.disconnect() }
 
                     }else{
-                        config?.networkId?.let { wifiManager?.enableNetwork(it,true) }
-                        wifiManager?.reconnect();
+                        config?.networkId?.let { runCatching { wifiManager?.enableNetwork(it,true) } }
+                        runCatching { wifiManager?.reconnect() }
                     }
 
                     onBack()

@@ -1,6 +1,8 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+
+    id("org.jetbrains.kotlin.android")
 }
 
 val accountProfileQueryUrl = (project.findProperty("ACCOUNT_PROFILE_QUERY_URL") as String?)
@@ -25,7 +27,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "com.oplus.engineernetwork"
+        applicationId = "com.android.speaker.settings"
         minSdk = 24
         targetSdk = 34
         versionCode = 1
@@ -51,17 +53,28 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
         buildConfig = true
     }
+
+
+}
+
+kotlin {
+    jvmToolchain(17)
 }
 
 
 dependencies {
+    implementation(files("libs/iotsdk.aar"))
+    implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.squareup.okhttp3:okhttp:4.12.0")
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.5")
+    implementation("org.eclipse.paho:org.eclipse.paho.android.service:1.1.1")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -73,8 +86,9 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.navigation.compose)
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1")
-    implementation(libs.androidx.constraintlayout)
-    implementation(libs.androidx.ui.graphics)
+    implementation(libs.core.ktx)
+    //implementation(libs.androidx.constraintlayout)
+    //implementation(libs.androidx.ui.graphics)
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("io.coil-kt:coil-svg:2.7.0")
 

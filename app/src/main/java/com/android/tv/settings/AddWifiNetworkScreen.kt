@@ -1,18 +1,19 @@
 package com.android.tv.settings
 
 import android.app.Service
-import android.net.wifi.WifiConfiguration
 import android.net.wifi.WifiManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -36,7 +37,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -54,12 +58,15 @@ fun AddWifiNetworkScreen(onBack: () -> Unit) {
     var ssid by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var passwordVisible by remember { mutableStateOf(false) }
-    val securityOptions = listOf("WPA/WPA2 PSK", "WEP", )
+    val securityOptions = listOf(SECURITY_WPA_PSK, SECURITY_WEP, SECURITY_OPEN)
     var selectedSecurity by remember { mutableStateOf(securityOptions[0]) }
     val context = LocalContext.current
-    val wifiManager = if (LocalInspectionMode.current) null else context.getSystemService(Service.WIFI_SERVICE) as WifiManager;
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val wifiManager = if (LocalInspectionMode.current) null else context.applicationContext.getSystemService(Service.WIFI_SERVICE) as WifiManager
     var showConnectingDialog by remember { mutableStateOf(false) }
     var showSecurityDialog by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
    // val config = wifiManager?.configuredNetworks?.find { it.SSID.trim('"') == ssid.trim('"') }
 
     if (showConnectingDialog) {
@@ -79,32 +86,23 @@ fun AddWifiNetworkScreen(onBack: () -> Unit) {
             }
         }
         LaunchedEffect(Unit) {
-            val conf = WifiConfiguration()
-            conf.SSID = "\"$ssid\""
-            when (selectedSecurity) {
-                "None" -> {
-                    conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE)
-                }
-                "WEP" -> {
-                    conf.wepKeys[0] = "\"$password\""
-                    conf.wepTxKeyIndex = 0
-                    conf.allowedKeyManagement.set(WifiConfiguration.KeyMgmt.NONE)
-                    conf.allowedGroupCiphers.set(WifiConfiguration.GroupCipher.WEP40)
-                }
-                "WPA/WPA2 PSK" -> {
-                    conf.preSharedKey = "\"$password\""
-                }
+            errorMessage = null
+            val netId = runCatching {
+                wifiManager?.addOrUpdateLegacyNetwork(
+                    ssid = ssid.normalizedWifiSsid(),
+                    password = password,
+                    security = selectedSecurity,
+                ) ?: -1
+            }.getOrDefault(-1)
+            if (wifiManager != null && wifiManager.connectLegacyNetwork(netId)) {
+                delay(2000)
+                showConnectingDialog = false
+                onBack()
+            } else {
+                showConnectingDialog = false
+                wifiManager?.clearFailedLegacyNetwork(netId)
+                errorMessage = "保存或连接 Wi‑Fi 失败"
             }
-            @Suppress("DEPRECATION")
-            val netId = wifiManager?.addNetwork(conf)
-            if (netId != -1) {
-                wifiManager?.disconnect()
-                netId?.let { wifiManager?.enableNetwork(it, true) }
-                wifiManager?.reconnect()
-            }
-            delay(2000) // Give time for connection to establish
-            showConnectingDialog = false
-            onBack()
         }
     }
 
@@ -138,7 +136,17 @@ fun AddWifiNetworkScreen(onBack: () -> Unit) {
         }
     }
 
-    Column(modifier = Modifier.padding(24.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectTapGestures {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                }
+            }
+            .padding(24.dp)
+    ) {
         Text("网络设置", fontSize = 20.sp, color = Color(0xFF131519))
         Spacer(modifier = Modifier.height(16.dp))
         Card(
@@ -172,7 +180,7 @@ fun AddWifiNetworkScreen(onBack: () -> Unit) {
                         Icon(painter = painterResource(id = R.drawable.arrow_right), contentDescription = null, tint = Color.Gray)
                     }
                 }
-                //if (selectedSecurity != "None") {
+                if (selectedSecurity != SECURITY_OPEN) {
                     Spacer(modifier = Modifier.padding(8.dp))
                     Row(verticalAlignment = Alignment.CenterVertically){
 
@@ -195,11 +203,27 @@ fun AddWifiNetworkScreen(onBack: () -> Unit) {
                                 }
                             }
                         )
-                    //}
+                    }
+                } else {
+                    Spacer(modifier = Modifier.padding(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text("密码")
+                        Spacer(modifier = Modifier.weight(1f))
+                        Text("开放网络无需密码", color = Color(0x99131519))
+                    }
                 }
             }
         }
         Spacer(modifier = Modifier.padding(16.dp))
+        if (!errorMessage.isNullOrBlank()) {
+            Text(
+                text = errorMessage.orEmpty(),
+                color = Color(0xFFE14B4B),
+                fontSize = 14.sp,
+                modifier = Modifier.align(Alignment.CenterHorizontally)
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+        }
 
         Button(
             colors = ButtonDefaults.buttonColors(
@@ -220,9 +244,8 @@ fun AddWifiNetworkScreen(onBack: () -> Unit) {
                     shape = RoundedCornerShape(30.dp)
                 ),
             onClick = {
-                if (ssid.isNotBlank() && (selectedSecurity == "None" || password.isNotBlank())) {
-                   // config?.networkId?.let { wifiManager?.disableNetwork(it) }
-                    //wifiManager?.disconnect()
+                if (ssid.isNotBlank() && (selectedSecurity == SECURITY_OPEN || password.isNotBlank())) {
+                    errorMessage = null
                     showConnectingDialog = true
 
                 }
