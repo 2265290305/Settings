@@ -1,6 +1,13 @@
 <resources>
     <string name="app_name">设置</string>
     <string name="Manchu_Chinese">普通话</string>
+    <string name="shenyang_cn">沈阳话</string>
+    <string name="xiamen_cn">厦门话</string>
+    <string name="chengdu_cn">成都话</string>
+    <string name="changsha_cn">长沙话</string>
+    <string name="zhengzhou_cn">郑州话</string>
+    <string name="xian_cn">西安话</string>
+    <string name="yueyu_cn">粤语</string>
     <string name="Elite_Chinese">上海话</string>
-    <string name="Standard_Chinese">粤语</string>
+
 </resources>

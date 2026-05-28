@@ -5,6 +5,8 @@ import android.net.Uri
 import android.os.Bundle
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,8 +30,6 @@ import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.Slider
-import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
@@ -42,9 +42,12 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -590,31 +593,10 @@ private fun HdmiDisplayScalingScreen(
                     )
                     Spacer(Modifier.height(24.dp))
 
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Placeholder icon; reusing an existing drawable to avoid adding new resources.
-                        Icon(
-                            painter = painterResource(R.drawable.account),
-                            contentDescription = null,
-                            tint = Color(0xFF4C73FF),
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Spacer(Modifier.width(12.dp))
-                        Slider(
-                            value = percent.toFloat(),
-                            onValueChange = { percent = it.toInt() },
-                            valueRange = 80f..100f,
-                            steps = 19,
-                            colors = SliderDefaults.colors(
-                                thumbColor = Color(0xFF4C73FF),
-                                activeTrackColor = Color(0xFF4C73FF),
-                                inactiveTrackColor = Color(0xFFCBD5E1)
-                            ),
-                            modifier = Modifier.weight(1f)
-                        )
-                    }
+                    HdmiScalingProgressBar(
+                        percent = percent,
+                        onPercentChange = { percent = it }
+                    )
                 }
             }
 
@@ -650,6 +632,58 @@ private fun HdmiDisplayScalingScreen(
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun HdmiScalingProgressBar(
+    percent: Int,
+    onPercentChange: (Int) -> Unit,
+) {
+    val minPercent = 80
+    val maxPercent = 100
+    val progress = ((percent - minPercent).toFloat() / (maxPercent - minPercent))
+        .coerceIn(0f, 1f)
+
+    fun percentFromX(x: Float, width: Float): Int {
+        if (width <= 0f) return percent
+        return ((x / width).coerceIn(0f, 1f) * (maxPercent - minPercent) + minPercent)
+            .toInt()
+            .coerceIn(minPercent, maxPercent)
+    }
+
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(28.dp)
+            .clip(RoundedCornerShape(999.dp))
+            .background(Color(0xFFE9EEF9))
+            .pointerInput(percent) {
+                detectTapGestures { offset ->
+                    onPercentChange(percentFromX(offset.x, size.width.toFloat()))
+                }
+            }
+            .pointerInput(percent) {
+                detectDragGestures(
+                    onDragStart = { offset ->
+                        onPercentChange(percentFromX(offset.x, size.width.toFloat()))
+                    },
+                    onDrag = { change, _ ->
+                        onPercentChange(percentFromX(change.position.x, size.width.toFloat()))
+                    }
+                )
+            }
+    ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth(progress)
+                .fillMaxHeight()
+                .background(
+                    brush = Brush.horizontalGradient(
+                        listOf(Color(0xFF6B7BFF), Color(0xFF4DA9FF))
+                    )
+                )
+        )
     }
 }
 

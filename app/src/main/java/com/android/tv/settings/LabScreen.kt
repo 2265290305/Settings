@@ -8,7 +8,6 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import android.widget.Toast
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,22 +48,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.android.tv.settings.ui.theme.设置Theme
-import org.json.JSONArray
 
 private const val METHOD_DEV_QUERY = "DEV_QUERY"
 private const val METHOD_DEV_OPT = "DEV_OPT"
-private const val DIALECT_SOURCE_TYPE_USER = "1"
 private const val LAB_PROVIDER_TAG = "LabScreenProvider"
-private const val DEFAULT_DIALECT_RECOGNITION_DESC =
-    "目前支持普通话、上海话、粤语、西安话、成都话、郑州话、厦门话、长沙话。自定义可在设置中，敬请期待"
-private const val DEFAULT_DIALECT_WAKE_UP_DESC =
-    "开关开启后，可以通过普通话、上海话、粤语对“小翼管家”进行唤醒"
 
 private val DEVICEINFO_AUTHORITIES = listOf(
     "com.android.ctcc.deviceinfo",
@@ -88,32 +80,14 @@ private val DEVICE_INFO_URIS: List<Uri> = contentUris("device_info")
 private val SETTINGS_URIS: List<Uri> = contentUris("settings")
 private val DISTANCE_DETECT_URIS: List<Uri> = contentUris("distanceDectect", includeDeviceInfoFallback = true)
 private val DISTANCE_ALARM_URIS: List<Uri> = contentUris("distanceAlarm", includeDeviceInfoFallback = true)
-private val DIALECT_SWITCH_URIS: List<Uri> = contentUris("dialectSwitch", includeDeviceInfoFallback = true)
-private val DIALECT_ID_URIS: List<Uri> = contentUris("dialectID", includeDeviceInfoFallback = true)
-private val DIALECT_NAME_URIS: List<Uri> = contentUris("dialectName", includeDeviceInfoFallback = true)
-private val DIALECT_WAKE_UP_SWITCH_URIS: List<Uri> = contentUris("dialectWakeUpSwitch", includeDeviceInfoFallback = true)
-private val DIALECT_WAKE_UP_MODE_URIS: List<Uri> = contentUris("dialectWakeUpMode", includeDeviceInfoFallback = true)
-private val DIALECT_WAKE_UP_DISPLAY_URIS: List<Uri> = contentUris("dialectWakeUpDisplay", includeDeviceInfoFallback = true)
 private val ONE_SHOT_SWITCH_URIS: List<Uri> = contentUris("oneShotSwitch", includeDeviceInfoFallback = true)
 private val SUPPORT_FULL_DUPLEX_URIS: List<Uri> = contentUris("supportFullDuplex", includeDeviceInfoFallback = true)
 private val FULL_DUPLEX_MODE_URIS: List<Uri> = contentUris("fullDuplexMode", includeDeviceInfoFallback = true)
-
-private data class LabDialectOption(
-    val label: String,
-    val id: String?
-)
 
 private fun normalizeProviderValue(value: Any?): String? {
     val normalized = value?.toString()?.trim()
     if (normalized.isNullOrEmpty()) return null
     if (normalized.equals("null", ignoreCase = true)) return null
-    return normalized
-}
-
-private fun normalizeDisplayText(value: String?): String? {
-    val normalized = normalizeProviderValue(value) ?: return null
-    if (normalized.equals("true", ignoreCase = true)) return null
-    if (normalized.equals("false", ignoreCase = true)) return null
     return normalized
 }
 
@@ -158,28 +132,6 @@ private fun isBundleSuccess(bundle: Bundle?): Boolean {
     if (bundle.getBoolean("result", false)) return true
     if (bundle.getInt("code", -1) == 0) return true
     return false
-}
-
-private fun parseDialectOptions(
-    dialectListJson: String,
-    fallbackOptions: List<LabDialectOption>
-): List<LabDialectOption> {
-    val parsedOptions = runCatching {
-        val array = JSONArray(dialectListJson)
-        buildList {
-            for (index in 0 until array.length()) {
-                val item = array.optJSONObject(index) ?: continue
-                val label = item.optString("dialectName").trim()
-                if (label.isEmpty()) continue
-                val rawId = item.optString("dialectId").trim()
-                val dialectId = rawId.ifEmpty {
-                    if (label == "普通话") "pth000" else ""
-                }.ifEmpty { null }
-                add(LabDialectOption(label = label, id = dialectId))
-            }
-        }
-    }.getOrDefault(emptyList())
-    return parsedOptions.distinctBy { option -> option.label }.ifEmpty { fallbackOptions }
 }
 
 private fun queryProviderValue(context: Context, uris: List<Uri>, key: String, defaultValue: String): String {
@@ -294,24 +246,12 @@ private fun updateLegacySetting(context: Context, key: String, value: String): B
 @Composable
 fun LabScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current.applicationContext
-    val fallbackDialectOptions = listOf(
-        LabDialectOption(label = stringResource(R.string.Manchu_Chinese), id = "pth000"),
-        LabDialectOption(label = stringResource(R.string.Elite_Chinese), id = null),
-        LabDialectOption(label = stringResource(R.string.Standard_Chinese), id = null)
-    )
 
     var distanceReminder by rememberSaveable { mutableStateOf(false) }
-    var dialectSelectionEnabled by rememberSaveable { mutableStateOf(true) }
-    var dialectWakeUpSupported by rememberSaveable { mutableStateOf(true) }
-    var dialectWakeUpEnabled by rememberSaveable { mutableStateOf(false) }
-    var selectedDialect by rememberSaveable { mutableStateOf(fallbackDialectOptions.first().label) }
-    var dialectRecognitionDesc by rememberSaveable { mutableStateOf(DEFAULT_DIALECT_RECOGNITION_DESC) }
-    var dialectWakeUpDesc by rememberSaveable { mutableStateOf(DEFAULT_DIALECT_WAKE_UP_DESC) }
     var gestureControl by rememberSaveable { mutableStateOf(true) }
     var quickCommands by rememberSaveable { mutableStateOf(true) }
     var continuousDialogue by rememberSaveable { mutableStateOf(false) }
     var supportFullDuplex by rememberSaveable { mutableStateOf(true) }
-    var dialectOptions by remember { mutableStateOf(fallbackDialectOptions) }
     var refreshVersion by remember { mutableStateOf(0) }
 
     DisposableEffect(context) {
@@ -325,12 +265,6 @@ fun LabScreen(modifier: Modifier = Modifier) {
                 DISTANCE_DETECT_URIS +
                 DISTANCE_ALARM_URIS +
                 DEVICE_INFO_URIS +
-                DIALECT_SWITCH_URIS +
-                DIALECT_ID_URIS +
-                DIALECT_NAME_URIS +
-                DIALECT_WAKE_UP_SWITCH_URIS +
-                DIALECT_WAKE_UP_MODE_URIS +
-                DIALECT_WAKE_UP_DISPLAY_URIS +
                 ONE_SHOT_SWITCH_URIS +
                 SUPPORT_FULL_DUPLEX_URIS +
                 FULL_DUPLEX_MODE_URIS
@@ -345,46 +279,6 @@ fun LabScreen(modifier: Modifier = Modifier) {
 
     LaunchedEffect(context, refreshVersion) {
         distanceReminder = queryProviderBool(context, DISTANCE_DETECT_URIS, "distanceDectect", false)
-        dialectSelectionEnabled = queryProviderBool(context, DIALECT_SWITCH_URIS, "dialectSwitch", true)
-        dialectWakeUpSupported = queryProviderBool(context, DIALECT_WAKE_UP_SWITCH_URIS, "dialectWakeUpSwitch", true)
-        queryProviderValue(context, DIALECT_WAKE_UP_DISPLAY_URIS, "dialectWakeUpDisplay", "0")
-        dialectWakeUpEnabled = queryProviderValue(
-            context,
-            DIALECT_WAKE_UP_MODE_URIS,
-            "dialectWakeUpMode",
-            "0"
-        ) == "1"
-        dialectRecognitionDesc = normalizeDisplayText(
-            queryProviderValue(
-                context,
-                DEVICE_INFO_URIS,
-                "dialectRecognitionDesc",
-                DEFAULT_DIALECT_RECOGNITION_DESC
-            )
-        ) ?: DEFAULT_DIALECT_RECOGNITION_DESC
-        dialectWakeUpDesc = normalizeDisplayText(
-            queryProviderValue(
-                context,
-                DEVICE_INFO_URIS,
-                "dialectWakeUpDesc",
-                DEFAULT_DIALECT_WAKE_UP_DESC
-            )
-        ) ?: DEFAULT_DIALECT_WAKE_UP_DESC
-        val refreshedOptions = parseDialectOptions(
-            dialectListJson = queryProviderValue(context, DEVICE_INFO_URIS, "dialectList", ""),
-            fallbackOptions = fallbackDialectOptions
-        )
-        dialectOptions = refreshedOptions
-        val selectedDialectName = queryProviderValue(
-            context,
-            DIALECT_NAME_URIS,
-            "dialectName",
-            refreshedOptions.firstOrNull()?.label ?: fallbackDialectOptions.first().label
-        )
-        val selectedDialectId = queryProviderValue(context, DIALECT_ID_URIS, "dialectID", "")
-        selectedDialect = refreshedOptions.firstOrNull { option ->
-            option.label == selectedDialectName || (selectedDialectId.isNotBlank() && option.id == selectedDialectId)
-        }?.label ?: normalizeDisplayText(selectedDialectName) ?: refreshedOptions.firstOrNull()?.label.orEmpty()
         gestureControl = queryLegacySetting(context, "gesture_control", "1") == "1"
         quickCommands = queryProviderBool(context, ONE_SHOT_SWITCH_URIS, "oneShotSwitch", true)
         supportFullDuplex = queryProviderBool(context, SUPPORT_FULL_DUPLEX_URIS, "supportFullDuplex", true)
@@ -408,62 +302,6 @@ fun LabScreen(modifier: Modifier = Modifier) {
             onCheckedChange = { checked ->
                 if (updateProviderValues(context, DISTANCE_DETECT_URIS, mapOf("distanceDectect" to if (checked) "1" else "0"))) {
                     distanceReminder = checked
-                } else {
-                    Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
-                }
-            }
-        )
-
-        DialectCard(
-            recognitionDesc = dialectRecognitionDesc,
-            dialectSelectionEnabled = dialectSelectionEnabled,
-            wakeUpSupported = dialectWakeUpSupported,
-            wakeUpEnabled = dialectWakeUpEnabled,
-            wakeUpDesc = dialectWakeUpDesc,
-            onWakeUpChange = { checked ->
-                if (updateProviderValues(
-                        context,
-                        DIALECT_WAKE_UP_MODE_URIS,
-                        mapOf(
-                            "dialectWakeUpMode" to if (checked) "1" else "0",
-                            "sourceType" to DIALECT_SOURCE_TYPE_USER
-                        )
-                    )
-                ) {
-                    dialectWakeUpEnabled = checked
-                } else {
-                    Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
-                }
-            },
-            dialectOptions = dialectOptions,
-            selectedDialect = selectedDialect,
-            onDialectChange = { dialect ->
-                val option = dialectOptions.firstOrNull { it.label == dialect }
-                if (option != null) {
-                    val updateNameOk = updateProviderValues(
-                        context,
-                        DIALECT_NAME_URIS,
-                        mapOf(
-                            "dialectName" to option.label,
-                            "sourceType" to DIALECT_SOURCE_TYPE_USER
-                        )
-                    )
-                    val updateIdOk = option.id?.let { dialectId ->
-                        updateProviderValues(
-                            context,
-                            DIALECT_ID_URIS,
-                            mapOf(
-                                "dialectID" to dialectId,
-                                "sourceType" to DIALECT_SOURCE_TYPE_USER
-                            )
-                        )
-                    } ?: true
-
-                    if (updateNameOk && updateIdOk) {
-                        selectedDialect = dialect
-                    } else {
-                        Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
-                    }
                 } else {
                     Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
                 }
@@ -559,201 +397,6 @@ private fun SwitchInfoCard(
                     uncheckedBorderColor = Color.Transparent
                 )
             )
-        }
-    }
-}
-
-@Composable
-private fun DialectCard(
-    recognitionDesc: String,
-    dialectSelectionEnabled: Boolean,
-    wakeUpSupported: Boolean,
-    wakeUpEnabled: Boolean,
-    wakeUpDesc: String,
-    onWakeUpChange: (Boolean) -> Unit,
-    dialectOptions: List<LabDialectOption>,
-    selectedDialect: String,
-    onDialectChange: (String) -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor)),
-        modifier = Modifier.fillMaxWidth()
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(22.dp)) {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.CenterStart)
-                        .padding(end = 84.dp)
-                ) {
-                    Text(
-                        text = "方言识别",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorResource(R.color.textblack)
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        text = recognitionDesc,
-                        fontSize = 20.sp,
-                        color = Color(0xFF6B7280),
-                        lineHeight = 28.sp
-                    )
-                }
-            }
-            Spacer(Modifier.height(20.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White)
-                    .padding(horizontal = 24.dp, vertical = 24.dp)
-            ) {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(end = 24.dp)
-                ) {
-                    Text(
-                        text = "方言唤醒",
-                        fontSize = 28.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorResource(R.color.textblack)
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        text = wakeUpDesc,
-                        fontSize = 20.sp,
-                        color = colorResource(R.color.textblack),
-                        lineHeight = 28.sp
-                    )
-                }
-                Switch(
-                    checked = wakeUpEnabled,
-                    onCheckedChange = onWakeUpChange,
-                    enabled = wakeUpSupported,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.White,
-                        checkedTrackColor = Color(0xFF4C73FF),
-                        uncheckedThumbColor = Color.White,
-                        uncheckedTrackColor = Color(0xFFE0E0E0),
-                        checkedBorderColor = Color.Transparent,
-                        uncheckedBorderColor = Color.Transparent,
-                        disabledCheckedThumbColor = Color.White,
-                        disabledCheckedTrackColor = Color(0xFFB4C5FF),
-                        disabledUncheckedThumbColor = Color.White,
-                        disabledUncheckedTrackColor = Color(0xFFE0E0E0)
-                    )
-                )
-            }
-
-            Spacer(Modifier.height(8.dp))
-
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.White)
-                    .padding(30.dp)
-            ) {
-                Text(
-                    text = "方言对话",
-                    fontSize = 28.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorResource(R.color.textblack)
-                )
-                Spacer(Modifier.height(2.dp))
-                Text(
-                    text = "小翼会使用您选定的语音与您对话",
-                    fontSize = 20.sp,
-                    color = colorResource(R.color.textblack),
-                    lineHeight = 28.sp
-                )
-                val optionRows = dialectOptions.chunked(2)
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    optionRows.forEachIndexed { index, rowOptions ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(77.dp),
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                        ) {
-                            rowOptions.forEach { option ->
-                                DialectChip(
-                                    modifier = Modifier
-                                        .width(265.dp)
-                                        .fillMaxHeight(),
-                                    label = option.label,
-                                    selected = option.label == selectedDialect,
-                                    enabled = dialectSelectionEnabled,
-                                    onClick = { onDialectChange(option.label) }
-                                )
-                            }
-                            if (rowOptions.size == 1) {
-                                Spacer(
-                                    Modifier
-                                        .width(265.dp)
-                                        .fillMaxHeight()
-                                )
-                            }
-                        }
-                        if (index < optionRows.lastIndex) {
-                            Spacer(Modifier.height(12.dp))
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun DialectChip(
-    modifier: Modifier = Modifier,
-    label: String,
-    selected: Boolean,
-    enabled: Boolean,
-    onClick: () -> Unit
-) {
-    Card(
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
-        border = BorderStroke(1.dp, Color(0xFFDDDDDD)),
-        modifier = modifier
-            .clickable(enabled = enabled, onClick = onClick)
-
-    ) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxHeight()
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxHeight()
-                    .padding(horizontal = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Image(
-                    painter = painterResource(R.drawable.doubao),
-                    contentDescription = null,
-                    modifier = Modifier.size(48.dp)
-                )
-                Spacer(Modifier.width(6.dp))
-                Text(text = label, fontSize = 26.sp, fontWeight = FontWeight.SemiBold, color = colorResource(R.color.textgray))
-                Spacer(Modifier.width(8.dp))
-                Image(
-                    painter = painterResource(
-                        if (selected) R.drawable.lab_option_selected else R.drawable.lab_option_unselected
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier.size(22.dp)
-                )
-            }
         }
     }
 }

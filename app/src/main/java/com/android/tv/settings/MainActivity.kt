@@ -18,6 +18,15 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -605,7 +614,7 @@ private fun resolveStartTarget(intent: Intent?): StartTarget {
             fromSystemUiActivation = fromSystemUiActivation,
         )
         ACTION_IOT_PAGE_PRIVATE -> StartTarget(
-            selectedDestination = 8,
+            selectedDestination = 9,
             fromSystemUiActivation = fromSystemUiActivation,
         )
         else -> StartTarget(fromSystemUiActivation = fromSystemUiActivation)
@@ -840,81 +849,101 @@ fun NavigationRailExample(
                         //.background(colorResource(R.color.black) ) // 内容区域背景色
                         .padding(top = contentPadding.calculateTopPadding(), end = 40.dp)
                 ) {
-                    when (selectedDestination) {
-                        0 -> PersonalCenterScreen()
-                        1 -> {
-                            NavHost(
-                                navController = navController,
-                                startDestination = startTarget.wifiStartRoute
-                            ) {
-                                composable(Destinations.WifiScreen.route) {
-                                    WifiManagerScreen(navController = navController,)
-                                }
-                                composable(Destinations.AddWifiScreen.route) {
-                                    AddWifiNetworkScreen(onBack = { navController.popBackStack() })
-                                }
-                                composable(
-                                    Destinations.WifiConnectScreen.route,
-                                    arguments = listOf(
-                                        navArgument("ssid") { type = NavType.StringType },
-                                        navArgument("security") { type = NavType.StringType }
-                                    )
+                    AnimatedContent(
+                        targetState = selectedDestination,
+                        transitionSpec = {
+                            val forward = targetState > initialState
+                            val enter = slideInHorizontally(
+                                animationSpec = tween(260, easing = FastOutSlowInEasing),
+                                initialOffsetX = { width -> if (forward) width / 5 else -width / 5 }
+                            ) + fadeIn(animationSpec = tween(180))
+                            val exit = slideOutHorizontally(
+                                animationSpec = tween(170, easing = FastOutLinearInEasing),
+                                targetOffsetX = { width -> if (forward) -width / 6 else width / 6 }
+                            ) + fadeOut(animationSpec = tween(120))
+                            enter togetherWith exit
+                        },
+                        label = "settings-content"
+                    ) { destination ->
+                        when (destination) {
+                            0 -> PersonalCenterScreen()
+                            1 -> {
+                                NavHost(
+                                    navController = navController,
+                                    startDestination = startTarget.wifiStartRoute
                                 ) {
-                                    val ssid = Uri.decode(it.arguments?.getString("ssid") ?: "")
-                                    val security = Uri.decode(it.arguments?.getString("security") ?: SECURITY_WPA_PSK)
-                                    WifiConnectScreen(
-                                        ssid = ssid,
-                                        security = security,
-                                        onBack = { navController.popBackStack() }
-                                    )
-                                }
-                                composable(
-                                    Destinations.WifiDetailScreen.route,
-                                    arguments = listOf(navArgument("ssid") { type = NavType.StringType })
-                                ) {
-                                    val ssid = Uri.decode(it.arguments?.getString("ssid") ?: "")
-                                    WifiDetailScreen (ssid = ssid, onBack = { navController.popBackStack() })
+                                    composable(Destinations.WifiScreen.route) {
+                                        WifiManagerScreen(navController = navController,)
+                                    }
+                                    composable(Destinations.AddWifiScreen.route) {
+                                        AddWifiNetworkScreen(onBack = { navController.popBackStack() })
+                                    }
+                                    composable(
+                                        Destinations.WifiConnectScreen.route,
+                                        arguments = listOf(
+                                            navArgument("ssid") { type = NavType.StringType },
+                                            navArgument("security") { type = NavType.StringType }
+                                        )
+                                    ) {
+                                        val ssid = Uri.decode(it.arguments?.getString("ssid") ?: "")
+                                        val security = Uri.decode(it.arguments?.getString("security") ?: SECURITY_WPA_PSK)
+                                        WifiConnectScreen(
+                                            ssid = ssid,
+                                            security = security,
+                                            onBack = { navController.popBackStack() }
+                                        )
+                                    }
+                                    composable(
+                                        Destinations.WifiDetailScreen.route,
+                                        arguments = listOf(navArgument("ssid") { type = NavType.StringType })
+                                    ) {
+                                        val ssid = Uri.decode(it.arguments?.getString("ssid") ?: "")
+                                        WifiDetailScreen (ssid = ssid, onBack = { navController.popBackStack() })
+                                    }
                                 }
                             }
-                        }
-                        2->{
-                            BlueToothScreen(modifier,navController)
-                        }
-                        3->{
-                            SoundAndDisplayScreen(
-                                onExitLeft = {
-                                    navItemFocusRequesters.getOrNull(selectedDestination)?.requestFocus()
-                                }
-                            )
-                        }
-                        4->{
-                            ScreenSaverSettingsScreen(modifier =modifier)
-                        }
-                        5->{
-                            HdmiSettingsScreen()
-                        }
-                        6->{
-                            RebootScreen {  }
-                        }
-                        7->{
-                            LabScreen()
-                        }
-                        8->{
-                            PrivacyScreen()
-                        }
-                        9->{
-                            StorageSettingsScreen()
-                        }
-                        10->{
-                            LocalInfoScreen()
-                        }
-                        11->{
-                            OneKeyCheckScreen(
-                                onOpenNetworkSettings = { selectedDestination = 1 }
-                            )
-                        }
-                        else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(text = "${names[selectedDestination]} 页面")
+                            2->{
+                                BlueToothScreen(modifier,navController)
+                            }
+                            3->{
+                                SoundAndDisplayScreen(
+                                    onExitLeft = {
+                                        navItemFocusRequesters.getOrNull(selectedDestination)?.requestFocus()
+                                    }
+                                )
+                            }
+                            4->{
+                                ScreenSaverSettingsScreen(modifier =modifier)
+                            }
+                            5->{
+                                HdmiSettingsScreen()
+                            }
+                            6->{
+                                RebootScreen {  }
+                            }
+                            7->{
+                                LabScreen()
+                            }
+                            8->{
+                                DialectSettingsScreen()
+                            }
+                            9->{
+                                PrivacyScreen()
+                            }
+                            10->{
+                                StorageSettingsScreen()
+                            }
+                            11->{
+                                LocalInfoScreen()
+                            }
+                            12->{
+                                OneKeyCheckScreen(
+                                    onOpenNetworkSettings = { selectedDestination = 1 }
+                                )
+                            }
+                            else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text(text = "${names[destination]} 页面")
+                            }
                         }
                     }
                 }
@@ -1286,12 +1315,12 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
         Card(
             shape = RoundedCornerShape(22.dp),
             colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor))
-            , modifier = Modifier.fillMaxHeight(0.5F)
+            , modifier = Modifier.fillMaxHeight(0.7F)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-
+                    .fillMaxHeight(1f)
                     .padding(vertical = 16.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {

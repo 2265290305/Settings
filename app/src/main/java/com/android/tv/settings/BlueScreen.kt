@@ -3,7 +3,6 @@ package com.android.tv.settings
 import android.annotation.SuppressLint
 import android.app.Service
 import android.bluetooth.BluetoothAdapter
-import android.bluetooth.BluetoothClass
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
 import android.bluetooth.BluetoothGattCallback
@@ -34,7 +33,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -153,7 +151,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
         if (bleConnectedDevice?.address == address) return true
 
         val manager = Blm ?: return false
-        
+
         // 尝试通过多个 Profile 检查
         val profiles = intArrayOf(
             BluetoothProfile.A2DP,
@@ -162,7 +160,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             4, // HID_HOST
             BluetoothProfile.GATT_SERVER
         )
-        
+
         val connectedByManager = profiles.any { profile ->
             runCatching {
                 manager.getConnectedDevices(profile).any { it.address == address }
@@ -200,7 +198,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
 
     fun isBleDevice(device: BluetoothDevice): Boolean {
         return device.type == BluetoothDevice.DEVICE_TYPE_LE ||
-            device.type == BluetoothDevice.DEVICE_TYPE_DUAL
+                device.type == BluetoothDevice.DEVICE_TYPE_DUAL
     }
 
     fun removeBondCompat(device: BluetoothDevice): Boolean {
@@ -225,7 +223,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             "电信蓝牙遥控"
         )
         if (remoteKeywords.any { display.contains(it) }) return true
-        
+
         val btClass = device.bluetoothClass
         if (btClass != null) {
             val devClass = btClass.deviceClass
@@ -298,6 +296,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                     Blm.adapter.closeProfileProxy(profile, proxy)
                 }
             }
+
             override fun onServiceDisconnected(profile: Int) {}
         }, BluetoothProfile.A2DP)
 
@@ -309,6 +308,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                 }
                 Blm.adapter.closeProfileProxy(profile, proxy)
             }
+
             override fun onServiceDisconnected(profile: Int) {}
         }, 4) // HID_HOST
     }
@@ -325,8 +325,10 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                             markConnected(gatt.device)
                             gatt.discoverServices()
                         }
+
                         BluetoothProfile.STATE_DISCONNECTED -> {
-                            if (bleConnectedDevice?.address == gatt.device.address) bleConnectedDevice = null
+                            if (bleConnectedDevice?.address == gatt.device.address) bleConnectedDevice =
+                                null
                             markDisconnected(gatt.device)
                             gatt.close()
                             val wasManualDisconnect = manualDisconnectAddress == gatt.device.address
@@ -363,6 +365,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                 }
                 mainHandler.postDelayed({ adapter.closeProfileProxy(profile, proxy) }, 2000)
             }
+
             override fun onServiceDisconnected(profile: Int) {}
         }, 4)
     }
@@ -435,12 +438,14 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                 @SuppressLint("DiscouragedPrivateApi")
                 override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                     runCatching {
-                        val method = proxy.javaClass.getMethod("disconnect", BluetoothDevice::class.java)
+                        val method =
+                            proxy.javaClass.getMethod("disconnect", BluetoothDevice::class.java)
                         method.isAccessible = true
                         method.invoke(proxy, device)
                     }
                     mainHandler.postDelayed({ adapter.closeProfileProxy(profile, proxy) }, 1000)
                 }
+
                 override fun onServiceDisconnected(profile: Int) {}
             }, profileId)
         }
@@ -451,17 +456,21 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             override fun onReceive(context: Context, intent: Intent) {
                 when (intent.action) {
                     BluetoothDevice.ACTION_FOUND -> {
-                        val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        val device: BluetoothDevice? =
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                         device?.let {
                             addDiscoveredDevice(it)
                             maybeAutoConnectRemote(it)
                         }
                     }
+
                     BluetoothAdapter.ACTION_DISCOVERY_FINISHED -> {
                         if (scanTimeoutJob == null) isScanning = false
                     }
+
                     BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
-                        val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        val device: BluetoothDevice? =
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                         val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
                         if (state == BluetoothDevice.BOND_BONDED) {
                             updatePairedDevices()
@@ -474,13 +483,17 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                             }
                         }
                     }
+
                     BluetoothDevice.ACTION_ACL_CONNECTED -> {
-                        val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        val device: BluetoothDevice? =
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                         markConnected(device)
                         updatePairedDevices()
                     }
+
                     BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
-                        val device: BluetoothDevice? = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        val device: BluetoothDevice? =
+                            intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                         val wasManualDisconnect = device?.address == manualDisconnectAddress
                         if (wasManualDisconnect) {
                             manualDisconnectAddress = null
@@ -502,7 +515,11 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
         Blm?.adapter?.let { adapter ->
             if (adapter.isDiscovering) adapter.cancelDiscovery()
             adapter.startDiscovery()
-            adapter.bluetoothLeScanner?.startScan(null, ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(), bleScanCallback)
+            adapter.bluetoothLeScanner?.startScan(
+                null,
+                ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build(),
+                bleScanCallback
+            )
         }
         scanTimeoutJob?.cancel()
         scanTimeoutJob = scope.launch {
@@ -556,15 +573,15 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(color = colorResource(R.color.cardcolor))
+
             .clip(RoundedCornerShape(18.dp))
             .padding(24.dp)
             .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
+        verticalArrangement = Arrangement.spacedBy(0.dp)
     ) {
         Card(
-            modifier = Modifier.fillMaxWidth().padding(30.dp),
-            shape = RoundedCornerShape(18.dp),
+            modifier = Modifier.fillMaxWidth(),
+            shape =  RoundedCornerShape(9.dp),
             colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor))
         ) {
             Row(
@@ -590,76 +607,157 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                     }
                 )
             }
+        }
 
+        Spacer(Modifier.height(5.dp))
 
-            Spacer(modifier = Modifier.height(16.dp))
+        if (isChecked) {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(9.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .height(70.dp)
+                        .clickable { showRenameDialog = true },
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("本机蓝牙名称", fontSize = 16.sp)
+                    Spacer(Modifier.weight(1f))
+                    Text(btname.ifEmpty { "N/A" }, color = colorResource(R.color.textgray))
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrow_right),
+                        contentDescription = null,
+                        tint = Color.Gray
+                    )
+                }
+            }
+            Spacer(Modifier.height(5.dp))
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(9.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .padding(horizontal = 16.dp)
+                        .height(70.dp)
+                        .clickable(onClick = {
+                            showBleRemoteDialog = true
+                            startScan()
+                        }),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("蓝牙遥控器", fontSize = 16.sp)
+                    Spacer(Modifier.weight(1f))
+                    Icon(
+                        painter = painterResource(id = R.drawable.arrow_right),
+                        contentDescription = null,
+                        tint = Color.Gray
+                    )
+                }
+            }
 
-            if (isChecked) {
+            val myDevices = (pairedDevices + listOfNotNull(connectedDevice, bleConnectedDevice))
+                .filter(::hasDisplayableName)
+                .distinctBy { it.address }
+
+            if (myDevices.isNotEmpty()) {
+                Text(
+                    "我的设备",
+                    fontSize = 16.sp,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+                )
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(9.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White),
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .height(70.dp)
-                            .clickable { showRenameDialog = true },
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("本机蓝牙名称", fontSize = 16.sp)
-                        Spacer(Modifier.weight(1f))
-                        Text(btname.ifEmpty { "N/A" }, color = colorResource(R.color.textgray))
-                        Icon(
-                            painter = painterResource(id = R.drawable.arrow_right),
-                            contentDescription = null,
-                            tint = Color.Gray
-                        )
-                    }
-                    Row(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .height(70.dp)
-                            .clickable(onClick = {
-                                showBleRemoteDialog = true
-                                startScan()
-                            }),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text("蓝牙遥控器", fontSize = 16.sp)
-                        Spacer(Modifier.weight(1f))
-                        Icon(
-                            painter = painterResource(id = R.drawable.arrow_right),
-                            contentDescription = null,
-                            tint = Color.Gray
-                        )
+                    Column {
+                        myDevices.forEach { device ->
+                            Log.d("address", device.address + ":" + connectedDevice?.address)
+                            val isConnected = isDeviceConnectedNow(device)
+                            Row(
+                                modifier = Modifier
+                                    .clickable {
+                                        selectedDevice = device
+                                        showDeviceOptionsDialog = true
+                                    }
+                                    .padding(horizontal = 16.dp, vertical = 20.dp)
+                                    .fillMaxWidth(),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.bluetooth),
+                                    contentDescription = "Bluetooth"
+                                )
+                                Spacer(modifier = Modifier.width(10.dp))
+                                Text(displayDeviceName(device), fontSize = 16.sp)
+                                Spacer(Modifier.weight(1f))
+                                Text(
+                                    if (isConnected) "已连接" else "未连接",
+                                    color = if (isConnected) Color(0xFF4577FF) else Color.Gray,
+                                    fontSize = 14.sp
+                                )
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_info),
+                                    contentDescription = "Info",
+                                    tint = if (isConnected) Color(0xFF4577FF) else Color.Gray
+                                )
+                            }
+                        }
                     }
                 }
+            }
 
-                val myDevices = (pairedDevices + listOfNotNull(connectedDevice, bleConnectedDevice))
-                    .filter(::hasDisplayableName)
-                    .distinctBy { it.address }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("可用蓝牙", fontSize = 16.sp)
+                TextButton(onClick = { startScan() }) {
+                    Text("刷新", color = Color(0xFF4577FF))
+                }
+            }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = Color.White),
+            ) {
+                when {
+                    isScanning -> {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp), contentAlignment = Alignment.Center
+                        ) {
+                            CircularProgressIndicator()
+                        }
+                    }
 
-                if (myDevices.isNotEmpty()) {
-                    Text(
-                        "我的设备",
-                        fontSize = 16.sp,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                    )
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(16.dp),
-                        colors = CardDefaults.cardColors(containerColor = Color.White),
-                    ) {
+                    discoveredClassicDevices.isEmpty() -> {
+                        Text(
+                            "No new devices found.",
+                            modifier = Modifier.padding(16.dp),
+                            color = Color.Gray
+                        )
+                    }
+
+                    else -> {
                         Column {
-                            myDevices.forEach { device ->
-                                Log.d("address", device.address + ":" + connectedDevice?.address)
-                                val isConnected = isDeviceConnectedNow(device)
+                            discoveredClassicDevices.forEach { device ->
                                 Row(
                                     modifier = Modifier
                                         .clickable {
-                                            selectedDevice = device
-                                            showDeviceOptionsDialog = true
+                                            pendingBleConnectAddress = device.address
+                                            pendingPairDevice = device
+                                            pairRequestCode = null
+                                            showPairDialog = true
                                         }
                                         .padding(horizontal = 16.dp, vertical = 20.dp)
                                         .fillMaxWidth(),
@@ -672,82 +770,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                                     Spacer(modifier = Modifier.width(10.dp))
                                     Text(displayDeviceName(device), fontSize = 16.sp)
                                     Spacer(Modifier.weight(1f))
-                                    Text(
-                                        if (isConnected) "已连接" else "未连接",
-                                        color = if (isConnected) Color(0xFF4577FF) else Color.Gray,
-                                        fontSize = 14.sp
-                                    )
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_info),
-                                        contentDescription = "Info",
-                                        tint = if (isConnected) Color(0xFF4577FF) else Color.Gray
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("可用蓝牙", fontSize = 16.sp)
-                    TextButton(onClick = { startScan() }) {
-                        Text("刷新", color = Color(0xFF4577FF))
-                    }
-                }
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                ) {
-                    when {
-                        isScanning -> {
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp), contentAlignment = Alignment.Center
-                            ) {
-                                CircularProgressIndicator()
-                            }
-                        }
-
-                        discoveredClassicDevices.isEmpty() -> {
-                            Text(
-                                "No new devices found.",
-                                modifier = Modifier.padding(16.dp),
-                                color = Color.Gray
-                            )
-                        }
-
-                        else -> {
-                            Column {
-                                discoveredClassicDevices.forEach { device ->
-                                    Row(
-                                        modifier = Modifier
-                                            .clickable {
-                                                pendingBleConnectAddress = device.address
-                                                pendingPairDevice = device
-                                                pairRequestCode = null
-                                                showPairDialog = true
-                                            }
-                                            .padding(horizontal = 16.dp, vertical = 20.dp)
-                                            .fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(R.drawable.bluetooth),
-                                            contentDescription = "Bluetooth"
-                                        )
-                                        Spacer(modifier = Modifier.width(10.dp))
-                                        Text(displayDeviceName(device), fontSize = 16.sp)
-                                        Spacer(Modifier.weight(1f))
-                                        Text("点击配对", color = Color.Gray, fontSize = 14.sp)
-                                    }
+                                    Text("点击配对", color = Color.Gray, fontSize = 14.sp)
                                 }
                             }
                         }
@@ -755,9 +778,10 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                 }
             }
         }
+
     }
 
-    if (showBleRemoteDialog ) {
+    if (showBleRemoteDialog) {
         val allDiscovered = cachedBleDevices + discoveredClassicDevices
         val remoteCandidates = allDiscovered
             .filter { isLikelyRemote(it) && hasDisplayableName(it) }
@@ -796,7 +820,8 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                     if (target.bondState == BluetoothDevice.BOND_NONE) {
                         val started = target.createBond()
                         if (!started) {
-                            Toast.makeText(context, "发起配对失败，请重试", Toast.LENGTH_SHORT).show()
+                            Toast.makeText(context, "发起配对失败，请重试", Toast.LENGTH_SHORT)
+                                .show()
                             pendingBleConnectAddress = null
                         }
                     } else if (target.bondState == BluetoothDevice.BOND_BONDED) {
@@ -864,7 +889,12 @@ fun RenameDialog(
                 modifier = Modifier.padding(24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("修改名称", fontSize = 18.sp, color = Color.Black, fontWeight = FontWeight.Bold)
+                Text(
+                    "修改名称",
+                    fontSize = 18.sp,
+                    color = Color.Black,
+                    fontWeight = FontWeight.Bold
+                )
                 Spacer(modifier = Modifier.height(24.dp))
                 BasicTextField(
                     value = newName,
@@ -966,7 +996,12 @@ fun BleRemoteDialog(
                         modifier = Modifier.clickable { onDismiss() }
                     )
                     Spacer(Modifier.weight(1f))
-                    Text("添加蓝牙遥控器", fontSize = titleSize, fontWeight = FontWeight.Bold, color = Color(0xFF1D2027))
+                    Text(
+                        "添加蓝牙遥控器",
+                        fontSize = titleSize,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1D2027)
+                    )
                     Spacer(Modifier.weight(1f))
                     Spacer(Modifier.width(40.dp))
                 }
@@ -975,14 +1010,34 @@ fun BleRemoteDialog(
 
                 if (compact) {
                     Column(modifier = Modifier.fillMaxWidth()) {
-                        Text("遥控器蓝牙配对", fontSize = headingSize, fontWeight = FontWeight.Bold, color = Color(0xFF181C23))
+                        Text(
+                            "遥控器蓝牙配对",
+                            fontSize = headingSize,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF181C23)
+                        )
                         Spacer(modifier = Modifier.height(12.dp))
-                        Text("安装电池后，请将遥控器接近设备。", fontSize = bodySize, color = Color(0xFF1F242C))
-                        Text("同时按住“桌面”和“菜单”键 3 秒以上。", fontSize = bodySize, color = Color(0xFF1F242C))
+                        Text(
+                            "安装电池后，请将遥控器接近设备。",
+                            fontSize = bodySize,
+                            color = Color(0xFF1F242C)
+                        )
+                        Text(
+                            "同时按住“桌面”和“菜单”键 3 秒以上。",
+                            fontSize = bodySize,
+                            color = Color(0xFF1F242C)
+                        )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text("已配对的遥控器可长按“桌面”和“菜单”键重新配对。", fontSize = tipsSize, color = Color(0xFF2F343D))
+                        Text(
+                            "已配对的遥控器可长按“桌面”和“菜单”键重新配对。",
+                            fontSize = tipsSize,
+                            color = Color(0xFF2F343D)
+                        )
                         Spacer(modifier = Modifier.height(18.dp))
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Image(
                                 painter = painterResource(id = R.drawable.lanya),
                                 contentDescription = "蓝牙遥控器配对示意图"
@@ -1000,12 +1055,29 @@ fun BleRemoteDialog(
                                 .weight(1f)
                                 .padding(start = 40.dp, top = 30.dp)
                         ) {
-                            Text("遥控器蓝牙配对", fontSize = headingSize, fontWeight = FontWeight.Bold, color = Color(0xFF181C23))
+                            Text(
+                                "遥控器蓝牙配对",
+                                fontSize = headingSize,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF181C23)
+                            )
                             Spacer(modifier = Modifier.height(16.dp))
-                            Text("安装电池后，请将遥控器接近设备。", fontSize = bodySize, color = Color(0xFF1F242C))
-                            Text("同时按住“桌面”和“菜单”键 3 秒以上。", fontSize = bodySize, color = Color(0xFF1F242C))
+                            Text(
+                                "安装电池后，请将遥控器接近设备。",
+                                fontSize = bodySize,
+                                color = Color(0xFF1F242C)
+                            )
+                            Text(
+                                "同时按住“桌面”和“菜单”键 3 秒以上。",
+                                fontSize = bodySize,
+                                color = Color(0xFF1F242C)
+                            )
                             Spacer(modifier = Modifier.height(52.dp))
-                            Text("已配对的遥控器可长按“桌面”和“菜单”键重新配对。", fontSize = tipsSize, color = Color(0xFF2F343D))
+                            Text(
+                                "已配对的遥控器可长按“桌面”和“菜单”键重新配对。",
+                                fontSize = tipsSize,
+                                color = Color(0xFF2F343D)
+                            )
                         }
 
                         Box(
@@ -1042,6 +1114,7 @@ fun BleRemoteDialog(
                                 CircularProgressIndicator()
                             }
                         }
+
                         devices.isEmpty() -> {
                             Text(
                                 "未发现可配对遥控器，请重试",
@@ -1050,6 +1123,7 @@ fun BleRemoteDialog(
                                 fontSize = if (compact) 18.sp else 24.sp
                             )
                         }
+
                         else -> {
                             Column {
                                 devices.forEach { device ->
@@ -1063,7 +1137,10 @@ fun BleRemoteDialog(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .clickable(enabled = enabled) { onPairRequest(device) }
-                                            .padding(horizontal = 24.dp, vertical = if (compact) 14.dp else 20.dp),
+                                            .padding(
+                                                horizontal = 24.dp,
+                                                vertical = if (compact) 14.dp else 20.dp
+                                            ),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Icon(
@@ -1080,7 +1157,9 @@ fun BleRemoteDialog(
                                         Text(
                                             stateText,
                                             fontSize = if (compact) 16.sp else 20.sp,
-                                            color = if (stateText == "已连接") Color(0xFF4577FF) else Color(0xFF6C7482)
+                                            color = if (stateText == "已连接") Color(0xFF4577FF) else Color(
+                                                0xFF6C7482
+                                            )
                                         )
                                     }
                                 }
@@ -1133,7 +1212,12 @@ fun PairConfirmDialog(
                 modifier = Modifier.padding(horizontal = 40.dp, vertical = 36.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("蓝牙配对请求", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = Color(0xFF10131A))
+                Text(
+                    "蓝牙配对请求",
+                    fontSize = 26.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF10131A)
+                )
                 Spacer(modifier = Modifier.height(26.dp))
                 if (!pairingCode.isNullOrBlank()) {
                     Text("密码：$pairingCode", fontSize = 24.sp, color = Color(0xFF1A1D24))
@@ -1153,7 +1237,12 @@ fun PairConfirmDialog(
                         shape = RoundedCornerShape(36.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFE8EBF1))
                     ) {
-                        Text("取消", color = Color(0xFF4A78F0), fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            "取消",
+                            color = Color(0xFF4A78F0),
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                     Button(
                         onClick = onConfirm,
@@ -1163,7 +1252,12 @@ fun PairConfirmDialog(
                         shape = RoundedCornerShape(36.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4577FF))
                     ) {
-                        Text("确定", color = Color.White, fontSize = 24.sp, fontWeight = FontWeight.Bold)
+                        Text(
+                            "确定",
+                            color = Color.White,
+                            fontSize = 24.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
@@ -1208,7 +1302,12 @@ fun ConnectedDeviceOptionsDialog(
                                 .padding(horizontal = 54.dp, vertical = 34.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text(if (isConnected) "取消连接" else "连接设备", fontSize = 50.sp, color = Color(0xFF22252C), fontWeight = FontWeight.Bold)
+                            Text(
+                                if (isConnected) "取消连接" else "连接设备",
+                                fontSize = 50.sp,
+                                color = Color(0xFF22252C),
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                         Spacer(
                             modifier = Modifier
@@ -1223,7 +1322,12 @@ fun ConnectedDeviceOptionsDialog(
                                 .padding(horizontal = 54.dp, vertical = 34.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("忽略此设备", fontSize = 50.sp, color = Color(0xFF22252C), fontWeight = FontWeight.Bold)
+                            Text(
+                                "忽略此设备",
+                                fontSize = 50.sp,
+                                color = Color(0xFF22252C),
+                                fontWeight = FontWeight.Bold
+                            )
                         }
                     }
                 }
