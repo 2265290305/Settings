@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.Uri
+import org.json.JSONObject
 import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
@@ -11,6 +12,7 @@ import android.provider.Settings
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -43,7 +45,16 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -107,6 +118,42 @@ private fun queryDeviceInfoBestEffort(context: Context, keys: List<String>): Str
         if (!v.isNullOrEmpty()) return v
     }
     return null
+}
+
+/**
+ * 天翼规范 8.9.11 地理位置查询：Launcher 通过 contentProvider 对外提供省份码/地理位置/灵动项目 id。
+ * uri 为 content://cn.dlife.smartcloud.launcher/getInfo/$key（key: provinceCode/area/projectId），
+ * 用 cursor 查询取第 0 列字符串。
+ */
+private fun queryLauncherInfo(context: Context, key: String): String? {
+    val uri = Uri.parse("content://cn.dlife.smartcloud.launcher/getInfo/$key")
+    return runCatching {
+        context.contentResolver.query(uri, null, null, null, null)?.use { cursor ->
+            if (!cursor.moveToFirst()) return@use null
+            normalizeValue(cursor.getString(0))
+        }
+    }.getOrNull()
+}
+
+/**
+ * 位置信息：优先取 Launcher 的 area（位置信息 JSON，含 country/province/city），
+ * 解析成 “国家 省份 城市”，失败再回退旧的 device_info 字段。
+ */
+private fun queryDeviceLocation(context: Context): String? {
+    val areaJson = queryLauncherInfo(context, "area")
+    if (!areaJson.isNullOrBlank()) {
+        runCatching {
+            val obj = JSONObject(areaJson)
+            val parts = listOf("country", "province", "city")
+                .map { obj.optString(it).trim() }
+                .filter { it.isNotEmpty() }
+                .distinct()
+            if (parts.isNotEmpty()) return parts.joinToString(" ")
+        }
+        // 不是 JSON 时直接展示原始串。
+        return areaJson
+    }
+    return queryDeviceInfoBestEffort(context, listOf("location", "province", "city", "area"))
 }
 
 private fun updateDeviceNameBestEffort(context: Context, newName: String): Boolean {
@@ -305,6 +352,9 @@ fun LocalInfoScreen(modifier: Modifier = Modifier) {
     var systemVersion by rememberSaveable { mutableStateOf("") }
 
     var editNameOpen by rememberSaveable { mutableStateOf(false) }
+    var factoryResetConfirmOpen by rememberSaveable { mutableStateOf(false) }
+
+    var checkingUpdate by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val name = runCatching { Settings.Global.getString(context.contentResolver, "device_name") }.getOrNull()
@@ -342,9 +392,7 @@ fun LocalInfoScreen(modifier: Modifier = Modifier) {
             ?: normalizeValue(queryDeviceInfoBestEffort(context, listOf("ipv6", "IPv6", "deviceIpv6")))
             ?: "未知"
 
-        deviceLocation = normalizeValue(
-            queryDeviceInfoBestEffort(context, listOf("location", "province", "city", "area"))
-        ) ?: "未知"
+        deviceLocation = normalizeValue(queryDeviceLocation(context)) ?: "未知"
 
         systemVersion = normalizeValue(
             systemPropertyGet("ro.build.version.incremental")
@@ -372,6 +420,19 @@ fun LocalInfoScreen(modifier: Modifier = Modifier) {
         )
     }
 
+    if (factoryResetConfirmOpen) {
+        FactoryResetConfirmDialog(
+            onDismiss = { factoryResetConfirmOpen = false },
+            onConfirm = {
+                factoryResetConfirmOpen = false
+                val ok = context.performFactoryReset()
+                if (!ok) {
+                    Toast.makeText(context, "恢复出厂失败，请稍后重试", Toast.LENGTH_SHORT).show()
+                }
+            }
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -395,6 +456,7 @@ fun LocalInfoScreen(modifier: Modifier = Modifier) {
                     title = "设备名称",
                     value = deviceName,
                     clickable = true,
+                    modifier = Modifier.entryFocus(),
                     onClick = { editNameOpen = true }
                 )
                 InfoRow(title = "设备型号", value = deviceModel)
@@ -446,9 +508,25 @@ fun LocalInfoScreen(modifier: Modifier = Modifier) {
                             )
                         }
                         OutlinedButton(
+                            enabled = !checkingUpdate,
                             onClick = {
-                                if (!context.launchRomUpgradeOrFallback()) {
-                                    Toast.makeText(context, "未找到升级入口", Toast.LENGTH_SHORT).show()
+                                checkingUpdate = true
+                                Toast.makeText(context, "正在检查更新…", Toast.LENGTH_SHORT).show()
+                                // 系统更新交给 TMC（com.tatv.android.TMC）升级服务处理：
+                                // 绑定其 AIDL 并调用 checkUpgrade，由 TMC 自行完成下载/安装/重启。
+                                val started = RomUpgradeClient.checkUpgrade(context) { code ->
+                                    checkingUpdate = false
+                                    // code 由 TMC 升级服务定义：0 一般表示已受理/无更新，其余回显便于排查。
+                                    if (code != 0) {
+                                        Toast.makeText(context, "检查更新返回：$code", Toast.LENGTH_SHORT).show()
+                                    }
+                                }
+                                if (!started) {
+                                    checkingUpdate = false
+                                    // 未找到 TMC 升级服务时回退到既有 intent 方式。
+                                    if (!context.launchRomUpgradeOrFallback()) {
+                                        Toast.makeText(context, "未找到升级入口", Toast.LENGTH_SHORT).show()
+                                    }
                                 }
                             },
                             colors = ButtonDefaults.outlinedButtonColors(contentColor = Color(0xFF4C73FF))
@@ -505,8 +583,9 @@ fun LocalInfoScreen(modifier: Modifier = Modifier) {
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
+                            // 优先走系统/定制机自带的恢复出厂确认界面；该机若无则弹自带确认弹窗。
                             if (!context.openFactoryResetEntry()) {
-                                Toast.makeText(context, "未找到恢复出厂入口", Toast.LENGTH_SHORT).show()
+                                factoryResetConfirmOpen = true
                             }
                         }
                 ) {
@@ -541,12 +620,13 @@ private fun InfoRow(
     title: String,
     value: String,
     clickable: Boolean = false,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit = {}
 ) {
     Card(
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .then(if (clickable) Modifier.clickable(onClick = onClick) else Modifier)
     ) {
@@ -627,3 +707,105 @@ private fun EditDeviceNameDialog(
         }
     }
 }
+
+@Composable
+private fun FactoryResetConfirmDialog(
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    val cancelFocus = remember { FocusRequester() }
+    var cancelFocused by remember { mutableStateOf(false) }
+    var confirmFocused by remember { mutableStateOf(false) }
+
+    // 默认聚焦“取消”，防止遥控器一进来直接确认误触。
+    LaunchedEffect(Unit) {
+        runCatching { cancelFocus.requestFocus() }
+    }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.padding(22.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
+                Text(
+                    text = "恢复出厂设置",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorResource(R.color.textblack)
+                )
+                Text(
+                    text = "此操作将清除所有数据并将设备恢复到出厂状态，且无法撤销。设备会自动重启，确定继续吗？",
+                    fontSize = 14.sp,
+                    color = Color(0xFF6B7280)
+                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    DialogActionButton(
+                        text = "取消",
+                        focused = cancelFocused,
+                        highlightColor = Color(0xFFEAF0FF),
+                        contentColor = Color(0xFF4356B6),
+                        modifier = Modifier
+                            .focusRequester(cancelFocus)
+                            .onFocusChanged { cancelFocused = it.isFocused },
+                        onClick = onDismiss
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    DialogActionButton(
+                        text = "确定恢复",
+                        focused = confirmFocused,
+                        highlightColor = Color(0xFFFDECEC),
+                        contentColor = Color(0xFFD23B3B),
+                        modifier = Modifier.onFocusChanged { confirmFocused = it.isFocused },
+                        onClick = onConfirm
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun DialogActionButton(
+    text: String,
+    focused: Boolean,
+    highlightColor: Color,
+    contentColor: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (focused) highlightColor else Color.Transparent)
+            .focusable()
+            .onKeyEvent { event ->
+                if (event.type == KeyEventType.KeyDown &&
+                    (event.key == Key.DirectionCenter || event.key == Key.Enter)
+                ) {
+                    onClick()
+                    true
+                } else {
+                    false
+                }
+            }
+            .clickable { onClick() }
+            .padding(horizontal = 18.dp, vertical = 10.dp)
+    ) {
+        Text(
+            text = text,
+            fontSize = 15.sp,
+            fontWeight = if (focused) FontWeight.SemiBold else FontWeight.Normal,
+            color = contentColor
+        )
+    }
+}
+

@@ -22,11 +22,44 @@
     <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
     <uses-permission android:name="android.permission.WRITE_SETTINGS" />
     <uses-permission android:name="android.permission.GET_TASKS" />
+    <!-- 一键检测 SDK 所需 -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- OTA 本地安装（RecoverySystem）：重启进 recovery 刷机 / 写 /cache/recovery / 工厂重置 -->
+    <uses-permission android:name="android.permission.REBOOT" />
+    <uses-permission android:name="android.permission.ACCESS_CACHE_FILESYSTEM" />
+    <uses-permission android:name="android.permission.RECOVERY" />
+    <uses-permission android:name="android.permission.MASTER_CLEAR" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- 天翼规范 8.9.11：访问 Launcher 地理位置/省份码 contentProvider -->
+    <uses-permission android:name="cn.dlife.smartcloud.launcher.contentprovider" />
+    <!-- 系统进程跨用户投递退出登录/解绑广播 -->
+    <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS"
+        tools:ignore="ProtectedPermissions" />
+
     <uses-permission android:name="android.permission.PACKAGE_USAGE_STATS"
+        tools:ignore="ProtectedPermissions" />
+
+    <!-- 拉起统一账号 APK 的协议详情页 ZpProtocolDetailActivity 需要此权限 -->
+    <uses-permission android:name="com.dlife.permission.ACCESS_ACTIVITY"
         tools:ignore="ProtectedPermissions" />
 
     <queries>
         <package android:name="com.yueme.itv" />
+        <package android:name="com.rjsg666A" />
+        <package android:name="cn.dlife.smartcloud.launcher" />
+        <!-- 统一账号 APK：协议详情页 / 修改资料页 -->
+        <package android:name="com.chinatelecom.accloudbox" />
+        <provider android:authorities="cn.dlife.smartcloud.launcher" />
+        <!-- TMC 系统升级（OTA）服务，供 RomUpgradeClient 绑定 -->
+        <package android:name="com.tatv.android.TMC" />
+        <intent>
+            <action android:name="com.telecom.tmc.IUpgradeAidlInterface" />
+        </intent>
+        <intent>
+            <action android:name="com.telecom.romupgrade" />
+        </intent>
     </queries>
 
     <application
@@ -42,13 +75,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Light"
-        tools:replace="android:allowBackup">
+        tools:replace="android:allowBackup,android:theme">
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:label="@string/app_name"
+            android:launchMode="singleTask"
             android:screenOrientation="landscape"
-            android:theme="@style/Theme.设置">
+            android:theme="@style/Theme.设置.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -61,6 +95,22 @@
             </intent-filter>
             <intent-filter>
                 <action android:name="com.android.ctcc.iotctl.action.page.private" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.settings.DREAM_SETTINGS" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+            <!-- 外部(引导入网/Launcher 等)深层跳转到设置具体子页：直达对应导航项。 -->
+            <intent-filter>
+                <action android:name="android.settings.PERSONALCENTER" />
+                <action android:name="android.settings.NETWORK" />
+                <action android:name="android.settings.BLUETOOTH" />
+                <action android:name="android.settings.SOUNDDISPLAY" />
+                <action android:name="android.settings.SCREENSAVER" />
+                <action android:name="android.settings.ENERGY_SAVING" />
 
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
@@ -139,6 +189,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+
+
 
         <service
             android:name=".ImageScreenSaverDreamService"

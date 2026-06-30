@@ -4,6 +4,9 @@ import android.content.Context
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.net.wifi.WifiManager
+import android.util.Log
+import com.telecom.quickdetector.QuickDetectorSdk
+import com.telecom.quickdetector.http.model.BusinessPackageInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -44,12 +47,50 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
 import java.net.InetSocketAddress
 import java.net.Socket
 import kotlin.math.roundToInt
 
+private const val ONE_KEY_TAG = "OneKeyCheck"
+
 private data class TcpProbeTarget(val host: String, val port: Int)
+
+// 业务套餐 checkType(1~9) 到 名称/图标 的映射（图标用本地 drawable，名称优先用 SDK 返回的 name）。
+private fun businessMeta(checkType: Long): Pair<String, Int>? = when (checkType) {
+    1L -> "小翼管家" to R.drawable.account
+    2L -> "翼家智话" to R.drawable.ic_info
+    3L -> "云回看" to R.drawable.refresh
+    4L -> "天翼超高清" to R.drawable.ic_visibility
+    5L -> "AI守护" to R.drawable.lock
+    6L -> "时光缩影" to R.drawable.path
+    7L -> "画面异常巡检" to R.drawable.ic_info
+    8L -> "翼家健康" to R.drawable.ic_visibility
+    9L -> "天翼云盘" to R.drawable.qrcode
+    else -> null
+}
+
+private fun businessToServiceItem(bp: BusinessPackageInfo): ServiceItem? {
+    val (defName, icon) = businessMeta(bp.checkType) ?: return null
+    val title = bp.name?.takeIf { it.isNotBlank() } ?: defName
+    // status: 1已绑定 2未绑定 3已开通 4未开通 -> 1/3 视为已绑定/已开通
+    val bound = bp.status == "1" || bp.status == "3"
+    return ServiceItem(title, bound, icon)
+}
+
+private val FALLBACK_SERVICES = listOf(
+    ServiceItem("小翼管家", false, R.drawable.account),
+    ServiceItem("翼家智话", false, R.drawable.ic_info),
+    ServiceItem("云回看", false, R.drawable.refresh),
+    ServiceItem("天翼超高清", false, R.drawable.ic_visibility),
+    ServiceItem("AI守护", false, R.drawable.lock),
+    ServiceItem("时光缩影", false, R.drawable.path),
+    ServiceItem("画面异常巡检", false, R.drawable.ic_info),
+    ServiceItem("翼家健康", false, R.drawable.ic_visibility),
+    ServiceItem("天翼云盘", false, R.drawable.qrcode)
+)
 
 private fun bestEffortSsid(context: Context): String? {
     val wm = context.getSystemService(Context.WIFI_SERVICE) as? WifiManager ?: return null
@@ -136,16 +177,67 @@ fun OneKeyCheckScreen(
     var packetLossPercent by rememberSaveable { mutableStateOf<Int?>(null) }
     var networkProvince by rememberSaveable { mutableStateOf("未知") }
     var signalRssi by rememberSaveable { mutableStateOf<Int?>(null) }
+    var services by remember { mutableStateOf(FALLBACK_SERVICES) }
 
     LaunchedEffect(Unit) {
-        networkName = bestEffortSsid(context) ?: "未知"
-        networkConnected = bestEffortConnected(context)
-        signalRssi = bestEffortRssi(context)
+        // 网络名称/信号强度/连接状态：用一键检测 SDK，失败回退本地探测。
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val sig = QuickDetectorSdk.getSignalStrength()
+                networkConnected = sig.isConnected
+                signalRssi = sig.rssi.takeIf { it != 0 }
+                val name = QuickDetectorSdk.getNetWorkName()
+                networkName = name.takeIf { it.isNotBlank() }
+                    ?: sig.ssid?.takeIf { it.isNotBlank() }
+                    ?: bestEffortSsid(context) ?: "未知"
+                Log.i(ONE_KEY_TAG, "signal rssi=${sig.rssi} level=${sig.level} ssid=${sig.ssid} connected=${sig.isConnected}")
+            }.onFailure {
+                Log.w(ONE_KEY_TAG, "getSignalStrength/getNetWorkName failed, fallback", it)
+                networkName = bestEffortSsid(context) ?: "未知"
+                networkConnected = bestEffortConnected(context)
+                signalRssi = bestEffortRssi(context)
+            }
+        }
 
-        // Best-effort probes without ICMP permissions; values can vary by network environment.
-        val target = TcpProbeTarget(host = "1.1.1.1", port = 443)
-        networkDelayMs = tcpConnectLatencyMs(target, timeoutMs = 1200)
-        packetLossPercent = tcpLossPercent(target, attempts = 6, timeoutMs = 900)
+        // 网络延迟与丢包：用 SDK ping，失败回退 TCP 探测。
+        withContext(Dispatchers.IO) {
+            runCatching {
+                val r = QuickDetectorSdk.ping("www.baidu.com", 4, 10)
+                networkDelayMs = r.avgLatencyMs?.toLong()
+                packetLossPercent = r.packetLossRate
+                Log.i(ONE_KEY_TAG, "ping avgLatency=${r.avgLatencyMs} loss=${r.packetLossRate}% reachable=${r.isReachable}")
+            }.onFailure {
+                Log.w(ONE_KEY_TAG, "sdk ping failed, fallback to tcp probe", it)
+                val target = TcpProbeTarget(host = "1.1.1.1", port = 443)
+                coroutineScope {
+                    val latency = async { tcpConnectLatencyMs(target, timeoutMs = 900) }
+                    val loss = async { tcpLossPercent(target, attempts = 3, timeoutMs = 700) }
+                    networkDelayMs = latency.await()
+                    packetLossPercent = loss.await()
+                }
+            }
+        }
+
+        // 网络归属地（省份）：异步回调。
+        runCatching {
+            QuickDetectorSdk.getLocalNetWorkInfo({ geo ->
+                networkProvince = geo?.province?.takeIf { it.isNotBlank() } ?: "未知"
+                Log.i(ONE_KEY_TAG, "localNetwork province=${geo?.province} city=${geo?.city} isp=${geo?.isp}")
+            }, { code, msg ->
+                Log.w(ONE_KEY_TAG, "getLocalNetWorkInfo failed code=$code msg=$msg")
+            })
+        }
+
+        // 业务套餐绑定信息：异步回调，成功则替换默认列表。
+        runCatching {
+            QuickDetectorSdk.getBusinessBindInfo({ list ->
+                val mapped = list.mapNotNull { businessToServiceItem(it) }
+                if (mapped.isNotEmpty()) services = mapped
+                Log.i(ONE_KEY_TAG, "businessBindInfo size=${list.size} mapped=${mapped.size}")
+            }, { code, msg ->
+                Log.w(ONE_KEY_TAG, "getBusinessBindInfo failed code=$code msg=$msg")
+            })
+        }
     }
 
     Column(
@@ -180,6 +272,7 @@ fun OneKeyCheckScreen(
                     Spacer(Modifier.weight(1f))
                     Button(
                         onClick = onOpenNetworkSettings,
+                        modifier = Modifier.entryFocus(),
                         shape = RoundedCornerShape(12.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF4C73FF), contentColor = Color.White),
                         contentPadding = ButtonDefaults.ContentPadding
@@ -232,20 +325,6 @@ fun OneKeyCheckScreen(
                     fontWeight = FontWeight.SemiBold,
                     color = colorResource(R.color.textblack)
                 )
-
-                val services = remember {
-                    listOf(
-                        ServiceItem("小翼管家", true, R.drawable.account),
-                        ServiceItem("云回看", true, R.drawable.refresh),
-                        ServiceItem("时光缩影", true, R.drawable.path),
-                        ServiceItem("天翼云盘", true, R.drawable.qrcode),
-                        ServiceItem("翼家智话", false, R.drawable.ic_info),
-                        ServiceItem("天翼超高清", false, R.drawable.ic_visibility),
-                        ServiceItem("AI守护", false, R.drawable.lock),
-                        ServiceItem("画面异常巡检", false, R.drawable.ic_info),
-                        ServiceItem("翼家健康", false, R.drawable.ic_visibility)
-                    )
-                }
 
                 services.chunked(2).forEach { rowItems ->
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {

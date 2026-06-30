@@ -448,6 +448,7 @@ fun ScreenSaverSettingsScreen(modifier: Modifier = Modifier) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .entryFocus()
                     .background(Color.White, RoundedCornerShape(16.dp))
                     .clickable { showDialog = true }
                     .padding(horizontal = 18.dp, vertical = 22.dp),

@@ -63,13 +63,18 @@ private const val PRIVACY_VOICE_AUDIO_SOURCE_TYPE = 2
 private const val PRIVACY_VOICE_LEFT_VOICE_TIME = 11L
 private const val PRIVACY_VOICE_RIGHT_VOICE_TIME = 500L
 private val PRIVACY_MIC_CONTROL_URIS: List<Uri> = listOf(
-    Uri.parse("content://com.android.ctcc.deviceinfo/devStat"),
-    Uri.parse("content://com.android.ctcc.deviceinfo/device_info"),
+    Uri.parse("content://com.android.zshd.deviceinfo/devStat"),
+    Uri.parse("content://com.android.zshd.deviceinfo/device_info"),
     Uri.parse("content://com.android.zshd.deviceinfo/devStat"),
     Uri.parse("content://com.android.zshd.deviceinfo/device_info")
 )
 private val PRIVACY_VOICE_PROVIDER_URI: Uri = Uri.parse("content://com.android.ctcc.voice/settings")
 private val PRIVACY_CAMERA_DISABLED_URI: Uri = Settings.Secure.getUriFor("camera_disabled")
+// 按需求监听 micMute 变化的精确 URI：content://AUTHORITY/devStat?micMute=1
+private val PRIVACY_MIC_MUTE_NOTIFY_URIS: List<Uri> = listOf(
+    Uri.parse("content://com.android.zshd.deviceinfo/devStat?micMute=1"),
+    Uri.parse("content://com.android.ctcc.deviceinfo/devStat?micMute=1")
+)
 
 private fun privacyNormalizeValue(value: Any?): String? {
     val normalized = value?.toString()?.trim()
@@ -223,6 +228,10 @@ fun PrivacyScreen(modifier: Modifier = Modifier) {
         PRIVACY_MIC_CONTROL_URIS.forEach { uri ->
             runCatching { context.contentResolver.registerContentObserver(uri, true, observer) }
         }
+        // 按需求显式监听 devStat?micMute=1，确保 micMute 变化能被回调刷新。
+        PRIVACY_MIC_MUTE_NOTIFY_URIS.forEach { uri ->
+            runCatching { context.contentResolver.registerContentObserver(uri, true, observer) }
+        }
         runCatching { context.contentResolver.registerContentObserver(PRIVACY_CAMERA_DISABLED_URI, false, observer) }
         onDispose {
             runCatching { context.contentResolver.unregisterContentObserver(observer) }
@@ -263,6 +272,7 @@ fun PrivacyScreen(modifier: Modifier = Modifier) {
                     desc = "开启后，你可以通过语音来唤醒设备",
                     checked = voiceWake,
                     enabled = !voiceWakeUpdating,
+                    switchModifier = Modifier.entryFocus(),
                     onCheckedChange = {
                         if (voiceWakeUpdating) return@ToggleItem
                         val previous = voiceWake
@@ -303,13 +313,25 @@ fun PrivacyScreen(modifier: Modifier = Modifier) {
             ) {
                 LinkRow(
                     text = "天翼智屏用户协议",
-                    onClick = { context.launchUnifiedAccountAgreementOrFallback() }
+                    onClick = {
+                        if (!context.launchUnifiedAccountProtocolDetailOrFallback(
+                                PROTOCOL_TITLE_USER_AGREEMENT,
+                                PROTOCOL_URL_USER_AGREEMENT
+                            )
+                        ) {
+                            Toast.makeText(context, "无法打开用户协议", Toast.LENGTH_SHORT).show()
+                        }
+                    }
                 )
                 Divider(color = Color(0xFFE9EAEC), modifier = Modifier.padding(horizontal = 10.dp))
                 LinkRow(
                     text = "天翼智屏隐私政策",
                     onClick = {
-                        if (!context.launchUnifiedAccountProtocolDetailOrFallback("天翼智屏隐私政策", "")) {
+                        if (!context.launchUnifiedAccountProtocolDetailOrFallback(
+                                PROTOCOL_TITLE_PRIVACY,
+                                PROTOCOL_URL_PRIVACY
+                            )
+                        ) {
                             Toast.makeText(context, "无法打开隐私政策", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -325,6 +347,7 @@ private fun ToggleItem(
     desc: String,
     checked: Boolean,
     enabled: Boolean = true,
+    switchModifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Card(
@@ -361,7 +384,7 @@ private fun ToggleItem(
                 checked = checked,
                 enabled = enabled,
                 onCheckedChange = onCheckedChange,
-                modifier = Modifier.align(Alignment.CenterEnd),
+                modifier = Modifier.align(Alignment.CenterEnd).then(switchModifier),
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = Color(0xFF4C73FF),

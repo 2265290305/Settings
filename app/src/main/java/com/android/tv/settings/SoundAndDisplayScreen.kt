@@ -1,6 +1,9 @@
 package com.android.tv.settings
 
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.media.AudioManager
 import android.provider.Settings
 import androidx.compose.foundation.Canvas
@@ -23,7 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
@@ -50,6 +53,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import com.android.tv.settings.ui.theme.设置Theme
 import kotlin.math.roundToInt
 
@@ -86,8 +90,25 @@ fun SoundAndDisplayScreen(
     val focusRequesters = remember { List(3) { FocusRequester() } }
     var focusedRow by remember { mutableIntStateOf(0) }
 
-    LaunchedEffect(Unit) {
-        focusRequesters.first().requestFocus()
+    // 不在进入页面时自动抢焦点：否则在左侧菜单移动到“声音与显示”时，本页一组合就把焦点
+    // 抢进页面，导致菜单无法继续上下浏览。焦点改由用户按右键/确定键进入（统一导航模型）。
+
+    // 监听系统音量变化（遥控器/硬件键加减、其他应用调音量），实时同步滑条进度。
+    DisposableEffect(audioManager) {
+        if (isPreview || audioManager == null) {
+            onDispose { }
+        } else {
+            val receiver = object : BroadcastReceiver() {
+                override fun onReceive(c: Context?, intent: Intent?) {
+                    systemVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC).toFloat()
+                    alarmVolume = audioManager.getStreamVolume(AudioManager.STREAM_ALARM).toFloat()
+                }
+            }
+            // AudioService 在音量变化时发送的系统广播（隐藏 action，字符串稳定）。
+            val filter = IntentFilter("android.media.VOLUME_CHANGED_ACTION")
+            ContextCompat.registerReceiver(context, receiver, filter, ContextCompat.RECEIVER_EXPORTED)
+            onDispose { runCatching { context.unregisterReceiver(receiver) } }
+        }
     }
 
     fun percentText(value: Float, maxValue: Float): String {
@@ -98,13 +119,15 @@ fun SoundAndDisplayScreen(
     fun setSystemVolume(value: Float) {
         val bounded = value.coerceIn(0f, maxSystemVolume)
         systemVolume = bounded
-        audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, bounded.roundToInt(), AudioManager.FLAG_SHOW_UI)
+        // 不带 FLAG_SHOW_UI：SystemUI 已有音量 toast，避免重复弹窗。
+        audioManager?.setStreamVolume(AudioManager.STREAM_MUSIC, bounded.roundToInt(), 0)
     }
 
     fun setAlarmVolume(value: Float) {
         val bounded = value.coerceIn(0f, maxAlarmVolume)
         alarmVolume = bounded
-        audioManager?.setStreamVolume(AudioManager.STREAM_ALARM, bounded.roundToInt(), AudioManager.FLAG_SHOW_UI)
+        // 不带 FLAG_SHOW_UI：SystemUI 已有音量 toast，避免重复弹窗。
+        audioManager?.setStreamVolume(AudioManager.STREAM_ALARM, bounded.roundToInt(), 0)
     }
 
     fun setBrightness(value: Float) {
@@ -139,6 +162,7 @@ fun SoundAndDisplayScreen(
             percentText = percentText(systemVolume, maxSystemVolume),
             focused = focusedRow == 0,
             focusRequester = focusRequesters[0],
+            extraModifier = Modifier.entryFocus(),
             onFocused = { focusedRow = 0 },
             onMoveUp = { focusRequesters[0].requestFocus() },
             onMoveDown = { focusRequesters[1].requestFocus() },
@@ -196,6 +220,7 @@ private fun SoundDisplaySliderRow(
     percentText: String,
     focused: Boolean,
     focusRequester: FocusRequester,
+    extraModifier: Modifier = Modifier,
     onFocused: () -> Unit,
     onMoveUp: () -> Unit,
     onMoveDown: () -> Unit,
@@ -216,6 +241,7 @@ private fun SoundDisplaySliderRow(
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .then(extraModifier)
             .focusRequester(focusRequester)
             .onFocusChanged { if (it.isFocused) onFocused() }
             .onPreviewKeyEvent {

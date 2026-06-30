@@ -4,7 +4,9 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -43,10 +45,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -131,6 +141,8 @@ private fun parseHdmiResolutionOptions(raw: String): List<String> {
     return raw.split(",")
         .map { it.trim() }
         .filter { it.isNotEmpty() }
+        // provider 不支持该查询时可能回 "false"/"true"/"null" 等非法值，过滤掉。
+        .filter { !it.equals("false", ignoreCase = true) && !it.equals("true", ignoreCase = true) && !it.equals("null", ignoreCase = true) }
 }
 
 private fun parseHdmiScreenBorders(raw: String): HdmiScreenBorders? {
@@ -179,11 +191,17 @@ fun HdmiSettingsScreen(modifier: Modifier = Modifier) {
         val availableResolutions = parseHdmiResolutionOptions(
             queryHdmiValue(context, "getAllResolutions", "Auto")
         )
-        val currentResolutionOptions = availableResolutions.ifEmpty { resolutionOptions }
+        // 始终保证存在 "Auto" 且置顶（索引 1 即 Auto）。
+        val currentResolutionOptions = availableResolutions
+            .ifEmpty { listOf("Auto") }
+            .let { opts -> if (opts.any { it.equals("Auto", ignoreCase = true) }) opts else listOf("Auto") + opts }
         resolutionOptions = currentResolutionOptions
 
-        val resolutionIndex = queryHdmiValue(context, "getResolution", "1").toIntOrNull()
-        selectedResolution = currentResolutionOptions.getOrNull((resolutionIndex ?: 1) - 1)
+        // provider 索引从 1 开始；解析不出有效索引（如回 "false"）时默认 AUTO。
+        val resolutionIndex = queryHdmiValue(context, "getResolution", "").toIntOrNull()
+        selectedResolution = resolutionIndex
+            ?.let { currentResolutionOptions.getOrNull(it - 1) }
+            ?: currentResolutionOptions.firstOrNull { it.equals("Auto", ignoreCase = true) }
             ?: currentResolutionOptions.firstOrNull()
             ?: "Auto"
 
@@ -204,7 +222,9 @@ fun HdmiSettingsScreen(modifier: Modifier = Modifier) {
         // Card 1: Auto screen off
 
             Row(
-                modifier = Modifier.clickable(
+                modifier = Modifier
+                    .entryFocus()
+                    .clickable(
                     onClick = {
                         showDialog = true
                     }
@@ -374,6 +394,42 @@ fun HdmiSettingsScreen(modifier: Modifier = Modifier) {
     }
 }
 
+/** HDMI 列表弹窗的可聚焦选项行：聚焦时高亮背景，适配遥控器。 */
+@Composable
+private fun HdmiChoiceRow(
+    option: String,
+    selected: Boolean,
+    focusRequester: FocusRequester?,
+    onClick: () -> Unit,
+) {
+    var focused by remember { mutableStateOf(false) }
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .onFocusChanged { focused = it.isFocused }
+            .clickable { onClick() }
+            .background(if (focused) Color(0xFFEAF0FF) else Color.Transparent)
+            .padding(horizontal = 24.dp, vertical = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = option,
+            modifier = Modifier.weight(1f),
+            fontSize = 16.sp,
+            color = if (focused) Color(0xFF4356B6) else Color(0xFF1A1D24)
+        )
+        if (selected) {
+            Text(
+                text = "✓",
+                color = Color(0xFF4356B6),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+        }
+    }
+}
+
 @Composable
 fun AutoScreenOffDialog(
     options: List<String>,
@@ -381,6 +437,9 @@ fun AutoScreenOffDialog(
     onOptionSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val selectedIndex = options.indexOf(selectedOption).coerceAtLeast(0)
+    val firstFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { firstFocus.requestFocus() } }
     Dialog(onDismissRequest = onDismiss, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Box(
             modifier = Modifier
@@ -416,23 +475,12 @@ fun AutoScreenOffDialog(
                     )
                     Divider()
                     options.forEachIndexed { index, option ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onOptionSelected(option) }
-                                .padding(horizontal = 24.dp, vertical = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = option, modifier = Modifier.weight(1f), fontSize = 16.sp)
-                            if (option == selectedOption) {
-                                Text(
-                                    text = "✓",
-                                    color = Color(0xFF4356B6),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp
-                                )
-                            }
-                        }
+                        HdmiChoiceRow(
+                            option = option,
+                            selected = option == selectedOption,
+                            focusRequester = if (index == selectedIndex) firstFocus else null,
+                            onClick = { onOptionSelected(option) }
+                        )
                         if (index < 2 || index==3) {
                             Divider(modifier = Modifier.padding(horizontal = 24.dp))
                         }
@@ -450,6 +498,9 @@ fun HdmiResolutionDialog(
     onOptionSelected: (String) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val selectedIndex = options.indexOf(selectedOption).coerceAtLeast(0)
+    val firstFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { firstFocus.requestFocus() } }
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -487,23 +538,12 @@ fun HdmiResolutionDialog(
                     )
                     //Divider()
                     options.forEachIndexed { index, option ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onOptionSelected(option) }
-                                .padding(horizontal = 24.dp, vertical = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text(text = option, modifier = Modifier.weight(1f), fontSize = 16.sp)
-                            if (option == selectedOption) {
-                                Text(
-                                    text = "✓",
-                                    color = Color(0xFF4356B6),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp
-                                )
-                            }
-                        }
+                        HdmiChoiceRow(
+                            option = option,
+                            selected = option == selectedOption,
+                            focusRequester = if (index == selectedIndex) firstFocus else null,
+                            onClick = { onOptionSelected(option) }
+                        )
                         if (index <2 || index==3) {
                             Divider(modifier = Modifier.padding(horizontal = 24.dp))
                         }
@@ -521,6 +561,9 @@ private fun HdmiDisplayScalingScreen(
     onConfirm: (Int) -> Unit,
 ) {
     var percent by rememberSaveable(initialPercent) { mutableStateOf(initialPercent) }
+    // 进入缩放页时聚焦进度条，遥控器左右键即可调整。
+    val barFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { barFocus.requestFocus() } }
 
     // Layout tuned for smaller phone screens:
     // - Content scrolls if height is tight
@@ -595,7 +638,8 @@ private fun HdmiDisplayScalingScreen(
 
                     HdmiScalingProgressBar(
                         percent = percent,
-                        onPercentChange = { percent = it }
+                        onPercentChange = { percent = it },
+                        focusRequester = barFocus
                     )
                 }
             }
@@ -619,11 +663,17 @@ private fun HdmiDisplayScalingScreen(
             ) {
                 Text("取消", fontSize = 18.sp, fontWeight = FontWeight.SemiBold)
             }
+            var confirmFocused by remember { mutableStateOf(false) }
             Card(
                 modifier = Modifier
                     .height(56.dp)
                     .weight(1f)
-                    .clickable { onConfirm(percent) },
+                    .onFocusChanged { confirmFocused = it.isFocused }
+                    .clickable { onConfirm(percent) }
+                    .then(
+                        if (confirmFocused) Modifier.border(3.dp, Color.White, RoundedCornerShape(28.dp))
+                        else Modifier
+                    ),
                 shape = RoundedCornerShape(28.dp),
                 colors = CardDefaults.cardColors(containerColor = Color(0xFF4C73FF))
             ) {
@@ -639,11 +689,13 @@ private fun HdmiDisplayScalingScreen(
 private fun HdmiScalingProgressBar(
     percent: Int,
     onPercentChange: (Int) -> Unit,
+    focusRequester: FocusRequester? = null,
 ) {
     val minPercent = 80
     val maxPercent = 100
     val progress = ((percent - minPercent).toFloat() / (maxPercent - minPercent))
         .coerceIn(0f, 1f)
+    var focused by remember { mutableStateOf(false) }
 
     fun percentFromX(x: Float, width: Float): Int {
         if (width <= 0f) return percent
@@ -656,8 +708,23 @@ private fun HdmiScalingProgressBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(28.dp)
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .onFocusChanged { focused = it.isFocused }
+            .onKeyEvent { e ->
+                if (e.type != KeyEventType.KeyDown) return@onKeyEvent false
+                when (e.key) {
+                    Key.DirectionLeft -> { onPercentChange((percent - 1).coerceIn(minPercent, maxPercent)); true }
+                    Key.DirectionRight -> { onPercentChange((percent + 1).coerceIn(minPercent, maxPercent)); true }
+                    else -> false
+                }
+            }
+            .focusable()
             .clip(RoundedCornerShape(999.dp))
             .background(Color(0xFFE9EEF9))
+            .then(
+                if (focused) Modifier.border(2.dp, Color(0xFF4C73FF), RoundedCornerShape(999.dp))
+                else Modifier
+            )
             .pointerInput(percent) {
                 detectTapGestures { offset ->
                     onPercentChange(percentFromX(offset.x, size.width.toFloat()))

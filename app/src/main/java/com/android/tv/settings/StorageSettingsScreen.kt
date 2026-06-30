@@ -32,6 +32,8 @@ import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -54,6 +56,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -310,89 +313,93 @@ fun StorageSettingsScreen(modifier: Modifier = Modifier) {
     val usedBytes = (totalBytes - availBytes).coerceAtLeast(0L)
     val usedFraction = if (totalBytes > 0) usedBytes.toFloat() / totalBytes.toFloat() else 0f
 
-    val totalCache = items.sumOf { it.cacheBytes.coerceAtLeast(0L) }
+    val totalCache = remember(items) { items.sumOf { it.cacheBytes.coerceAtLeast(0L) } }
 
-    Column(
+    LazyColumn(
         modifier = modifier
             .fillMaxSize()
             //.background(Color(0xFFF0F2F5))
-            .padding(20.dp)
-            .verticalScroll(rememberScrollState()),
+            .padding(20.dp),
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        Card(
-            shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor)),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = "存储空间",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = colorResource(R.color.textblack)
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        text = "总内存${formatGb(totalBytes)}  已使用${formatGb(usedBytes)}  可用${formatGb(availBytes)}",
-                        fontSize = 13.sp,
-                        color = Color(0xFF6B7280)
-                    )
-                }
+        item {
+            Card(
+                shape = RoundedCornerShape(22.dp),
+                colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor)),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Column(modifier = Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
+                    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "存储空间",
+                            fontSize = 18.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = colorResource(R.color.textblack)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = "总内存${formatGb(totalBytes)}  已使用${formatGb(usedBytes)}  可用${formatGb(availBytes)}",
+                            fontSize = 13.sp,
+                            color = Color(0xFF6B7280)
+                        )
+                    }
 
-                // Progress bar
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(12.dp)
-                        .background(Color(0xFFE5E7EB), RoundedCornerShape(20.dp))
-                ) {
+                    // Progress bar
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(usedFraction.coerceIn(0f, 1f))
-                            .fillMaxHeight()
-                            .background(Color(0xFF4C73FF), RoundedCornerShape(20.dp))
+                            .fillMaxWidth()
+                            .height(12.dp)
+                            .background(Color(0xFFE5E7EB), RoundedCornerShape(20.dp))
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth(usedFraction.coerceIn(0f, 1f))
+                                .fillMaxHeight()
+                                .background(Color(0xFF4C73FF), RoundedCornerShape(20.dp))
+                        )
+                    }
+
+                    StorageActionRow(
+                        title = "清理缓存数据",
+                        value = if (loading) "可清理--" else "可清理${formatBytes(context, totalCache)}",
+                        modifier = Modifier.entryFocus(),
+                        onClick = {
+                            showClearCache = true
+                        }
                     )
                 }
-
-                StorageActionRow(
-                    title = "清理缓存数据",
-                    value = if (loading) "可清理--" else "可清理${formatBytes(context, totalCache)}",
-                    onClick = {
-                        showClearCache = true
-                    }
-                )
             }
         }
 
-        Card(
-            shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor)),
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Column(modifier = Modifier.fillMaxWidth().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                Text(
-                    text = "本机应用",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = colorResource(R.color.textblack)
+        item {
+            Text(
+                text = "本机应用",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = colorResource(R.color.textblack),
+                modifier = Modifier.padding(horizontal = 18.dp)
+            )
+        }
+        if (loading) {
+            item {
+                // 与 WiFi/蓝牙列表一致的骨架屏：读取应用占用较慢，用微光占位行预示即将出现的应用列表。
+                SettingsLoadingIndicator(
+                    appearDelayMillis = 0,
+                    rows = 5,
+                    rowHeight = 68.dp
                 )
-
-                if (loading) {
-                    Text(text = "正在读取应用占用...", fontSize = 13.sp, color = Color(0xFF6B7280))
-                } else {
-                    Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        items.forEachIndexed { idx, item ->
-                            AppRow(
-                                item = item,
-                                onClick = { appInfoPackage = item.packageName }
-                            )
-                            if (idx != items.lastIndex) {
-                                Divider(color = Color(0xFFE9EAEC), modifier = Modifier.padding(horizontal = 10.dp))
-                            }
-                        }
-                    }
+            }
+        } else {
+            itemsIndexed(
+                items = items,
+                key = { _, item -> item.packageName }
+            ) { idx, item ->
+                AppRow(
+                    item = item,
+                    onClick = { appInfoPackage = item.packageName }
+                )
+                if (idx != items.lastIndex) {
+                    Divider(color = Color(0xFFE9EAEC), modifier = Modifier.padding(horizontal = 10.dp))
                 }
             }
         }
@@ -403,12 +410,13 @@ fun StorageSettingsScreen(modifier: Modifier = Modifier) {
 private fun StorageActionRow(
     title: String,
     value: String,
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Card(
         shape = RoundedCornerShape(18.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
     ) {
@@ -435,6 +443,35 @@ private fun StorageActionRow(
 }
 
 @Composable
+private fun AppIcon(item: AppStorageItem, size: Int) {
+    val context = LocalContext.current
+    val density = LocalDensity.current
+    val isPreview = LocalInspectionMode.current
+    var icon by remember(item.packageName) { mutableStateOf(item.icon) }
+
+    LaunchedEffect(item.packageName) {
+        if (icon != null || isPreview) return@LaunchedEffect
+        val maxPx = with(density) { size.dp.toPx().toInt().coerceAtLeast(1) }
+        icon = withContext(Dispatchers.IO) {
+            runCatching {
+                context.packageManager.getApplicationIcon(item.packageName).toImageBitmap(maxPx)
+            }.getOrNull()
+        }
+    }
+
+    if (icon != null) {
+        Image(bitmap = icon!!, contentDescription = null, modifier = Modifier.size(size.dp))
+    } else {
+        Icon(
+            painter = painterResource(R.drawable.account),
+            contentDescription = null,
+            tint = Color.Unspecified,
+            modifier = Modifier.size(size.dp)
+        )
+    }
+}
+
+@Composable
 private fun AppRow(item: AppStorageItem, onClick: () -> Unit) {
     Card(
         shape = RoundedCornerShape(18.dp),
@@ -445,16 +482,7 @@ private fun AppRow(item: AppStorageItem, onClick: () -> Unit) {
     ) {
         Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 14.dp)) {
             Row(modifier = Modifier.align(Alignment.CenterStart), verticalAlignment = Alignment.CenterVertically) {
-                if (item.icon != null) {
-                    Image(bitmap = item.icon, contentDescription = null, modifier = Modifier.size(40.dp))
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.account),
-                        contentDescription = null,
-                        tint = Color.Unspecified,
-                        modifier = Modifier.size(40.dp)
-                    )
-                }
+                AppIcon(item = item, size = 40)
                 Spacer(Modifier.width(12.dp))
                 Text(
                     text = item.label,
@@ -537,16 +565,7 @@ private fun AppInfoScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    if (item.icon != null) {
-                        Image(bitmap = item.icon, contentDescription = null, modifier = Modifier.size(86.dp))
-                    } else {
-                        Icon(
-                            painter = painterResource(R.drawable.account),
-                            contentDescription = null,
-                            tint = Color.Unspecified,
-                            modifier = Modifier.size(86.dp)
-                        )
-                    }
+                    AppIcon(item = item, size = 86)
                     Text(
                         text = item.label,
                         fontSize = 22.sp,
@@ -788,7 +807,6 @@ private suspend fun loadAppStorageItems(context: Context): List<AppStorageItem> 
     val result = ArrayList<AppStorageItem>(apps.size)
     for (ai in apps) {
         val label = runCatching { pm.getApplicationLabel(ai).toString() }.getOrDefault(ai.packageName)
-        val icon = runCatching { pm.getApplicationIcon(ai).toImageBitmap() }.getOrNull()
 
         var appBytes = -1L
         var dataBytes = -1L
@@ -814,7 +832,7 @@ private suspend fun loadAppStorageItems(context: Context): List<AppStorageItem> 
             AppStorageItem(
                 packageName = ai.packageName,
                 label = label,
-                icon = icon,
+                icon = null,
                 totalBytes = totalBytes,
                 appBytes = appBytes,
                 dataBytes = dataBytes,
@@ -831,10 +849,12 @@ private suspend fun loadAppStorageItems(context: Context): List<AppStorageItem> 
     )
 }
 
-private fun android.graphics.drawable.Drawable.toImageBitmap(): ImageBitmap {
+private fun android.graphics.drawable.Drawable.toImageBitmap(maxSizePx: Int): ImageBitmap {
+    val width = intrinsicWidth.coerceAtLeast(1).coerceAtMost(maxSizePx)
+    val height = intrinsicHeight.coerceAtLeast(1).coerceAtMost(maxSizePx)
     val bmp = Bitmap.createBitmap(
-        intrinsicWidth.coerceAtLeast(1),
-        intrinsicHeight.coerceAtLeast(1),
+        width,
+        height,
         Bitmap.Config.ARGB_8888
     )
     val canvas = Canvas(bmp)
@@ -871,110 +891,129 @@ private fun ClearCacheScreen(
             .sumOf { it.cacheBytes.coerceAtLeast(0L) }
     }
 
-    Column(
+    BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF0F2F5))
             .padding(24.dp)
-            .verticalScroll(rememberScrollState()),
-        verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
-        // Top bar inside content area (app already has a global top bar outside).
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Icon(
-                painter = painterResource(R.drawable.back),
-                contentDescription = "返回",
-                modifier = Modifier
-                    .size(26.dp)
-                    .align(Alignment.CenterStart)
-                    .clickable { onBack() },
-                tint = colorResource(R.color.textblack)
-            )
-            Text(
-                text = "清除缓存数据",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.SemiBold,
-                color = colorResource(R.color.textblack),
-                modifier = Modifier.align(Alignment.Center)
-            )
+        val spacing = 18.dp
+        val cardWidth = (maxWidth - spacing) / 2f
+        val rows = (candidates.size + 1) / 2
 
-            Card(
-                shape = RoundedCornerShape(999.dp),
-                colors = CardDefaults.cardColors(containerColor = Color(0xFF4C73FF)),
-                modifier = Modifier
-                    .align(Alignment.CenterEnd)
-                    .height(44.dp)
-                    .clickable(enabled = !clearing && !loading) { onOneClickClear(selected) }
-            ) {
-                Box(modifier = Modifier.padding(horizontal = 18.dp), contentAlignment = Alignment.Center) {
-                    Text(
-                        text = if (clearing) "清理中" else "一键清除",
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(18.dp)
+        ) {
+            item {
+                // Top bar inside content area (app already has a global top bar outside).
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Icon(
+                        painter = painterResource(R.drawable.back),
+                        contentDescription = "返回",
+                        modifier = Modifier
+                            .size(26.dp)
+                            .align(Alignment.CenterStart)
+                            .clickable { onBack() },
+                        tint = colorResource(R.color.textblack)
                     )
-                }
-            }
-        }
+                    Text(
+                        text = "清除缓存数据",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = colorResource(R.color.textblack),
+                        modifier = Modifier.align(Alignment.Center)
+                    )
 
-        Text(
-            text = "选择需要清理的应用",
-            fontSize = 16.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = colorResource(R.color.textblack)
-        )
-
-        if (loading) {
-            Text(text = "正在读取应用缓存...", fontSize = 13.sp, color = Color(0xFF6B7280))
-        } else {
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                val spacing = 18.dp
-                val cardWidth = (maxWidth - spacing) / 2f
-                val rows = (candidates.size + 1) / 2
-                Column(verticalArrangement = Arrangement.spacedBy(18.dp)) {
-                    for (r in 0 until rows) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(spacing)) {
-                            val left = candidates.getOrNull(r * 2)
-                            val right = candidates.getOrNull(r * 2 + 1)
-                            if (left != null) {
-                                CacheAppCard(
-                                    item = left,
-                                    selected = selected.contains(left.packageName),
-                                    width = cardWidth,
-                                    onToggle = {
-                                        selected = selected.toMutableSet().also { set ->
-                                            if (!set.add(left.packageName)) set.remove(left.packageName)
-                                        }.toSet()
-                                    }
-                                )
-                            } else {
-                                Spacer(Modifier.width(cardWidth))
-                            }
-                            if (right != null) {
-                                CacheAppCard(
-                                    item = right,
-                                    selected = selected.contains(right.packageName),
-                                    width = cardWidth,
-                                    onToggle = {
-                                        selected = selected.toMutableSet().also { set ->
-                                            if (!set.add(right.packageName)) set.remove(right.packageName)
-                                        }.toSet()
-                                    }
-                                )
-                            } else {
-                                Spacer(Modifier.width(cardWidth))
-                            }
+                    Card(
+                        shape = RoundedCornerShape(999.dp),
+                        colors = CardDefaults.cardColors(containerColor = Color(0xFF4C73FF)),
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .height(44.dp)
+                            .clickable(enabled = !clearing && !loading) { onOneClickClear(selected) }
+                    ) {
+                        Box(modifier = Modifier.padding(horizontal = 18.dp), contentAlignment = Alignment.Center) {
+                            Text(
+                                text = if (clearing) "清理中" else "一键清除",
+                                fontSize = 16.sp,
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
                         }
                     }
                 }
             }
 
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "预计可清理 ${formatBytes(context, totalSelectedCache)}",
-                fontSize = 12.sp,
-                color = Color(0xFF6B7280)
-            )
+            item {
+                Text(
+                    text = "选择需要清理的应用",
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = colorResource(R.color.textblack)
+                )
+            }
+
+            if (loading) {
+                item {
+                    SettingsLoadingIndicator(
+                        appearDelayMillis = 0,
+                        rows = 4,
+                        rowHeight = 68.dp
+                    )
+                }
+            } else {
+                items(
+                    count = rows,
+                    key = { row ->
+                        val left = candidates.getOrNull(row * 2)?.packageName.orEmpty()
+                        val right = candidates.getOrNull(row * 2 + 1)?.packageName.orEmpty()
+                        "$left|$right"
+                    }
+                ) { r ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(spacing)) {
+                        val left = candidates.getOrNull(r * 2)
+                        val right = candidates.getOrNull(r * 2 + 1)
+                        if (left != null) {
+                            CacheAppCard(
+                                item = left,
+                                selected = selected.contains(left.packageName),
+                                width = cardWidth,
+                                onToggle = {
+                                    selected = selected.toMutableSet().also { set ->
+                                        if (!set.add(left.packageName)) set.remove(left.packageName)
+                                    }.toSet()
+                                }
+                            )
+                        } else {
+                            Spacer(Modifier.width(cardWidth))
+                        }
+                        if (right != null) {
+                            CacheAppCard(
+                                item = right,
+                                selected = selected.contains(right.packageName),
+                                width = cardWidth,
+                                onToggle = {
+                                    selected = selected.toMutableSet().also { set ->
+                                        if (!set.add(right.packageName)) set.remove(right.packageName)
+                                    }.toSet()
+                                }
+                            )
+                        } else {
+                            Spacer(Modifier.width(cardWidth))
+                        }
+                    }
+                }
+
+                item {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = "预计可清理 ${formatBytes(context, totalSelectedCache)}",
+                        fontSize = 12.sp,
+                        color = Color(0xFF6B7280)
+                    )
+                }
+            }
         }
     }
 }
@@ -995,16 +1034,7 @@ private fun CacheAppCard(
     ) {
         Box(modifier = Modifier.fillMaxWidth().padding(horizontal = 18.dp, vertical = 18.dp)) {
             Row(modifier = Modifier.align(Alignment.CenterStart), verticalAlignment = Alignment.CenterVertically) {
-                if (item.icon != null) {
-                    Image(bitmap = item.icon, contentDescription = null, modifier = Modifier.size(46.dp))
-                } else {
-                    Icon(
-                        painter = painterResource(R.drawable.account),
-                        contentDescription = null,
-                        tint = Color.Unspecified,
-                        modifier = Modifier.size(46.dp)
-                    )
-                }
+                AppIcon(item = item, size = 46)
                 Spacer(Modifier.width(12.dp))
                 Column {
                     Text(

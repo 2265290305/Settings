@@ -43,6 +43,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
@@ -59,7 +61,7 @@ private const val METHOD_DEV_OPT = "DEV_OPT"
 private const val LAB_PROVIDER_TAG = "LabScreenProvider"
 
 private val DEVICEINFO_AUTHORITIES = listOf(
-    "com.android.ctcc.deviceinfo",
+    "com.android.zshd.deviceinfo",
     "com.android.zshd.deviceinfo"
 )
 
@@ -83,6 +85,8 @@ private val DISTANCE_ALARM_URIS: List<Uri> = contentUris("distanceAlarm", includ
 private val ONE_SHOT_SWITCH_URIS: List<Uri> = contentUris("oneShotSwitch", includeDeviceInfoFallback = true)
 private val SUPPORT_FULL_DUPLEX_URIS: List<Uri> = contentUris("supportFullDuplex", includeDeviceInfoFallback = true)
 private val FULL_DUPLEX_MODE_URIS: List<Uri> = contentUris("fullDuplexMode", includeDeviceInfoFallback = true)
+// 手势控制：按需求改用 DEV_QUERY/DEV_OPT 的 gestureStart（settings + device_info 兜底）。
+private val GESTURE_START_URIS: List<Uri> = contentUris("settings", includeDeviceInfoFallback = true)
 
 private fun normalizeProviderValue(value: Any?): String? {
     val normalized = value?.toString()?.trim()
@@ -279,7 +283,9 @@ fun LabScreen(modifier: Modifier = Modifier) {
 
     LaunchedEffect(context, refreshVersion) {
         distanceReminder = queryProviderBool(context, DISTANCE_DETECT_URIS, "distanceDectect", false)
-        gestureControl = queryLegacySetting(context, "gesture_control", "1") == "1"
+        // 手势控制：优先读 gestureStart（DEV_QUERY），兼容旧机的 gesture_control。
+        gestureControl = queryProviderValue(context, GESTURE_START_URIS, "gestureStart", "")
+            .ifBlank { queryLegacySetting(context, "gesture_control", "1") } == "1"
         quickCommands = queryProviderBool(context, ONE_SHOT_SWITCH_URIS, "oneShotSwitch", true)
         supportFullDuplex = queryProviderBool(context, SUPPORT_FULL_DUPLEX_URIS, "supportFullDuplex", true)
         continuousDialogue = supportFullDuplex &&
@@ -299,6 +305,8 @@ fun LabScreen(modifier: Modifier = Modifier) {
             title = "距离过近提醒",
             desc = "儿童靠近时，设备将提醒您注意设备安全距离",
             checked = distanceReminder,
+            // 右键进入实验室页时聚焦到的“最上面控件”。
+            focusRequester = LocalEntryFocusRequester.current,
             onCheckedChange = { checked ->
                 if (updateProviderValues(context, DISTANCE_DETECT_URIS, mapOf("distanceDectect" to if (checked) "1" else "0"))) {
                     distanceReminder = checked
@@ -311,7 +319,11 @@ fun LabScreen(modifier: Modifier = Modifier) {
         GestureCard(
             checked = gestureControl,
             onCheckedChange = { checked ->
-                if (updateLegacySetting(context, "gesture_control", if (checked) "1" else "0")) {
+                val v = if (checked) "1" else "0"
+                // 写 gestureStart（DEV_OPT）；兼容旧机同时回写 gesture_control。
+                val ok = updateProviderValues(context, GESTURE_START_URIS, mapOf("gestureStart" to v))
+                updateLegacySetting(context, "gesture_control", v)
+                if (ok) {
                     gestureControl = checked
                 } else {
                     Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
@@ -352,6 +364,7 @@ private fun SwitchInfoCard(
     title: String,
     desc: String,
     checked: Boolean,
+    focusRequester: FocusRequester? = null,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Card(
@@ -387,7 +400,9 @@ private fun SwitchInfoCard(
             Switch(
                 checked = checked,
                 onCheckedChange = onCheckedChange,
-                modifier = Modifier.align(Alignment.CenterEnd),
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier),
                 colors = SwitchDefaults.colors(
                     checkedThumbColor = Color.White,
                     checkedTrackColor = Color(0xFF4C73FF),

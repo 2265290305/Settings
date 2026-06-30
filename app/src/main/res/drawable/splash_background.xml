@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 冷启动闪屏：与主界面同底色 + 居中 logo，遮住首帧组装时间。无需额外依赖。 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/topbar" />
+    <item
+        android:width="160dp"
+        android:height="160dp"
+        android:drawable="@mipmap/ic_launcher"
+        android:gravity="center" />
+</layer-list>

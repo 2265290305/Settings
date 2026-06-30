@@ -6,7 +6,9 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -38,12 +40,21 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -54,11 +65,34 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.android.tv.settings.ui.theme.设置Theme
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import android.net.Uri
 
 private const val REBOOT_METHOD_DEV_OPT = "DEV_OPT"
+private const val REBOOT_METHOD_DEV_QUERY = "DEV_QUERY"
 private val REBOOT_DEVICE_INFO_URI: Uri = Uri.parse("content://com.android.zshd.deviceinfo/device_info")
+
+// 节能设置 provider 契约（ZshdProvider，已反编译核实）：
+//  DEV_QUERY 用 KEY_PW_AUTO_INFO="PowerAutoInfo" 一次返回下列 6 个值；
+//  DEV_OPT 用下列 6 个 key 分别写入（autoScreenCtrl/autoPowerCtrl 值须 "0"/"1"，时间非空）。
+private const val KEY_PW_AUTO_INFO = "PowerAutoInfo"
+private const val KEY_PW_AUTO_SCREEN = "autoScreenCtrl"
+private const val KEY_PW_AUTO_SCREEN_OFF_TIME = "screen_off_timer"
+private const val KEY_PW_AUTO_SCREEN_ON_TIME = "screen_on_timer"
+private const val KEY_PW_AUTO_POWER = "autoPowerCtrl"
+private const val KEY_PW_AUTO_POWER_ON_TIME = "power_on_timer"
+private const val KEY_PW_AUTO_POWER_OFF_TIME = "power_off_timer"
+
+/** 查询节能设置当前值（DEV_QUERY PowerAutoInfo）；旧 provider 不支持该 key 时返回 null，页面保持默认。 */
+private fun queryPowerAutoInfo(context: Context): Bundle? {
+    return runCatching {
+        val extras = Bundle().apply { putString(KEY_PW_AUTO_INFO, "") }
+        context.contentResolver.call(REBOOT_DEVICE_INFO_URI, REBOOT_METHOD_DEV_QUERY, null, extras)
+    }.getOrNull()
+}
 
 private fun isRebootBundleSuccess(bundle: Bundle?): Boolean {
     if (bundle == null) return false
@@ -85,10 +119,10 @@ private fun updateRebootValues(context: Context, values: Map<String, String>): B
         }
         val result = resolver.call(REBOOT_DEVICE_INFO_URI, REBOOT_METHOD_DEV_OPT, null, extras)
         isRebootBundleSuccess(result)
-            || values.all { (key, value) ->
-                rebootNormalizeValue(result?.getString(key)) == value ||
+                || values.all { (key, value) ->
+            rebootNormalizeValue(result?.getString(key)) == value ||
                     rebootNormalizeValue(result?.getString("value")) == value
-            }
+        }
     }.getOrDefault(false)
 }
 
@@ -102,8 +136,27 @@ fun RebootScreen(onBack: () -> Unit) {
     var autoPowerEnabled by rememberSaveable { mutableStateOf(false) }
     var autoPowerTime by rememberSaveable { mutableStateOf("00:00/00:00") }
 
-    var showScreenOffDialog by rememberSaveable { mutableStateOf(false) }
-    var showPowerDialog by rememberSaveable { mutableStateOf(false) }
+    var showScreenOffPicker by rememberSaveable { mutableStateOf(false) }
+    var showScreenOnPicker by rememberSaveable { mutableStateOf(false) }
+    var showPowerOnPicker by rememberSaveable { mutableStateOf(false) }
+    var showPowerOffPicker by rememberSaveable { mutableStateOf(false) }
+
+    // 进入页面时查询设备当前节能设置（DEV_QUERY PowerAutoInfo），反映真实状态。
+    LaunchedEffect(Unit) {
+        val info = withContext(Dispatchers.IO) { queryPowerAutoInfo(context) } ?: return@LaunchedEffect
+        rebootNormalizeValue(info.getString(KEY_PW_AUTO_SCREEN))?.let { timedScreenOffEnabled = it == "1" }
+        val scrOff = rebootNormalizeValue(info.getString(KEY_PW_AUTO_SCREEN_OFF_TIME))
+        val scrOn = rebootNormalizeValue(info.getString(KEY_PW_AUTO_SCREEN_ON_TIME))
+        if (scrOff != null || scrOn != null) {
+            timedScreenOffTime = "${scrOff ?: "00:00"}/${scrOn ?: "00:00"}"
+        }
+        rebootNormalizeValue(info.getString(KEY_PW_AUTO_POWER))?.let { autoPowerEnabled = it == "1" }
+        val pwrOn = rebootNormalizeValue(info.getString(KEY_PW_AUTO_POWER_ON_TIME))
+        val pwrOff = rebootNormalizeValue(info.getString(KEY_PW_AUTO_POWER_OFF_TIME))
+        if (pwrOn != null || pwrOff != null) {
+            autoPowerTime = "${pwrOn ?: "00:00"}/${pwrOff ?: "00:00"}"
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -117,6 +170,7 @@ fun RebootScreen(onBack: () -> Unit) {
             title = "定时关屏",
             desc = "开启后，设备将在指定时间完成熄屏和亮屏操作",
             checked = timedScreenOffEnabled,
+            switchModifier = Modifier.entryFocus(),
             onCheckedChange = {
                 val values = buildMap {
                     put("autoScreenCtrl", if (it) "1" else "0")
@@ -135,10 +189,16 @@ fun RebootScreen(onBack: () -> Unit) {
         )
 
         if (timedScreenOffEnabled) {
+            // 拆成两行，各显示 hh:mm（点任一行打开同一个时间选择器）。
             ValueRowCard(
-                title = "定时关屏时间设置",
-                value = timedScreenOffTime,
-                onClick = { showScreenOffDialog = true }
+                title = "熄屏时间",
+                value = rangeLeft(timedScreenOffTime),
+                onClick = { showScreenOffPicker = true }
+            )
+            ValueRowCard(
+                title = "亮屏时间",
+                value = rangeRight(timedScreenOffTime),
+                onClick = { showScreenOnPicker = true }
             )
         }
 
@@ -164,67 +224,121 @@ fun RebootScreen(onBack: () -> Unit) {
         )
 
         if (autoPowerEnabled) {
+            // 拆成两行，各显示 hh:mm（点任一行打开同一个时间选择器）。
             ValueRowCard(
-                title = "定时开关机时间设置",
-                value = autoPowerTime,
-                onClick = { showPowerDialog = true }
+                title = "开机时间",
+                value = rangeLeft(autoPowerTime),
+                onClick = { showPowerOnPicker = true }
+            )
+            ValueRowCard(
+                title = "关机时间",
+                value = rangeRight(autoPowerTime),
+                onClick = { showPowerOffPicker = true }
             )
         }
     }
 
-    if (showScreenOffDialog) {
-        val (offH, offM, onH, onM) = remember(timedScreenOffTime) { parseTimeRange(timedScreenOffTime) }
-        TimeRangePickerDialog(
-            title = "定时关屏时间设置",
-            leftLabel = "熄屏时间",
-            rightLabel = "亮屏时间",
-            initialLeftHour = offH,
-            initialLeftMinute = offM,
-            initialRightHour = onH,
-            initialRightMinute = onM,
-            onConfirm = { lh, lm, rh, rm ->
-                val newValue = formatTimeRange(lh, lm, rh, rm)
+    // 熄屏时间：独立单时间弹窗（只调熄屏，亮屏保持不变）。
+    if (showScreenOffPicker) {
+        val (offH, offM) = remember(timedScreenOffTime) { parseSingleTime(rangeLeft(timedScreenOffTime)) }
+        SingleTimePickerDialog(
+            title = "熄屏时间",
+            initialHour = offH,
+            initialMinute = offM,
+            onConfirm = { h, m ->
+                val newOff = "${format2(h)}:${format2(m)}"
+                val onTime = rangeRight(timedScreenOffTime)
                 val values = mapOf(
-                    "screen_off_timer" to "${format2(lh)}:${format2(lm)}",
-                    "screen_on_timer" to "${format2(rh)}:${format2(rm)}",
+                    "screen_off_timer" to newOff,
+                    "screen_on_timer" to onTime,
                     "autoScreenCtrl" to if (timedScreenOffEnabled) "1" else "0"
                 )
                 if (updateRebootValues(context, values)) {
-                    timedScreenOffTime = newValue
-                    showScreenOffDialog = false
+                    timedScreenOffTime = "$newOff/$onTime"
+                    showScreenOffPicker = false
                 } else {
                     Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
                 }
             },
-            onDismiss = { showScreenOffDialog = false }
+            onDismiss = { showScreenOffPicker = false }
         )
     }
 
-    if (showPowerDialog) {
-        val (onH, onM, offH, offM) = remember(autoPowerTime) { parseTimeRange(autoPowerTime) }
-        TimeRangePickerDialog(
-            title = "定时开关机时间设置",
-            leftLabel = "开机时间",
-            rightLabel = "关机时间",
-            initialLeftHour = onH,
-            initialLeftMinute = onM,
-            initialRightHour = offH,
-            initialRightMinute = offM,
-            onConfirm = { lh, lm, rh, rm ->
-                val newValue = formatTimeRange(lh, lm, rh, rm)
+    // 亮屏时间：独立单时间弹窗（只调亮屏，熄屏保持不变）。
+    if (showScreenOnPicker) {
+        val (onH, onM) = remember(timedScreenOffTime) { parseSingleTime(rangeRight(timedScreenOffTime)) }
+        SingleTimePickerDialog(
+            title = "亮屏时间",
+            initialHour = onH,
+            initialMinute = onM,
+            onConfirm = { h, m ->
+                val newOn = "${format2(h)}:${format2(m)}"
+                val offTime = rangeLeft(timedScreenOffTime)
                 val values = mapOf(
-                    "power_on_timer" to "${format2(lh)}:${format2(lm)}",
-                    "power_off_timer" to "${format2(rh)}:${format2(rm)}",
-                    "autoPowerCtrl" to if (autoPowerEnabled) "1" else "0"
+                    "screen_off_timer" to offTime,
+                    "screen_on_timer" to newOn,
+                    "autoScreenCtrl" to if (timedScreenOffEnabled) "1" else "0"
                 )
                 if (updateRebootValues(context, values)) {
-                    autoPowerTime = newValue
-                    showPowerDialog = false
+                    timedScreenOffTime = "$offTime/$newOn"
+                    showScreenOnPicker = false
                 } else {
                     Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
                 }
             },
-            onDismiss = { showPowerDialog = false }
+            onDismiss = { showScreenOnPicker = false }
+        )
+    }
+
+    // 开机时间：独立单时间弹窗（只调开机，关机保持不变）。
+    if (showPowerOnPicker) {
+        val (onH, onM) = remember(autoPowerTime) { parseSingleTime(rangeLeft(autoPowerTime)) }
+        SingleTimePickerDialog(
+            title = "开机时间",
+            initialHour = onH,
+            initialMinute = onM,
+            onConfirm = { h, m ->
+                val newOn = "${format2(h)}:${format2(m)}"
+                val offTime = rangeRight(autoPowerTime)
+                val values = mapOf(
+                    "power_on_timer" to newOn,
+                    "power_off_timer" to offTime,
+                    "autoPowerCtrl" to if (autoPowerEnabled) "1" else "0"
+                )
+                if (updateRebootValues(context, values)) {
+                    autoPowerTime = "$newOn/$offTime"
+                    showPowerOnPicker = false
+                } else {
+                    Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onDismiss = { showPowerOnPicker = false }
+        )
+    }
+
+    // 关机时间：独立单时间弹窗（只调关机，开机保持不变）。
+    if (showPowerOffPicker) {
+        val (offH, offM) = remember(autoPowerTime) { parseSingleTime(rangeRight(autoPowerTime)) }
+        SingleTimePickerDialog(
+            title = "关机时间",
+            initialHour = offH,
+            initialMinute = offM,
+            onConfirm = { h, m ->
+                val newOff = "${format2(h)}:${format2(m)}"
+                val onTime = rangeLeft(autoPowerTime)
+                val values = mapOf(
+                    "power_on_timer" to onTime,
+                    "power_off_timer" to newOff,
+                    "autoPowerCtrl" to if (autoPowerEnabled) "1" else "0"
+                )
+                if (updateRebootValues(context, values)) {
+                    autoPowerTime = "$onTime/$newOff"
+                    showPowerOffPicker = false
+                } else {
+                    Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
+                }
+            },
+            onDismiss = { showPowerOffPicker = false }
         )
     }
 }
@@ -234,6 +348,7 @@ private fun SwitchCard(
     title: String,
     desc: String,
     checked: Boolean,
+    switchModifier: Modifier = Modifier,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Card(
@@ -264,6 +379,7 @@ private fun SwitchCard(
             }
             Spacer(Modifier.width(16.dp))
             Switch(
+                modifier = switchModifier,
                 checked = checked,
                 onCheckedChange = onCheckedChange,
                 colors = SwitchDefaults.colors(
@@ -381,8 +497,19 @@ private fun SingleChoiceDialog(
 
 private fun format2(n: Int): String = n.toString().padStart(2, '0')
 
-private fun formatTimeRange(lh: Int, lm: Int, rh: Int, rm: Int): String {
-    return "${format2(lh)}:${format2(lm)}/${format2(rh)}:${format2(rm)}"
+/** 取内部存储 "HH:MM/HH:MM" 的左半段(hh:mm)。 */
+private fun rangeLeft(value: String): String = value.substringBefore('/', "00:00").ifBlank { "00:00" }
+
+/** 取内部存储 "HH:MM/HH:MM" 的右半段(hh:mm)。 */
+private fun rangeRight(value: String): String = value.substringAfter('/', "00:00").ifBlank { "00:00" }
+
+/** 解析单个 "HH:MM" 成 [hour, minute]。 */
+private fun parseSingleTime(value: String): IntArray {
+    val parts = value.split(':')
+    return intArrayOf(
+        parts.getOrNull(0)?.toIntOrNull()?.coerceIn(0, 23) ?: 0,
+        parts.getOrNull(1)?.toIntOrNull()?.coerceIn(0, 59) ?: 0,
+    )
 }
 
 private fun parseTimeRange(value: String): IntArray {
@@ -401,25 +528,25 @@ private fun parseTimeRange(value: String): IntArray {
 }
 
 @Composable
-private fun TimeRangePickerDialog(
+private fun SingleTimePickerDialog(
     title: String,
-    leftLabel: String,
-    rightLabel: String,
-    initialLeftHour: Int,
-    initialLeftMinute: Int,
-    initialRightHour: Int,
-    initialRightMinute: Int,
-    onConfirm: (leftHour: Int, leftMinute: Int, rightHour: Int, rightMinute: Int) -> Unit,
+    initialHour: Int,
+    initialMinute: Int,
+    onConfirm: (hour: Int, minute: Int) -> Unit,
     onDismiss: () -> Unit
 ) {
-    // Values shown in the wheel (00-23, 00-59)
     val hours = remember { (0..23).map { format2(it) } }
     val minutes = remember { (0..59).map { format2(it) } }
 
-    var leftHour by rememberSaveable { mutableStateOf(initialLeftHour.coerceIn(0, 23)) }
-    var leftMinute by rememberSaveable { mutableStateOf(initialLeftMinute.coerceIn(0, 59)) }
-    var rightHour by rememberSaveable { mutableStateOf(initialRightHour.coerceIn(0, 23)) }
-    var rightMinute by rememberSaveable { mutableStateOf(initialRightMinute.coerceIn(0, 59)) }
+    var hour by rememberSaveable { mutableStateOf(initialHour.coerceIn(0, 23)) }
+    var minute by rememberSaveable { mutableStateOf(initialMinute.coerceIn(0, 59)) }
+
+    // 遥控器焦点：取消 | 时 | 分 | 确定，左右切换；时/分上下改值。进弹窗聚焦小时轮。
+    val cancelFocus = remember { FocusRequester() }
+    val hourFocus = remember { FocusRequester() }
+    val minuteFocus = remember { FocusRequester() }
+    val confirmFocus = remember { FocusRequester() }
+    LaunchedEffect(Unit) { runCatching { hourFocus.requestFocus() } }
 
     Dialog(
         onDismissRequest = onDismiss,
@@ -440,12 +567,11 @@ private fun TimeRangePickerDialog(
                             .padding(horizontal = 28.dp, vertical = 22.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Text(
+                        DialogActionText(
                             text = "取消",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF4C73FF),
-                            modifier = Modifier.clickable { onDismiss() }
+                            focusRequester = cancelFocus,
+                            onClick = onDismiss,
+                            onMoveRight = { hourFocus.requestFocus() }
                         )
                         Spacer(Modifier.weight(1f))
                         Text(
@@ -455,80 +581,81 @@ private fun TimeRangePickerDialog(
                             color = Color(0xFF1A1D24)
                         )
                         Spacer(Modifier.weight(1f))
-                        Text(
+                        DialogActionText(
                             text = "确定",
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color(0xFF4C73FF),
-                            modifier = Modifier.clickable {
-                                onConfirm(leftHour, leftMinute, rightHour, rightMinute)
-                            }
+                            focusRequester = confirmFocus,
+                            onClick = { onConfirm(hour, minute) },
+                            onMoveLeft = { minuteFocus.requestFocus() }
                         )
                     }
 
                     Spacer(Modifier.height(22.dp))
 
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 44.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = leftLabel, fontSize = 18.sp, color = Color(0xFF8B909A))
-                            Spacer(Modifier.height(18.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                WheelPicker(
-                                    values = hours,
-                                    initialIndex = leftHour,
-                                    onIndexChanged = { leftHour = it },
-                                    itemWidth = 104.dp
-                                )
-                                Spacer(Modifier.width(24.dp))
-                                WheelPicker(
-                                    values = minutes,
-                                    initialIndex = leftMinute,
-                                    onIndexChanged = { leftMinute = it },
-                                    itemWidth = 104.dp
-                                )
-                            }
-                        }
-
-                        Spacer(Modifier.width(28.dp))
-
-                        Text(
-                            text = "起   --   止",
-                            fontSize = 18.sp,
-                            color = Color(0xFF8B909A),
-                            modifier = Modifier.align(Alignment.CenterVertically)
+                        WheelPicker(
+                            values = hours,
+                            initialIndex = hour,
+                            onIndexChanged = { hour = it },
+                            itemWidth = 104.dp,
+                            focusRequester = hourFocus,
+                            onMoveLeft = { cancelFocus.requestFocus() },
+                            onMoveRight = { minuteFocus.requestFocus() }
                         )
-
-                        Spacer(Modifier.width(28.dp))
-
-                        Column(modifier = Modifier.weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(text = rightLabel, fontSize = 18.sp, color = Color(0xFF8B909A))
-                            Spacer(Modifier.height(18.dp))
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                WheelPicker(
-                                    values = hours,
-                                    initialIndex = rightHour,
-                                    onIndexChanged = { rightHour = it },
-                                    itemWidth = 104.dp
-                                )
-                                Spacer(Modifier.width(24.dp))
-                                WheelPicker(
-                                    values = minutes,
-                                    initialIndex = rightMinute,
-                                    onIndexChanged = { rightMinute = it },
-                                    itemWidth = 104.dp
-                                )
-                            }
-                        }
+                        Spacer(Modifier.width(24.dp))
+                        WheelPicker(
+                            values = minutes,
+                            initialIndex = minute,
+                            onIndexChanged = { minute = it },
+                            itemWidth = 104.dp,
+                            focusRequester = minuteFocus,
+                            onMoveLeft = { hourFocus.requestFocus() },
+                            onMoveRight = { confirmFocus.requestFocus() }
+                        )
                     }
                 }
             }
         }
     }
+}
+
+/** 弹窗里"取消/确定"这类可聚焦文字按钮：带焦点高亮 + 左右移焦回调。 */
+@Composable
+private fun DialogActionText(
+    text: String,
+    focusRequester: FocusRequester,
+    onClick: () -> Unit,
+    onMoveLeft: (() -> Unit)? = null,
+    onMoveRight: (() -> Unit)? = null,
+) {
+    var focused by remember { mutableStateOf(false) }
+    Text(
+        text = text,
+        fontSize = 20.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = Color(0xFF4C73FF),
+        modifier = Modifier
+            .focusRequester(focusRequester)
+            .onFocusChanged { focused = it.isFocused }
+            .onKeyEvent { e ->
+                if (e.type != KeyEventType.KeyDown) return@onKeyEvent false
+                when (e.key) {
+                    Key.DirectionLeft -> { onMoveLeft?.invoke(); onMoveLeft != null }
+                    Key.DirectionRight -> { onMoveRight?.invoke(); onMoveRight != null }
+                    Key.DirectionCenter, Key.Enter -> { onClick(); true }
+                    else -> false
+                }
+            }
+            .focusable()
+            .background(
+                color = if (focused) Color(0xFFEAF0FF) else Color.Transparent,
+                shape = RoundedCornerShape(8.dp)
+            )
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+    )
 }
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -539,10 +666,16 @@ private fun WheelPicker(
     onIndexChanged: (Int) -> Unit,
     itemWidth: androidx.compose.ui.unit.Dp,
     modifier: Modifier = Modifier,
+    focusRequester: FocusRequester? = null,
+    onMoveLeft: () -> Unit = {},
+    onMoveRight: () -> Unit = {},
 ) {
     val visibleCount = 7
     val itemHeight = 56.dp
     val padding = itemHeight * (visibleCount / 2).toFloat()
+
+    val scope = rememberCoroutineScope()
+    var focused by remember { mutableStateOf(false) }
 
     val state = rememberLazyListState(initialFirstVisibleItemIndex = initialIndex.coerceIn(0, values.lastIndex))
     val flingBehavior = rememberSnapFlingBehavior(lazyListState = state)
@@ -566,18 +699,40 @@ private fun WheelPicker(
             .collect { onIndexChanged(it) }
     }
 
+    fun scrollTo(target: Int) {
+        val t = target.coerceIn(0, values.lastIndex)
+        scope.launch { state.animateScrollToItem(t) }
+    }
+
     Box(
         modifier = modifier
             .width(itemWidth)
-            .height(itemHeight * visibleCount.toFloat()),
+            .height(itemHeight * visibleCount.toFloat())
+            .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
+            .onFocusChanged { focused = it.isFocused }
+            .onKeyEvent { e ->
+                if (e.type != KeyEventType.KeyDown) return@onKeyEvent false
+                when (e.key) {
+                    Key.DirectionUp -> { scrollTo(selectedIndex - 1); true }
+                    Key.DirectionDown -> { scrollTo(selectedIndex + 1); true }
+                    Key.DirectionLeft -> { onMoveLeft(); true }
+                    Key.DirectionRight -> { onMoveRight(); true }
+                    else -> false
+                }
+            }
+            .focusable(),
         contentAlignment = Alignment.Center
     ) {
-        // Highlighted selection row.
+        // Highlighted selection row（聚焦时加白色描边，明确遥控器当前所在的轮）。
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(itemHeight)
                 .background(Color(0xFF4C73FF), RoundedCornerShape(12.dp))
+                .then(
+                    if (focused) Modifier.border(2.dp, Color.White, RoundedCornerShape(12.dp))
+                    else Modifier
+                )
         )
 
         LazyColumn(
