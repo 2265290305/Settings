@@ -76,6 +76,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.Job
@@ -1215,6 +1216,8 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                         hasDisplayableName(it)
             }
             .distinctBy { it.address }
+            // “电信蓝牙遥控”默认置顶到第一栏，其余保持发现顺序（稳定排序）。
+            .sortedByDescending { displayDeviceName(it).contains("电信蓝牙遥控") }
 
         // “已连接”只认真实连接状态：设备在 connectedAddresses（由 HID profile 复核维护）里，
         // 且当前 profile 确实连着。绝不用 GATT 的 bleConnectedDevice 判定（那会误报已连接）。
@@ -1406,9 +1409,16 @@ fun BleRemoteDialog(
     LaunchedEffect(Unit) {
         onRefresh()
     }
-    // 拆分为全屏页面（不再用 Dialog 包裹），作为 BlueScreen 的全屏覆盖层渲染，
-    // 从而拥有自己独立的 verticalScroll，不受主页面根 Column 的滚动约束、列表也不会撑大上层 UI。
-    BackHandler(onBack = onDismiss)
+    // 用 Dialog(usePlatformDefaultWidth=false) 渲染到独立 window，真正全屏覆盖（含左侧导航栏），
+    // 且天然拥有自己独立的 verticalScroll，不受主页面内容区范围与根 Column 滚动约束。
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false,
+            dismissOnClickOutside = false,
+            dismissOnBackPress = true
+        )
+    ) {
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxSize()
@@ -1564,7 +1574,15 @@ fun BleRemoteDialog(
                         }
 
                         else -> {
-                            Column() {
+                            // 列表固定高度：单个 item 小一点，容器略高于一个 item，
+                            // 露出下一个 item 的边提示可滑动；发现多少设备卡片都不撑大，多的内部滑动。
+                            val rowHeight = if (compact) 48.dp else 56.dp
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(rowHeight * 1.4f)
+                                    .verticalScroll(rememberScrollState())
+                            ) {
                                 devices.forEach { device ->
                                     val stateText = when (device.address) {
                                         connectedAddress -> "已连接"
@@ -1575,11 +1593,9 @@ fun BleRemoteDialog(
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
+                                            .height(rowHeight)
                                             .clickable(enabled = enabled) { onPairRequest(device) }
-                                            .padding(
-                                                horizontal = 24.dp,
-                                                vertical = if (compact) 14.dp else 20.dp
-                                            ),
+                                            .padding(horizontal = 24.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
                                         Icon(
@@ -1631,6 +1647,7 @@ fun BleRemoteDialog(
                 }
             }
         }
+    }
 }
 
 @Composable
