@@ -2,7 +2,6 @@ package com.android.tv.settings
 
 import android.content.BroadcastReceiver
 import android.content.ComponentName
-import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
@@ -34,7 +33,6 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusGroup
 import androidx.compose.foundation.focusable
@@ -54,7 +52,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -77,6 +74,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.withFrameNanos
@@ -88,7 +86,6 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.key.Key
@@ -97,20 +94,19 @@ import androidx.compose.ui.input.key.key
 import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.key.type
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.changedToUpIgnoreConsumed
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
@@ -219,10 +215,6 @@ private fun isUnboundFromDevStat(context: Context): Boolean {
     return queryBindStatusForSystemUiActivation(context)?.trim() == "2"
 }
 
-private fun avatarKeyFromAsset(assetUrl: String): String {
-    return assetUrl.substringAfterLast('/').substringBeforeLast('.')
-}
-
 private fun authTokenHeaderOrNull(): String? {
     val token = BuildConfig.ACCOUNT_AUTH_TOKEN.trim()
     return if (token.isNotEmpty()) "Bearer $token" else null
@@ -240,6 +232,28 @@ private fun configuredAccountProfileQueryUrlOrNull(): String? {
     val host = runCatching { URL(endpoint).host }.getOrNull().orEmpty()
     if (host.equals("api.example.com", ignoreCase = true)) return null
     return endpoint
+}
+
+private fun resolveRemoteAvatarModel(raw: String?): String? {
+    val value = raw?.trim().orEmpty()
+    if (value.isBlank()) return null
+    if (value.startsWith("file:///android_asset/", ignoreCase = true)) return null
+    if (value.all(Char::isDigit)) return null
+    if (value.contains("headPortraitNum=", ignoreCase = true)) return null
+
+    val direct = runCatching { URL(value) }.getOrNull()
+    if (direct?.protocol.equals("http", ignoreCase = true) ||
+        direct?.protocol.equals("https", ignoreCase = true)
+    ) {
+        return value
+    }
+
+    val endpoint = configuredAccountProfileQueryUrlOrNull() ?: return null
+    val resolved = runCatching { URL(URL(endpoint), value).toString() }.getOrNull()
+    return resolved?.takeIf {
+        it.startsWith("http://", ignoreCase = true) ||
+            it.startsWith("https://", ignoreCase = true)
+    }
 }
 
 private fun parseBackendProfile(body: String): BackendProfile {
@@ -277,39 +291,6 @@ private suspend fun fetchAccountProfileFromBackend(): Result<BackendProfile> = w
             throw IllegalStateException("账号查询失败(code=$code) ${body.ifBlank { "服务端返回异常" }}")
         }
         parseBackendProfile(body)
-    }
-}
-
-private fun findAvatarIndex(avatarAssets: List<String>, avatarPath: String): Int {
-    val normalized = avatarPath.trim()
-    if (normalized.isEmpty()) return -1
-    // 1) 完整 asset url 精确匹配
-    avatarAssets.indexOfFirst { it.equals(normalized, ignoreCase = true) }.takeIf { it >= 0 }?.let { return it }
-    // 2) 按文件名(去扩展名)匹配，如 .../avatar_03.png
-    val byName = normalized.substringAfterLast('/').substringBeforeLast('.')
-    avatarAssets.indexOfFirst { asset -> asset.contains("/$byName.", ignoreCase = true) }
-        .takeIf { it >= 0 }?.let { return it }
-    // 3) 统一账号头像是编号集合(headPortraitNum)：从值/查询参数中解析头像编号映射到本地内置头像，
-    //    这样能直接本地渲染对应头像，避免依赖远程图片加载(否则会显示成灰色空圈)。
-    avatarNumberToIndex(normalized, avatarAssets.size)?.let { return it }
-    return -1
-}
-
-/**
- * 从形如 "3"、".../xxx?headPortraitNum=3"、".../head_3.png" 的头像值中解析头像编号并映射到内置
- * 头像下标(0-based)。统一账号约定 headPortraitNum 为 1-based，这里同时兼容 0-based。无法解析或
- * 越界(说明不是内置编号头像，而是真正的远程自定义头像)时返回 null。
- */
-private fun avatarNumberToIndex(value: String, count: Int): Int? {
-    val num = Regex("headPortraitNum=(\\d+)", RegexOption.IGNORE_CASE)
-        .find(value)?.groupValues?.get(1)?.toIntOrNull()
-        ?: value.takeIf { it.all(Char::isDigit) }?.toIntOrNull()
-        ?: Regex("(\\d+)(?=\\D*$)").find(value)?.groupValues?.get(1)?.toIntOrNull()
-        ?: return null
-    return when {
-        num in 1..count -> num - 1
-        num in 0 until count -> num
-        else -> null
     }
 }
 
@@ -387,6 +368,89 @@ private fun queryPersonalInfoValue(context: Context, key: String): String? {
     return null
 }
 
+private fun queryPersonalInfoAvatarWithDebug(context: Context): String? {
+    val resolver = context.contentResolver
+    val uriCandidates = buildPersonalInfoUriCandidates(context)
+    val summary = StringBuilder()
+    val avatarKeys = listOf(
+        "avatarpath",
+        "avatarPath",
+        "avatar",
+        "avatar_url",
+        "avatarUrl",
+        "icon",
+        "headPortrait",
+        "headPortraitUrl",
+        "headPortraitPath"
+    )
+
+    uriCandidates.forEach { uri ->
+        avatarKeys.forEach { key ->
+            val byCall = runCatching {
+                val extras = Bundle().apply { putString("key", key) }
+                Log.d(PROFILE_TAG, "avatar provider call uri=$uri method=$METHOD_DEV_QUERY extras={key=$key}")
+                val result = resolver.call(uri, METHOD_DEV_QUERY, null, extras)
+                dumpBundleKeysForDebug("avatar provider call result key=$key", result)
+                extractBundleString(result, key)
+            }.onFailure {
+                Log.d(PROFILE_TAG, "avatar provider call failed uri=$uri key=$key: ${it.message}")
+                summary.append("call[$key]=ERR(${it.message}); ")
+            }.getOrNull()
+            Log.d(PROFILE_TAG, "avatar provider call value key=$key value='$byCall'")
+            if (byCall.isNullOrBlank()) {
+                summary.append("call[$key]=null; ")
+            } else {
+                summary.append("call[$key]=$byCall; ")
+                Log.i(PROFILE_TAG, "avatar provider summary uri=$uri $summary")
+                return byCall
+            }
+        }
+    }
+
+    uriCandidates.forEach { uri ->
+        val fromCursor = runCatching {
+            resolver.query(uri, null, null, null, null)?.use { cursor ->
+                val cols = cursor.columnNames?.toList().orEmpty()
+                Log.d(PROFILE_TAG, "avatar provider query uri=$uri columns=$cols")
+                if (!cursor.moveToFirst()) {
+                    Log.d(PROFILE_TAG, "avatar provider query uri=$uri empty cursor")
+                    return@use null
+                }
+                cols.forEach { col ->
+                    val idx = cursor.getColumnIndex(col)
+                    val value = if (idx >= 0) cursor.getString(idx) else null
+                    Log.d(PROFILE_TAG, "avatar provider query row col=$col value='$value'")
+                    if (col.contains("avatar", true) ||
+                        col.contains("icon", true) ||
+                        col.contains("head", true) ||
+                        col.contains("portrait", true)
+                    ) {
+                        summary.append("queryCol[$col]=$value; ")
+                    }
+                }
+                avatarKeys.firstNotNullOfOrNull { key ->
+                    val idx = cursor.getColumnIndex(key)
+                    val value = if (idx >= 0) cursor.getString(idx)?.trim() else null
+                    Log.d(PROFILE_TAG, "avatar provider query candidate key=$key value='$value'")
+                    summary.append("query[$key]=$value; ")
+                    value?.takeIf { it.isNotEmpty() && it != "null" }
+                }
+            }
+        }.onFailure {
+            Log.d(PROFILE_TAG, "avatar provider query failed uri=$uri: ${it.message}")
+            summary.append("query=ERR(${it.message}); ")
+        }.getOrNull()
+        if (!fromCursor.isNullOrBlank()) {
+            Log.i(PROFILE_TAG, "avatar provider summary uri=$uri $summary")
+            return fromCursor
+        }
+    }
+
+    Log.i(PROFILE_TAG, "avatar provider summary value=null $summary")
+    Log.d(PROFILE_TAG, "avatar provider value not found")
+    return null
+}
+
 private fun queryAccountFromPersonalInfo(context: Context): String? {
     val raw = queryRawPersonalInfoBundle(context)
     dumpBundleKeysForDebug("DEV_QUERY(raw)", raw)
@@ -443,115 +507,11 @@ private fun queryAccountFromPersonalInfo(context: Context): String? {
     return null
 }
 
-private fun updatePersonalInfoByProvider(context: Context, nickname: String, avatarPath: String): Boolean {
-    val resolver = context.contentResolver
-    buildPersonalInfoUriCandidates(context).forEach { uri ->
-        val direct = runCatching {
-            val extras = Bundle().apply {
-                putString("nickname", nickname)
-                putString("avatarpath", avatarPath)
-            }
-            val result = resolver.call(uri, METHOD_DEV_OPT, null, extras)
-            isBundleSuccess(result)
-        }.getOrDefault(false)
-        if (direct) {
-            Log.d(PROFILE_TAG, "DEV_OPT direct success uri=$uri")
-            return true
-        }
-
-        val updateNickname = runCatching {
-            val extras = Bundle().apply {
-                putString("key", "nickname")
-                putString("value", nickname)
-            }
-            val result = resolver.call(uri, METHOD_DEV_OPT, null, extras)
-            isBundleSuccess(result)
-        }.getOrDefault(false)
-        val updateAvatar = runCatching {
-            val extras = Bundle().apply {
-                putString("key", "avatarpath")
-                putString("value", avatarPath)
-            }
-            val result = resolver.call(uri, METHOD_DEV_OPT, null, extras)
-            isBundleSuccess(result)
-        }.getOrDefault(false)
-        if (updateNickname && updateAvatar) {
-            Log.d(PROFILE_TAG, "DEV_OPT split success uri=$uri")
-            return true
-        }
-    }
-    return false
-}
-
-private fun updateUnifiedAccountInfoByProvider(
-    context: Context,
-    nickname: String,
-    avatarPath: String
-): Boolean {
-    val resolver = context.contentResolver
-    val candidateCalls = listOf(
-        Bundle().apply {
-            putString("nickname", nickname)
-            putString("title", nickname)
-            putString("avatarPath", avatarPath)
-            putString("avatar", avatarPath)
-            putString("icon", avatarPath)
-        },
-        Bundle().apply {
-            putString("key", "nickname")
-            putString("value", nickname)
-            putString("avatar", avatarPath)
-            putString("icon", avatarPath)
-        }
-    )
-    candidateCalls.forEach { extras ->
-        val updated = runCatching {
-            val result = resolver.call(ACCOUNT_USERINFO_URI, METHOD_DEV_OPT, null, extras)
-            isBundleSuccess(result)
-        }.getOrDefault(false)
-        if (updated) return true
-    }
-
-    val rows = runCatching {
-        resolver.update(
-            ACCOUNT_USERINFO_URI,
-            ContentValues().apply {
-                put("nickname", nickname)
-                put("title", nickname)
-                put("name", nickname)
-                put("avatarPath", avatarPath)
-                put("avatar", avatarPath)
-                put("icon", avatarPath)
-            },
-            null,
-            null
-        )
-    }.getOrDefault(0)
-    return rows > 0
-}
-
 private fun logProviderDiscovery(context: Context) {
     val pm = context.packageManager
     val auth = PERSONAL_INFO_URI.authority.orEmpty()
     Log.d(PROFILE_TAG, "uri=${PERSONAL_INFO_URI}")
     Log.d(PROFILE_TAG, "authority=$auth exists=${pm.resolveContentProvider(auth, 0) != null}")
-}
-
-private suspend fun submitAccountProfileUpdate(
-    context: Context,
-    nickname: String,
-    avatarAssetUrl: String
-): Result<Unit> = withContext(Dispatchers.IO) {
-    runCatching {
-        val personalInfoUpdated = updatePersonalInfoByProvider(context, nickname, avatarAssetUrl)
-        val unifiedAccountUpdated = updateUnifiedAccountInfoByProvider(context, nickname, avatarAssetUrl)
-        if (personalInfoUpdated || unifiedAccountUpdated) {
-            runCatching { context.contentResolver.notifyChange(PERSONAL_INFO_URI, null) }
-            runCatching { context.contentResolver.notifyChange(ACCOUNT_USERINFO_URI, null) }
-            return@runCatching Unit
-        }
-        throw IllegalStateException("Provider 接口不可用，请切换到支持 com.android.zshd.deviceinfo 的设备")
-    }
 }
 
 @Composable
@@ -564,71 +524,77 @@ private fun rememberSvgLoader(): ImageLoader {
     }
 }
 
-// 内置头像用 drawable 资源渲染（painterResource 最可靠，绕开 Coil 从 assets 加载在部分设备上失败的问题，
-// 避免头像变灰）。顺序与 avatarAssets 一一对应。
-private val avatarDrawables = listOf(
-    R.drawable.avatar_01, R.drawable.avatar_02, R.drawable.avatar_03, R.drawable.avatar_04,
-    R.drawable.avatar_05, R.drawable.avatar_06, R.drawable.avatar_07, R.drawable.avatar_08,
-    R.drawable.avatar_09, R.drawable.avatar_10, R.drawable.avatar_11
-)
-
 /**
- * 头像渲染：内置头像（model 为内置 url 或 null 时按 index）用 drawable；非内置（远程/自定义）才走 Coil。
+ * 个人中心头像只渲染接口返回的远程图片；为空或失败时保留父容器灰底，禁止本地头像兜底。
  */
 @Composable
 private fun AvatarImage(
     model: String?,
-    fallbackIndex: Int,
-    avatarAssets: List<String>,
     imageLoader: ImageLoader,
-    modifier: Modifier,
+    modifier: Modifier
 ) {
-    // model 已是上游解析后的最终来源：为 null 时用内置 fallbackIndex；非 null（远程 URL 或编号映射
-    // 后的内置 asset path）一律按其本身渲染——不再二次做文件名匹配，否则会把“恰好叫 avatar_xx 的
-    // 平台远程头像”错误替换成本地图（导致‘头像不是平台返回的’）。仅当其本身就是内置 asset 时走本地。
-    val builtinIndex = when {
-        model == null -> fallbackIndex
-        else -> avatarAssets.indexOfFirst { it.equals(model, ignoreCase = true) }
+    if (model == null) {
+        Box(modifier = modifier)
+        return
     }
-    when {
-        builtinIndex in avatarDrawables.indices -> Image(
-            painter = painterResource(avatarDrawables[builtinIndex]),
-            contentDescription = "Avatar",
-            modifier = modifier,
-            contentScale = ContentScale.Crop
-        )
-
-        model != null -> {
-            val fallback = painterResource(
-                avatarDrawables[fallbackIndex.coerceIn(avatarDrawables.indices)]
-            )
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(model)
-                    .crossfade(true)
-                    .build(),
-                imageLoader = imageLoader,
-                contentDescription = "Avatar",
-                modifier = modifier,
-                contentScale = ContentScale.Crop,
-                // 远程头像加载中/失败时回退到内置头像，避免显示成灰色空圈。
-                placeholder = fallback,
-                error = fallback
-            )
-        }
-
-        else -> Image(
-            painter = painterResource(avatarDrawables[fallbackIndex.coerceIn(avatarDrawables.indices)]),
-            contentDescription = "Avatar",
-            modifier = modifier,
-            contentScale = ContentScale.Crop
-        )
-    }
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(model)
+            .crossfade(true)
+            .build(),
+        imageLoader = imageLoader,
+        contentDescription = "Avatar",
+        modifier = modifier,
+        contentScale = ContentScale.Crop
+    )
 }
 
 class MainActivity : ComponentActivity() {
     // 当前跳转目标；singleTask 复用实例时由 onNewIntent 更新，驱动 Compose 切到对应子页。
     private val startTargetState = androidx.compose.runtime.mutableStateOf(StartTarget())
+    private var restoreDpadFocus: ((force: Boolean) -> Unit)? = null
+    private var touchMayHaveClearedDpadFocus = false
+    private var lastTouchFocusRestoreAt = 0L
+
+    override fun dispatchTouchEvent(event: android.view.MotionEvent): Boolean {
+        val handled = super.dispatchTouchEvent(event)
+        if (event.actionMasked == android.view.MotionEvent.ACTION_UP ||
+            event.actionMasked == android.view.MotionEvent.ACTION_CANCEL
+        ) {
+            touchMayHaveClearedDpadFocus = true
+            lastTouchFocusRestoreAt = SystemClock.uptimeMillis()
+            window.decorView.postDelayed({
+                // 触摸结束后恢复一次焦点；如果用户快速连续触摸，只响应最后一次。
+                if (SystemClock.uptimeMillis() - lastTouchFocusRestoreAt >= 70L) {
+                    restoreDpadFocus?.invoke(true)
+                }
+            }, 80L)
+        }
+        return handled
+    }
+
+    override fun dispatchKeyEvent(event: android.view.KeyEvent): Boolean {
+        val shouldRecoverFocus = event.action == android.view.KeyEvent.ACTION_DOWN &&
+                when (event.keyCode) {
+                    android.view.KeyEvent.KEYCODE_DPAD_UP,
+                    android.view.KeyEvent.KEYCODE_DPAD_DOWN,
+                    android.view.KeyEvent.KEYCODE_DPAD_LEFT,
+                    android.view.KeyEvent.KEYCODE_DPAD_RIGHT,
+                    android.view.KeyEvent.KEYCODE_DPAD_CENTER,
+                    android.view.KeyEvent.KEYCODE_ENTER,
+                    android.view.KeyEvent.KEYCODE_NUMPAD_ENTER -> true
+                    else -> false
+                }
+        if (shouldRecoverFocus && touchMayHaveClearedDpadFocus) {
+            touchMayHaveClearedDpadFocus = false
+            restoreDpadFocus?.invoke(true)
+        }
+        val handled = super.dispatchKeyEvent(event)
+        if (shouldRecoverFocus) {
+            window.decorView.post { restoreDpadFocus?.invoke(!handled) }
+        }
+        return handled
+    }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
@@ -695,7 +661,10 @@ class MainActivity : ComponentActivity() {
                         alpha = enterAlpha
                     }
                 ) {
-                    NavigationRailExample(startTarget = startTargetState.value)
+                    NavigationRailExample(
+                        startTarget = startTargetState.value,
+                        onDpadFocusRecoveryChanged = { restoreDpadFocus = it }
+                    )
                 }
             }
         }
@@ -821,12 +790,18 @@ sealed class Destinations(val route: String) {
     }
 }
 
+private enum class FocusArea {
+    Sidebar,
+    Content
+}
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationRailExample(
     modifier: Modifier = Modifier,
     startTarget: StartTarget = StartTarget(),
+    onDpadFocusRecoveryChanged: (((force: Boolean) -> Unit)?) -> Unit = {},
 ) {
     val navController = rememberNavController()
     val context = LocalContext.current
@@ -859,6 +834,10 @@ fun NavigationRailExample(
     // 必须用 remember 而非 rememberSaveable: 它反映“当前运行时焦点位置”, 持久化会在进程/配置重建后
     // 被恢复为陈旧 true(真实焦点其实在菜单), 导致首次 BACK 误判为“在内容区”而无反应。
     var focusInContent by remember { mutableStateOf(false) }
+    var focusInSidebar by remember { mutableStateOf(false) }
+    var lastFocusArea by remember { mutableStateOf(FocusArea.Sidebar) }
+    var touchVersion by remember { mutableIntStateOf(0) }
+    var restoredTouchVersion by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(navItems.size) {
         navItemFocusRequesters.getOrNull(selectedDestination)?.requestFocus()
@@ -866,7 +845,9 @@ fun NavigationRailExample(
 
     fun focusSelectedNavItem() {
         navItemFocusRequesters.getOrNull(selectedDestination)?.requestFocus()
+        focusInSidebar = true
         focusInContent = false
+        lastFocusArea = FocusArea.Sidebar
     }
 
     // 右键进入子目录并聚焦“最上面的第一个控件”。
@@ -884,6 +865,25 @@ fun NavigationRailExample(
             }
             if (!focusInContent) focusManager.moveFocus(FocusDirection.Right)
         }
+    }
+
+    fun recoverDpadFocusIfNeeded(force: Boolean = false) {
+        val touchedSinceLastRecovery = touchVersion != restoredTouchVersion
+        val noTrackedFocus = !focusInContent && !focusInSidebar
+        if (!force && !touchedSinceLastRecovery && !noTrackedFocus) return
+        restoredTouchVersion = touchVersion
+        when (lastFocusArea) {
+            FocusArea.Content -> enterContent()
+            FocusArea.Sidebar -> focusSelectedNavItem()
+        }
+    }
+
+    val latestDpadFocusRecovery by rememberUpdatedState(
+        newValue = { force: Boolean -> recoverDpadFocusIfNeeded(force) }
+    )
+    DisposableEffect(Unit) {
+        onDpadFocusRecoveryChanged { force -> latestDpadFocusRecovery(force) }
+        onDispose { onDpadFocusRecoveryChanged(null) }
     }
 
     fun handleBackNavigation() {
@@ -908,7 +908,20 @@ fun NavigationRailExample(
 
     val navRailWidth = 180.dp
     //val tintcolor = Color(0xFF4577FF)
-    Box(modifier = modifier.fillMaxSize()) {
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                awaitPointerEventScope {
+                    while (true) {
+                        val event = awaitPointerEvent(PointerEventPass.Final)
+                        if (event.changes.any { it.changedToUpIgnoreConsumed() }) {
+                            touchVersion++
+                        }
+                    }
+                }
+            }
+    ) {
         Scaffold(
             //containerColor = colorResource(R.color.topbar),
             modifier = Modifier.fillMaxSize(),
@@ -974,7 +987,11 @@ fun NavigationRailExample(
                                         if (it.isFocused) {
                                             selectedDestination = index
                                             // 焦点回到菜单：清除“焦点在子目录”标记。
+                                            focusInSidebar = true
                                             focusInContent = false
+                                            lastFocusArea = FocusArea.Sidebar
+                                        } else if (selectedDestination == index) {
+                                            focusInSidebar = false
                                         }
                                     }
                                     .onKeyEvent {
@@ -1049,7 +1066,13 @@ fun NavigationRailExample(
                         .focusGroup()
                         // 内容区(子目录)是否持有焦点的真相来源：用于统一返回逻辑，
                         // 不依赖 requestFocus 是否成功，焦点无论经右键/确定键/默认搜索进入都能正确反映。
-                        .onFocusChanged { focusInContent = it.hasFocus }
+                        .onFocusChanged {
+                            focusInContent = it.hasFocus
+                            if (it.hasFocus) {
+                                focusInSidebar = false
+                                lastFocusArea = FocusArea.Content
+                            }
+                        }
                         .onPreviewKeyEvent {
                             if (selectedDestination != 3 &&
                                 it.type == KeyEventType.KeyDown &&
@@ -1254,27 +1277,9 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
     val scope = rememberCoroutineScope()
     var logoutInProgress by remember { mutableStateOf(false) }
     var nickname by rememberSaveable { mutableStateOf("小翼8899") }
-    var avatarIndex by rememberSaveable { mutableIntStateOf(0) }
     var avatarModel by rememberSaveable { mutableStateOf<String?>(null) }
-    var showEditPage by rememberSaveable { mutableStateOf(false) }
-    var profileSaving by remember { mutableStateOf(false) }
     var accountText by rememberSaveable { mutableStateOf("未获取账号") }
     var profileVersion by remember { mutableStateOf(0) }
-    // 头像资源用 PNG：这些 SVG 实为 <pattern> 包内嵌位图，AndroidSVG 渲染 pattern 填充
-    // 不可靠（会渲染成透明，叠在灰底上即一片灰色）。改用从 SVG 中抽出的真实 PNG。
-    val avatarAssets = listOf(
-        "file:///android_asset/avatars/avatar_01.png",
-        "file:///android_asset/avatars/avatar_02.png",
-        "file:///android_asset/avatars/avatar_03.png",
-        "file:///android_asset/avatars/avatar_04.png",
-        "file:///android_asset/avatars/avatar_05.png",
-        "file:///android_asset/avatars/avatar_06.png",
-        "file:///android_asset/avatars/avatar_07.png",
-        "file:///android_asset/avatars/avatar_08.png",
-        "file:///android_asset/avatars/avatar_09.png",
-        "file:///android_asset/avatars/avatar_10.png",
-        "file:///android_asset/avatars/avatar_11.png"
-    )
     val svgLoader = rememberSvgLoader()
 
     // 修改头像/账号资料：拉起统一账号 App 的设置页（SetProfileActivity）并等待返回结果，
@@ -1346,24 +1351,15 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
         logProviderDiscovery(appContext)
 
         val accountInfo = queryUnifiedAccountInfo(appContext)
-        val providerAvatar = queryPersonalInfoValue(appContext, "avatarpath")
+        val providerAvatar = queryPersonalInfoAvatarWithDebug(appContext)
         val providerNickname = queryPersonalInfoValue(appContext, "nickname")
         val providerAccount = queryAccountFromPersonalInfo(appContext)
-        val backendAccountInfo = if (
-            providerNickname.isNullOrBlank() ||
-            providerAccount.isNullOrBlank() ||
-            providerAvatar.isNullOrBlank() ||
-            accountInfo == null
-        ) {
-            fetchAccountProfileFromBackend().getOrNull()?.let {
-                UnifiedAccountInfo(
-                    nickname = it.nickname,
-                    account = it.account,
-                    avatarPath = it.avatarPath
-                )
-            }
-        } else {
-            null
+        val backendAccountInfo = fetchAccountProfileFromBackend().getOrNull()?.let {
+            UnifiedAccountInfo(
+                nickname = it.nickname,
+                account = it.account,
+                avatarPath = it.avatarPath
+            )
         }
         val mergedAccountInfo = mergeUnifiedAccountInfo(accountInfo, backendAccountInfo)
         val resolvedNickname = mergedAccountInfo?.nickname
@@ -1372,20 +1368,15 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
             nickname = resolvedNickname
         }
 
-        val resolvedAvatar = mergedAccountInfo?.avatarPath ?: providerAvatar
+        val resolvedAvatar = resolveRemoteAvatarModel(backendAccountInfo?.avatarPath)
+            ?: resolveRemoteAvatarModel(accountInfo?.avatarPath)
+            ?: resolveRemoteAvatarModel(providerAvatar)
         Log.d(
-            PROFILE_TAG, "resolved avatar='$resolvedAvatar' index=${
-                resolvedAvatar?.let { findAvatarIndex(avatarAssets, it) } ?: -1
-            }")
-        if (!resolvedAvatar.isNullOrBlank()) {
-            val accountAvatar = resolvedAvatar.trim()
-            // 一律以平台返回为准：是真实 URL/路径(含 :// 或 /)就直接加载远程，不替换成本地内置图；
-            // 只有平台返回的是纯编号(headPortraitNum，无图可加载)时才映射到对应内置头像渲染。
-            val looksLikeUrl = accountAvatar.contains("://") || accountAvatar.contains('/')
-            if (looksLikeUrl) {
-                avatarModel = accountAvatar
-            }
-        }
+            PROFILE_TAG,
+            "resolved remote avatar='$resolvedAvatar' backend='${backendAccountInfo?.avatarPath}' " +
+                "account='${accountInfo?.avatarPath}' provider='$providerAvatar'"
+        )
+        avatarModel = resolvedAvatar
 
         val fetched = mergedAccountInfo?.account
             ?: providerAccount
@@ -1397,36 +1388,6 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
                 accountText = nickname
             }
         }
-    }
-
-    if (showEditPage) {
-        EditAccountInfoScreen(
-            currentNickname = nickname,
-            currentAvatarIndex = avatarIndex,
-            avatarAssets = avatarAssets,
-            saving = profileSaving,
-            onBack = { showEditPage = false },
-            onSave = { newNickname, newAvatarIndex ->
-                if (profileSaving) return@EditAccountInfoScreen
-                profileSaving = true
-                val avatar = avatarAssets.getOrElse(newAvatarIndex) { avatarAssets.first() }
-                scope.launch {
-                    val result = submitAccountProfileUpdate(appContext, newNickname, avatar)
-                    profileSaving = false
-                    if (result.isSuccess) {
-                        nickname = newNickname
-                        avatarIndex = newAvatarIndex
-                        avatarModel = avatar
-                        showEditPage = false
-                        Toast.makeText(appContext, "账号信息修改成功", Toast.LENGTH_SHORT).show()
-                    } else {
-                        val msg = result.exceptionOrNull()?.message ?: "账号信息修改失败，请稍后重试"
-                        Toast.makeText(appContext, msg, Toast.LENGTH_SHORT).show()
-                    }
-                }
-            }
-        )
-        return
     }
 
     // 退出登录成功/失败的统一收尾（成功信号可能来自结果广播、devStat 解绑状态或主动轮询，先到先处理）。
@@ -1543,8 +1504,6 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
                         ) {
                             AvatarImage(
                                 model = avatarModel,
-                                fallbackIndex = avatarIndex,
-                                avatarAssets = avatarAssets,
                                 imageLoader = svgLoader,
                                 modifier = Modifier.fillMaxSize()
                             )
@@ -1649,377 +1608,6 @@ fun PersonalCenterScreen(modifier: Modifier = Modifier) {
                 Text("扫码下载“小翼管家”", color = Color(0xFF7B808A), fontSize = 18.sp)
             }
         }
-    }
-}
-
-@Composable
-private fun EditAccountInfoScreen(
-    currentNickname: String,
-    currentAvatarIndex: Int,
-    avatarAssets: List<String>,
-    saving: Boolean,
-    onBack: () -> Unit,
-    onSave: (String, Int) -> Unit
-) {
-    val svgLoader = rememberSvgLoader()
-    var draftNickname by remember(currentNickname) { mutableStateOf(currentNickname) }
-    var draftAvatarIndex by remember(currentAvatarIndex) { mutableIntStateOf(currentAvatarIndex) }
-    var showAvatarDialog by remember { mutableStateOf(false) }
-    var showNicknameDialog by remember { mutableStateOf(false) }
-    Dialog(
-        onDismissRequest = onBack,
-        properties = DialogProperties(
-            usePlatformDefaultWidth = false
-        )
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(colorResource(R.color.topbar))
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.height(100.dp).background(colorResource(R.color.topbar))
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.back),
-                        contentDescription = "返回",
-                        modifier = Modifier.clickable { onBack() }
-                    )
-                    Spacer(Modifier.weight(1f))
-                    Text("修改账号信息", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color(0xFF1E2025))
-                    Spacer(Modifier.weight(1f))
-                    Spacer(Modifier.width(36.dp))
-                }
-
-                Card(
-                    shape = RoundedCornerShape(22.dp),
-                    colors = CardDefaults.cardColors(containerColor = Color.White),
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 40.dp).height(400.dp)
-                ) {
-                    Column(modifier = Modifier.padding(top = 45.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .width(250.dp)
-                                .height(180.dp)
-                                .align(Alignment.CenterHorizontally)
-                                .clip(RoundedCornerShape(75.dp))
-                                .background(colorResource(R.color.cardcolor)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            AvatarImage(
-                                model = null,
-                                fallbackIndex = draftAvatarIndex,
-                                avatarAssets = avatarAssets,
-                                imageLoader = svgLoader,
-                                modifier = Modifier.width(180.dp).height(180.dp)
-                            )
-                        }
-                        Spacer(Modifier.height(45.dp))
-                        Row(
-                            modifier = Modifier
-                                .align(Alignment.CenterHorizontally)
-                                .clickable {
-                                    showAvatarDialog = true
-
-                                },
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Text("点击更换头像", color = Color(0xFF4A7CFF), fontSize = 16.sp)
-                            Spacer(Modifier.width(8.dp))
-                            Icon(
-                                painter = painterResource(R.drawable.arrow_right),
-                                contentDescription = "更换头像",
-                                tint = Color(0xFF4A7CFF)
-                            )
-                        }
-
-                        Spacer(Modifier.height(20.dp))
-                        Card(
-                            shape = RoundedCornerShape(14.dp),
-                            colors = CardDefaults.cardColors(containerColor = Color.White),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { showNicknameDialog = true }
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 20.dp, vertical = 20.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    "昵称",
-                                    fontSize = 18.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = Color(0xFF20232A)
-                                )
-                                Spacer(Modifier.weight(1f))
-                                Text(draftNickname, fontSize = 18.sp, color = Color(0xFF8D919A))
-                                Spacer(Modifier.width(8.dp))
-                                Icon(
-                                    painter = painterResource(R.drawable.arrow_right),
-                                    contentDescription = "修改昵称",
-                                    tint = Color(0xFFB5B8BE)
-                                )
-                            }
-                        }
-                    }
-                }
-                Spacer(Modifier.weight(1f))
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    SecondaryPillButton(
-                        text = "取消",
-                        enabled = !saving,
-                        onClick = { if (!saving) onBack() }
-                    )
-                    Spacer(Modifier.width(24.dp))
-                    PrimaryPillButton(
-                        text = if (saving) "提交中..." else "确定",
-                        enabled = !saving,
-                        onClick = {
-                            if (!saving) onSave(draftNickname, draftAvatarIndex)
-                        }
-                    )
-                }
-                Spacer(Modifier.height(18.dp))
-            }
-        }
-    }
-
-    if (showAvatarDialog) {
-        AvatarPickerDialog(
-            avatars = avatarAssets,
-            selectedIndex = draftAvatarIndex,
-            onDismiss = { showAvatarDialog = false },
-            onConfirm = {
-                draftAvatarIndex = it
-                showAvatarDialog = false
-            }
-        )
-    }
-
-    if (showNicknameDialog) {
-        NicknameDialog(
-            currentValue = draftNickname,
-            onDismiss = { showNicknameDialog = false },
-            onConfirm = {
-                draftNickname = it
-                showNicknameDialog = false
-            }
-        )
-    }
-}
-
-@Composable
-private fun AvatarPickerDialog(
-    avatars: List<String>,
-    selectedIndex: Int,
-    onDismiss: () -> Unit,
-    onConfirm: (Int) -> Unit
-) {
-    val svgLoader = rememberSvgLoader()
-    var localSelection by remember(selectedIndex) { mutableIntStateOf(selectedIndex) }
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true)
-    ) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { onDismiss() },
-            contentAlignment = Alignment.CenterEnd
-        ) {
-
-            Card(
-                shape = RoundedCornerShape(20.dp),
-                colors = CardDefaults.cardColors(containerColor = Color.White),
-                modifier = Modifier.fillMaxHeight(1f).fillMaxWidth(0.8f)
-            ) {
-                Column(modifier = Modifier.padding(horizontal = 30.dp, vertical = 24.dp)) {
-                    Text(
-                        "选择头像",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF1D2026),
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center
-                    )
-                    Spacer(Modifier.height(16.dp))
-
-                    for (row in 0 until 3) {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            for (col in 0 until 4) {
-                                val index = row * 4 + col
-                                if (index < avatars.size) {
-                                    val avatar = avatars[index]
-                                    AvatarItem(
-                                        avatarAsset = avatar,
-                                        avatarAssets = avatars,
-                                        imageLoader = svgLoader,
-                                        selected = index == localSelection,
-                                        onClick = { localSelection = index }
-                                    )
-                                } else {
-                                    Spacer(Modifier.size(118.dp))
-                                }
-                            }
-                        }
-                        Spacer(Modifier.height(16.dp))
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        SecondaryPillButton(text = "取消", onClick = onDismiss)
-                        Spacer(Modifier.width(24.dp))
-                        PrimaryPillButton(text = "确定", onClick = { onConfirm(localSelection) })
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun AvatarItem(
-    avatarAsset: String,
-    avatarAssets: List<String>,
-    imageLoader: ImageLoader,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .size(118.dp)
-            .clip(RoundedCornerShape(59.dp))
-            .background(Color(0xFFE4E4E7))
-            .border(
-                if (selected) 3.dp else 0.dp,
-                if (selected) Color(0xFF4B79FF) else Color.Transparent,
-                RoundedCornerShape(59.dp)
-            )
-            .clickable { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        AvatarImage(
-            model = avatarAsset,
-            fallbackIndex = 0,
-            avatarAssets = avatarAssets,
-            imageLoader = imageLoader,
-            modifier = Modifier.fillMaxSize()
-        )
-    }
-}
-
-@Composable
-private fun NicknameDialog(
-    currentValue: String,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
-    var input by remember(currentValue) { mutableStateOf(currentValue) }
-    val maxLen = 12
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            shape = RoundedCornerShape(22.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            modifier = Modifier.width(560.dp)
-        ) {
-            Column(modifier = Modifier.padding(horizontal = 26.dp, vertical = 24.dp)) {
-                Text(
-                    "修改昵称",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center
-                )
-                Spacer(Modifier.height(18.dp))
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(18.dp))
-                        .background(Color(0xFFF2F3F6))
-                        .padding(horizontal = 16.dp, vertical = 14.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        BasicTextField(
-                            value = input,
-                            onValueChange = { if (it.length <= maxLen) input = it },
-                            modifier = Modifier.weight(1f),
-                            singleLine = true,
-                            textStyle = TextStyle(fontSize = 16.sp, color = Color(0xFF23252A))
-                        )
-                        Text("${input.length}/$maxLen", color = Color(0xFF8A8F99), fontSize = 16.sp)
-                    }
-                    if (input.isBlank()) {
-                        Text("请输入昵称", color = Color(0xFFB2B6BF), fontSize = 16.sp)
-                    }
-                }
-                Spacer(Modifier.height(18.dp))
-                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                    SecondaryPillButton(text = "取消", onClick = onDismiss)
-                    Spacer(Modifier.width(24.dp))
-                    PrimaryPillButton(
-                        text = "确定",
-                        onClick = { onConfirm(input.ifBlank { currentValue }) }
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun SecondaryPillButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .width(230.dp)
-            .height(66.dp)
-            .clip(RoundedCornerShape(33.dp))
-            .background(if (enabled) Color(0xFFE9ECF2) else Color(0xFFF2F3F6))
-            .clickable(enabled = enabled) { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text,
-            color = if (enabled) Color(0xFF4A79FF) else Color(0xFFB8C4E8),
-            fontSize = 21.sp,
-            fontWeight = FontWeight.Bold
-        )
-    }
-}
-
-@Composable
-private fun PrimaryPillButton(text: String, enabled: Boolean = true, onClick: () -> Unit) {
-    Box(
-        modifier = Modifier
-            .width(230.dp)
-            .height(66.dp)
-            .clip(RoundedCornerShape(33.dp))
-            .background(
-                Brush.horizontalGradient(
-                    if (enabled) listOf(Color(0xFF57A7FF), Color(0xFF3F47F3))
-                    else listOf(Color(0xFFBFD8FF), Color(0xFFAAB1F4))
-                )
-            )
-            .clickable(enabled = enabled) { onClick() },
-        contentAlignment = Alignment.Center
-    ) {
-        Text(text, color = Color.White, fontSize = 21.sp, fontWeight = FontWeight.Bold)
     }
 }
 

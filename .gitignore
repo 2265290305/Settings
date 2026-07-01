@@ -17,3 +17,13 @@
 local.properties
 *pdf
 *docx
+
+# JVM / Kotlin 崩溃与错误日志
+.kotlin/
+hs_err_pid*.log
+replay_pid*.log
+
+# 临时/调试产物（本地测试遗留）
+/一键检测*.zip
+/已连接
+/连接中...

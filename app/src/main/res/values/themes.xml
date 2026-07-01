@@ -6,9 +6,4 @@
         <item name="android:colorForeground">@color/topbar</item>
         <item name="android:colorBackground">@color/topbar</item>
     </style>
-
-    <!-- 冷启动闪屏主题：windowBackground 带 logo，onCreate 里随即切回 Theme.设置。 -->
-    <style name="Theme.设置.Splash" parent="Theme.设置">
-        <item name="android:windowBackground">@drawable/splash_background</item>
-    </style>
 </resources>
