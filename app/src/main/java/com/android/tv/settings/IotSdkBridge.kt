@@ -144,7 +144,6 @@ object IotSdkBridge {
     private fun queryProviderValue(context: Context, uri: Uri, key: String): String? {
         return runCatching {
             val extras = Bundle().apply {
-                putString("key", key)
                 putString(key, "")
             }
             val result = context.contentResolver.call(uri, METHOD_DEV_QUERY, null, extras)

@@ -91,7 +91,8 @@ private fun systemPropertyGet(key: String): String? {
 private fun queryProviderValue(context: Context, uri: Uri, key: String): String? {
     val resolver = context.contentResolver
     val byCall = runCatching {
-        val extras = Bundle().apply { putString("key", key) }
+        // ZshdProvider 以 extras 的字段名作查询 key，直接用字段名当 extra 名（不能传 putString("key", key)）。
+        val extras = Bundle().apply { putString(key, "") }
         val result = resolver.call(uri, METHOD_DEV_QUERY, null, extras)
         normalizeValue(result?.getString(key))
             ?: normalizeValue(result?.getString("value"))

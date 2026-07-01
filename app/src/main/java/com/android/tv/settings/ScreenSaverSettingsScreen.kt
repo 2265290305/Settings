@@ -118,7 +118,6 @@ private fun queryScreenSaverValue(context: Context, key: String, defaultValue: S
     val resolver = context.contentResolver
     return runCatching {
         val extras = Bundle().apply {
-            putString("key", key)
             putString(key, "")
         }
         val result = resolver.call(SCREEN_SAVER_DEVICE_INFO_URI, SCREEN_SAVER_METHOD_DEV_QUERY, null, extras)

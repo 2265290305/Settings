@@ -2,6 +2,7 @@ package com.android.tv.settings
 
 import android.annotation.SuppressLint
 import android.app.Service
+import androidx.activity.compose.BackHandler
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothGatt
@@ -33,7 +34,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -47,7 +47,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
-import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -77,7 +76,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.Job
@@ -810,7 +808,10 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                             String.format(Locale.US, "%06d", key)
                         } else null
                         pairingRequest = PairingRequestInfo(device, variant, passkey)
-                        Log.i(BLUE_SCREEN_TAG, "pairing request address=${device.address} variant=$variant key=$passkey")
+                        Log.i(
+                            BLUE_SCREEN_TAG,
+                            "pairing request address=${device.address} variant=$variant key=$passkey"
+                        )
                     }
 
                     BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
@@ -969,6 +970,9 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
         )
     }
 
+    // 添加蓝牙遥控器页显示时，主内容整体不渲染，只显示全屏子页（子页自带独立 verticalScroll，
+    // 不受这里根 Column 的滚动约束，可用列表可正常滚动且不会撑大主页面 UI）。
+    if (!showBleRemoteDialog) {
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -980,7 +984,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
     ) {
         Card(
             modifier = Modifier.fillMaxWidth(),
-            shape =  RoundedCornerShape(9.dp),
+            shape = RoundedCornerShape(9.dp),
             colors = CardDefaults.cardColors(containerColor = colorResource(R.color.cardcolor))
         ) {
             Row(
@@ -996,12 +1000,6 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                 Spacer(Modifier.weight(1f))
                 Switch(
                     modifier = Modifier.entryFocus(),
-                    colors = SwitchDefaults.colors(
-                        uncheckedTrackColor = colorResource(R.color.gray),
-                        uncheckedThumbColor = colorResource(R.color.white),
-                        checkedThumbColor = colorResource(R.color.white),
-                        checkedTrackColor = colorResource(R.color.theme_blue)
-                    ),
                     checked = isChecked,
                     onCheckedChange = { newCheckedState ->
                         isChecked = newCheckedState
@@ -1128,6 +1126,8 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                 .filter { it.bondState != BluetoothDevice.BOND_BONDED }
                 .filter { it.address !in myDeviceAddresses }
                 .distinctBy { it.address }
+                // “电信蓝牙遥控”默认置顶：名称含该关键词的排最前，其余保持扫描顺序。
+                .sortedByDescending { displayDeviceName(it).contains("电信蓝牙遥控") }
 
             Row(
                 modifier = Modifier
@@ -1166,15 +1166,24 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                     }
 
                     else -> {
-                        Column {
+                        // 外层根 Column 已是 verticalScroll，这里不能再放 LazyColumn/无界 Column，
+                        // 否则要么撑大整页把上面 UI 顶走，要么嵌套滚动因高度无界崩溃。
+                        // 方案：固定高度只露一个 item，其余在卡片内部滚动，不影响上面的 UI。
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(64.dp)
+                                .verticalScroll(rememberScrollState())
+                        ) {
                             availableDevices.forEach { device ->
                                 Row(
                                     modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(64.dp)
                                         .clickable {
                                             connectDevice(device, clearIgnored = true)
                                         }
-                                        .padding(horizontal = 16.dp, vertical = 20.dp)
-                                        .fillMaxWidth(),
+                                        .padding(horizontal = 16.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Icon(
@@ -1194,6 +1203,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
         }
 
     }
+    }
 
     if (showBleRemoteDialog) {
         val allDiscovered = cachedBleDevices + discoveredClassicDevices
@@ -1205,8 +1215,6 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                         hasDisplayableName(it)
             }
             .distinctBy { it.address }
-            // 默认将“电信蓝牙遥控”置顶为列表第一项，方便用户优先看到/连接目标遥控器。
-            .sortedByDescending { displayDeviceName(it).contains("电信蓝牙遥控") }
 
         // “已连接”只认真实连接状态：设备在 connectedAddresses（由 HID profile 复核维护）里，
         // 且当前 profile 确实连着。绝不用 GATT 的 bleConnectedDevice 判定（那会误报已连接）。
@@ -1274,6 +1282,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                             val bytes = pin.toByteArray(Charsets.UTF_8)
                             device.setPin(bytes)
                         }
+
                         else -> device.setPairingConfirmation(true)
                     }
                 }.getOrDefault(false)
@@ -1397,15 +1406,14 @@ fun BleRemoteDialog(
     LaunchedEffect(Unit) {
         onRefresh()
     }
-    Dialog(
-        onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false, dismissOnClickOutside = true)
+    // 拆分为全屏页面（不再用 Dialog 包裹），作为 BlueScreen 的全屏覆盖层渲染，
+    // 从而拥有自己独立的 verticalScroll，不受主页面根 Column 的滚动约束、列表也不会撑大上层 UI。
+    BackHandler(onBack = onDismiss)
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color(0xFFD8DBDF))
     ) {
-        BoxWithConstraints(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color(0xFFD8DBDF))
-        ) {
             val compact = maxWidth < 1100.dp
             val titleSize = if (compact) 30.sp else 40.sp
             val headingSize = if (compact) 38.sp else 52.sp
@@ -1556,15 +1564,7 @@ fun BleRemoteDialog(
                         }
 
                         else -> {
-                            // 卡片限定最大高度、内部单独滚动：设备变多时只在卡片内滑动，
-                            // 不会撑大外层 Column 把上方标题/说明/示意图挤出屏幕。
-                            val rowHeight = if (compact) 52.dp else 64.dp
-                            val maxVisibleRows = 4
-                            Column(
-                                modifier = Modifier
-                                    .heightIn(max = rowHeight * maxVisibleRows)
-                                    .verticalScroll(rememberScrollState())
-                            ) {
+                            Column() {
                                 devices.forEach { device ->
                                     val stateText = when (device.address) {
                                         connectedAddress -> "已连接"
@@ -1631,7 +1631,6 @@ fun BleRemoteDialog(
                 }
             }
         }
-    }
 }
 
 @Composable

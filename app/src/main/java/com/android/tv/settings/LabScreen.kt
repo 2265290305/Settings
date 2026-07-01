@@ -144,9 +144,7 @@ private fun queryProviderValue(context: Context, uris: List<Uri>, key: String, d
     val callResult = uris.firstNotNullOfOrNull { uri ->
         runCatching {
             val candidates = listOf(
-                Bundle().apply { putString("key", key) },
                 Bundle().apply {
-                    putString("key", key)
                     putString(key, "")
                 },
                 Bundle()
@@ -180,7 +178,7 @@ private fun queryLegacySetting(context: Context, key: String, defaultValue: Stri
     val resolver = context.contentResolver
     return SETTINGS_URIS.firstNotNullOfOrNull { uri ->
         runCatching {
-            val extras = Bundle().apply { putString("key", key) }
+            val extras = Bundle().apply { putString(key, "") }
             val result = resolver.call(uri, METHOD_DEV_QUERY, null, extras)
             logUnauthorizedCallerIfNeeded(uri, METHOD_DEV_QUERY, key, extras, result)
             normalizeProviderValue(result?.getString("value"))

@@ -346,9 +346,11 @@ private fun isBundleSuccess(bundle: Bundle?): Boolean {
 private fun queryPersonalInfoValue(context: Context, key: String): String? {
     val resolver = context.contentResolver
     val uriCandidates = buildPersonalInfoUriCandidates(context)
+    // 昵称走 call(DEV_QUERY)：extra 名直接是字段名(nickname)，provider 以此为查询 key；
+    // query() cursor 取列仅作兜底。
     uriCandidates.forEach { uri ->
         val byCall = runCatching {
-            val extras = Bundle().apply { putString("key", key) }
+            val extras = Bundle().apply { putString(key, "") }
             val result = resolver.call(uri, METHOD_DEV_QUERY, null, extras)
             extractBundleString(result, key)
         }.getOrNull()
@@ -384,11 +386,13 @@ private fun queryPersonalInfoAvatarWithDebug(context: Context): String? {
         "headPortraitPath"
     )
 
+    // 头像走 call(DEV_QUERY)：ZshdProvider 把 extras 的“字段名”直接当查询 key，
+    // 所以 extra 名要直接是 avatarpath（而非 putString("key","avatarpath")，那样它会把 "key" 当字段名报错）。
     uriCandidates.forEach { uri ->
         avatarKeys.forEach { key ->
             val byCall = runCatching {
-                val extras = Bundle().apply { putString("key", key) }
-                Log.d(PROFILE_TAG, "avatar provider call uri=$uri method=$METHOD_DEV_QUERY extras={key=$key}")
+                val extras = Bundle().apply { putString(key, "") }
+                Log.d(PROFILE_TAG, "avatar provider call uri=$uri method=$METHOD_DEV_QUERY extras={$key}")
                 val result = resolver.call(uri, METHOD_DEV_QUERY, null, extras)
                 dumpBundleKeysForDebug("avatar provider call result key=$key", result)
                 extractBundleString(result, key)
@@ -407,6 +411,7 @@ private fun queryPersonalInfoAvatarWithDebug(context: Context): String? {
         }
     }
 
+    // 兜底：call 拿不到时再尝试 query() cursor 取列（兼容以 cursor 暴露数据的机型）。
     uriCandidates.forEach { uri ->
         val fromCursor = runCatching {
             resolver.query(uri, null, null, null, null)?.use { cursor ->
@@ -755,10 +760,8 @@ private fun queryProviderValueForSystemUiActivation(
     key: String,
 ): String? {
     return runCatching {
-        val extras = Bundle().apply {
-            putString("key", key)
-            putString(key, "")
-        }
+        // ZshdProvider 以 extras 的字段名作查询 key，故直接用字段名当 extra 名。
+        val extras = Bundle().apply { putString(key, "") }
         val result = context.contentResolver.call(uri, METHOD_DEV_QUERY, null, extras)
         normalizeSystemUiActivationProviderValue(result?.getString(key))
             ?: normalizeSystemUiActivationProviderValue(result?.getString("value"))

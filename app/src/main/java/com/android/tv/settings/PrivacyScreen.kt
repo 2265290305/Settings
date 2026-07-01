@@ -96,7 +96,6 @@ private fun queryPrivacyValue(context: Context, key: String, defaultValue: Strin
     return PRIVACY_MIC_CONTROL_URIS.firstNotNullOfOrNull { uri ->
         runCatching {
             val extras = Bundle().apply {
-                putString("key", key)
                 putString(key, "")
             }
             val result = resolver.call(uri, PRIVACY_METHOD_DEV_QUERY, null, extras)

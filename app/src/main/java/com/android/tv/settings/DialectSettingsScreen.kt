@@ -107,6 +107,8 @@ private val DIALECT_NAME_URIS: List<Uri> = contentUris("dialectName", includeDev
 private val DIALECT_WAKE_UP_SWITCH_URIS: List<Uri> = contentUris("dialectWakeUpSwitch", includeDeviceInfoFallback = true)
 private val DIALECT_WAKE_UP_MODE_URIS: List<Uri> = contentUris("dialectWakeUpMode", includeDeviceInfoFallback = true)
 private val DIALECT_WAKE_UP_DISPLAY_URIS: List<Uri> = contentUris("dialectWakeUpDisplay", includeDeviceInfoFallback = true)
+// 设备音色：provider 支持的查询 key 是 speakerId（实测 DEV_QUERY speakerId 返回 success=true）。
+private val SPEAKER_ID_URIS: List<Uri> = contentUris("speakerId", includeDeviceInfoFallback = true)
 
 private data class DialectOption(
     val label: String,
@@ -216,9 +218,7 @@ private fun queryProviderValue(context: Context, uris: List<Uri>, key: String, d
     val callResult = uris.firstNotNullOfOrNull { uri ->
         runCatching {
             val candidates = listOf(
-                Bundle().apply { putString("key", key) },
                 Bundle().apply {
-                    putString("key", key)
                     putString(key, "")
                 },
                 Bundle()
@@ -390,6 +390,15 @@ fun DialectSettingsScreen(modifier: Modifier = Modifier) {
     }
 
     LaunchedEffect(context, refreshVersion, remoteConfig) {
+        // 设备音色：从 provider 读回上次保存的 speakerId，映射到本地选项；无则保持默认首项。
+        val savedSpeakerId = normalizeProviderValue(
+            queryProviderValue(context, SPEAKER_ID_URIS, "speakerId", "")
+        )
+        if (savedSpeakerId != null) {
+            deviceToneOptions.firstOrNull { it.id == savedSpeakerId }?.let {
+                selectedDeviceToneId = it.id
+            }
+        }
         val cfg = remoteConfig
         if (cfg != null) {
             // 拉取成功：方言列表/描述/开关完全以接口返回值为准。
@@ -457,7 +466,20 @@ fun DialectSettingsScreen(modifier: Modifier = Modifier) {
                 onSelect = { pendingDeviceToneId = it },
                 onCancel = { showDeviceTonePage = false },
                 onConfirm = {
-                    selectedDeviceToneId = pendingDeviceToneId
+                    // 写入 provider（speakerId）持久化，否则退出页面后 rememberSaveable 丢失会变回默认。
+                    val ok = updateProviderValues(
+                        context,
+                        SPEAKER_ID_URIS,
+                        mapOf(
+                            "speakerId" to pendingDeviceToneId,
+                            "sourceType" to DIALECT_SOURCE_TYPE_USER
+                        )
+                    )
+                    if (ok) {
+                        selectedDeviceToneId = pendingDeviceToneId
+                    } else {
+                        Toast.makeText(context, "保存失败", Toast.LENGTH_SHORT).show()
+                    }
                     showDeviceTonePage = false
                 }
             )
