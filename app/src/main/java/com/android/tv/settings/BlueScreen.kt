@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -46,6 +47,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -994,6 +996,12 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                 Spacer(Modifier.weight(1f))
                 Switch(
                     modifier = Modifier.entryFocus(),
+                    colors = SwitchDefaults.colors(
+                        uncheckedTrackColor = colorResource(R.color.gray),
+                        uncheckedThumbColor = colorResource(R.color.white),
+                        checkedThumbColor = colorResource(R.color.white),
+                        checkedTrackColor = colorResource(R.color.theme_blue)
+                    ),
                     checked = isChecked,
                     onCheckedChange = { newCheckedState ->
                         isChecked = newCheckedState
@@ -1197,6 +1205,8 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                         hasDisplayableName(it)
             }
             .distinctBy { it.address }
+            // 默认将“电信蓝牙遥控”置顶为列表第一项，方便用户优先看到/连接目标遥控器。
+            .sortedByDescending { displayDeviceName(it).contains("电信蓝牙遥控") }
 
         // “已连接”只认真实连接状态：设备在 connectedAddresses（由 HID profile 复核维护）里，
         // 且当前 profile 确实连着。绝不用 GATT 的 bleConnectedDevice 判定（那会误报已连接）。
@@ -1546,7 +1556,15 @@ fun BleRemoteDialog(
                         }
 
                         else -> {
-                            Column() {
+                            // 卡片限定最大高度、内部单独滚动：设备变多时只在卡片内滑动，
+                            // 不会撑大外层 Column 把上方标题/说明/示意图挤出屏幕。
+                            val rowHeight = if (compact) 52.dp else 64.dp
+                            val maxVisibleRows = 4
+                            Column(
+                                modifier = Modifier
+                                    .heightIn(max = rowHeight * maxVisibleRows)
+                                    .verticalScroll(rememberScrollState())
+                            ) {
                                 devices.forEach { device ->
                                     val stateText = when (device.address) {
                                         connectedAddress -> "已连接"
