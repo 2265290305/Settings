@@ -84,7 +84,7 @@
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:screenOrientation="landscape"
-            android:theme="@style/Theme.设置">
+            android:theme="@style/Theme.设置.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

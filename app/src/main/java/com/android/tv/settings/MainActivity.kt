@@ -889,6 +889,9 @@ fun NavigationRailExample(
         onDispose { onDpadFocusRecoveryChanged(null) }
     }
 
+    // “再按一次返回键退出”的上次按键时间戳（elapsedRealtime，毫秒）。
+    var lastExitBackPressAt by remember { mutableStateOf(0L) }
+
     fun handleBackNavigation() {
         // 1) 仅当停留在 Wi-Fi 页(承载内嵌 NavHost)且其确有二级页时, 先在其内部回退。
         //    NavHost 只在 selectedDestination==1 时被组合; 不加此门控会在离开 Wi-Fi 页后
@@ -903,8 +906,15 @@ fun NavigationRailExample(
             focusSelectedNavItem()
             return
         }
-        // 3) 焦点已在菜单：返回 launcher。
-        context.launchSettingsExitTarget()
+        // 3) 焦点已在菜单：第一次按返回只提示，5 秒内再按一次才退出 app（回 launcher）。
+        //    窗口给 5 秒：TV 上用户读完 Toast 再按键反应较慢，2 秒窗口会频繁超时退不出去。
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - lastExitBackPressAt <= 5_000) {
+            context.launchSettingsExitTarget()
+        } else {
+            lastExitBackPressAt = now
+            Toast.makeText(context, "再按一次返回键退出设置", Toast.LENGTH_SHORT).show()
+        }
     }
 
     BackHandler(onBack = ::handleBackNavigation)
