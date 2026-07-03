@@ -42,29 +42,40 @@ object BluetoothRemoteAutoConnector {
             when (intent?.action) {
                 BluetoothDevice.ACTION_FOUND -> {
                     val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
-                    device?.let { maybeAutoHandle(it) }
+                    // 解绑后蓝牙栈里没有名字记录（device.name 为 null），只有广播里的
+                    // EXTRA_NAME 可用；不读它就认不出目标遥控器。
+                    val extraName = intent.getStringExtra(BluetoothDevice.EXTRA_NAME)
+                    device?.let { maybeAutoHandle(it, extraName) }
                 }
                 BluetoothDevice.ACTION_BOND_STATE_CHANGED -> {
                     val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
                     val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
-                    if (state == BluetoothDevice.BOND_BONDED && device != null && isTargetRemote(device)) {
+                    // 配对流程结束（成功或失败/解绑）就允许下次进配对模式时重新 createBond；
+                    // 进程常驻（persistent app），不清掉的话第二次配对永远不会自动发起。
+                    if (state == BluetoothDevice.BOND_BONDED || state == BluetoothDevice.BOND_NONE) {
+                        device?.let { autoPairTried.remove(it.address) }
+                    }
+                    if (state == BluetoothDevice.BOND_BONDED && device != null &&
+                        isTargetRemote(device) && !isIgnoredByUser(device.address)
+                    ) {
                         // 配对成功：多次重试连接，规避 HID 未就绪导致的首次连接不可用。
                         connectWithRetry(device)
                     }
                 }
                 BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
+                    // 被动连接模型（厂商 AutoBluetooth 同款：ACL_DISCONNECTED 只记录）：
+                    // 遥控器主动断开（退出配对模式/休眠/用户取消连接）一律不强制回连，
+                    // 否则会跟设置页“取消连接”打架，并对休眠遥控器造成假连接。
                     val device = intent.getParcelableExtra<BluetoothDevice>(BluetoothDevice.EXTRA_DEVICE)
-                    // 目标遥控器意外断开时再尝试回连。
-                    if (device != null && isTargetRemote(device) &&
-                        device.bondState == BluetoothDevice.BOND_BONDED
-                    ) {
-                        connectWithRetry(device, attempts = 2, delayMs = 2_000L)
+                    if (device != null && isTargetRemote(device)) {
+                        Log.d(TAG, "target remote acl disconnected, no auto reconnect address=${device.address}")
                     }
                 }
                 BluetoothAdapter.ACTION_STATE_CHANGED -> {
                     if (intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) == BluetoothAdapter.STATE_ON) {
-                        // 蓝牙打开后：回连已配对遥控器并重新扫描。
-                        reconnectBondedRemotes()
+                        // 蓝牙打开后只重新扫描（厂商 STATE_ON 同款）。不主动回连已绑定
+                        // 遥控器：对未在广播的休眠遥控器发起连接会产生“显示已连接但
+                        // 遥控器无反应”的假连接。已绑定遥控器由它自己按键回连。
                         startScan()
                     }
                 }
@@ -88,17 +99,80 @@ object BluetoothRemoteAutoConnector {
         }
         runCatching { ctx.registerReceiver(receiver, filter) }
 
-        // 开机/启动即生效：先回连已配对的目标遥控器，再扫描以便配对新遥控器。
+        // 开机/启动即生效：只扫描以便配对新遥控器（被动连接模型，不主动回连
+        // 已绑定遥控器——那会对休眠遥控器造成假连接）。
         if (adapter?.isEnabled == true) {
-            reconnectBondedRemotes()
             startScan()
         }
         Log.d(TAG, "auto connector started, bt enabled=${adapter?.isEnabled}")
     }
 
-    private fun isTargetRemote(device: BluetoothDevice): Boolean {
-        val name = runCatching { device.name }.getOrNull()?.trim().orEmpty()
+    private fun isTargetRemote(device: BluetoothDevice, extraName: String? = null): Boolean {
+        val name = runCatching { device.name }.getOrNull()?.trim()
+            ?.takeIf { it.isNotEmpty() }
+            ?: extraName?.trim().orEmpty()
         return name.contains(AUTO_CONNECT_REMOTE_NAME)
+    }
+
+    /** 设置页“忽略此设备”名单。忽略后遥控器会自广播约 2 分钟（removeBond 副作用），
+     * 无法与用户按键区分，因此本类对被忽略地址一律不自动配对/连接；解除忽略只由
+     * 设置页（带自广播抑制窗口）或用户手动点击完成。 */
+    private fun isIgnoredByUser(address: String): Boolean {
+        val prefs = appContext?.getSharedPreferences(
+            "ignored_bluetooth_devices", Context.MODE_PRIVATE
+        ) ?: return false
+        return prefs.getStringSet("ignored_addresses", emptySet()).orEmpty().contains(address)
+    }
+
+    /**
+     * 用户在设置页“取消连接”留下的黑名单（与 BlueToothScreen 共用同一 prefs）。
+     * “取消连接”不解绑，遥控器不会自广播——广播被扫到必是用户按两键进配对模式，
+     * 视为明确重连意图：清黑名单并恢复 connection policy——否则协议栈会拒绝
+     * HID connect，设置页的 ACL_CONNECTED 守卫也会把刚连上的遥控器再踢掉。
+     */
+    private fun clearUserBlockForRepairing(device: BluetoothDevice) {
+        val prefs = appContext?.getSharedPreferences(
+            "ignored_bluetooth_devices", Context.MODE_PRIVATE
+        ) ?: return
+        val address = device.address
+        val blocked = prefs.getStringSet("disconnected_addresses", emptySet()).orEmpty()
+        if (address !in blocked) return
+        prefs.edit()
+            .putStringSet("disconnected_addresses", (blocked - address).toSet())
+            .apply()
+        allowConnectionPolicy(device)
+        Log.d(TAG, "advertising remote was user-blocked, clear block address=$address")
+    }
+
+    /** 恢复 HID/A2DP/HEADSET 的 connection policy（“取消连接”时被设为 FORBIDDEN）。 */
+    private fun allowConnectionPolicy(device: BluetoothDevice) {
+        val a = adapter ?: return
+        intArrayOf(4, BluetoothProfile.A2DP, BluetoothProfile.HEADSET).forEach { profileId ->
+            runCatching {
+                a.getProfileProxy(appContext, object : BluetoothProfile.ServiceListener {
+                    override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
+                        runCatching {
+                            val m = proxy.javaClass.getMethod(
+                                "setConnectionPolicy", BluetoothDevice::class.java, Int::class.java
+                            )
+                            m.isAccessible = true
+                            m.invoke(proxy, device, 100) // CONNECTION_POLICY_ALLOWED
+                        }.recoverCatching {
+                            val m = proxy.javaClass.getMethod(
+                                "setPriority", BluetoothDevice::class.java, Int::class.java
+                            )
+                            m.isAccessible = true
+                            m.invoke(proxy, device, 100) // PRIORITY_ON
+                        }
+                        mainHandler.postDelayed(
+                            { runCatching { a.closeProfileProxy(profile, proxy) } }, 1_000L
+                        )
+                    }
+
+                    override fun onServiceDisconnected(profile: Int) {}
+                }, profileId)
+            }
+        }
     }
 
     private fun startScan() {
@@ -111,15 +185,13 @@ object BluetoothRemoteAutoConnector {
         mainHandler.postDelayed({ runCatching { adapter?.cancelDiscovery() } }, 12_000L)
     }
 
-    private fun reconnectBondedRemotes() {
-        val a = adapter ?: return
-        runCatching { a.bondedDevices }.getOrNull()
-            ?.filter { isTargetRemote(it) }
-            ?.forEach { connectWithRetry(it, attempts = 2, delayMs = 1_500L) }
-    }
-
-    private fun maybeAutoHandle(device: BluetoothDevice) {
-        if (!isTargetRemote(device)) return
+    private fun maybeAutoHandle(device: BluetoothDevice, extraName: String? = null) {
+        if (!isTargetRemote(device, extraName)) return
+        // 被忽略的设备不自动处理：忽略后遥控器的自广播和用户按键无法区分。
+        if (isIgnoredByUser(device.address)) return
+        // ACTION_FOUND = 遥控器正在广播 = 已进入配对模式（HOGP 遥控器只有配对模式才广播）。
+        // 这是唯一允许 TV 端主动配对/连接的时机（被动连接模型）。
+        clearUserBlockForRepairing(device)
         when (device.bondState) {
             BluetoothDevice.BOND_BONDED -> connectWithRetry(device, attempts = 2, delayMs = 1_500L)
             BluetoothDevice.BOND_NONE -> {

@@ -27,6 +27,7 @@ android {
     }
 
     defaultConfig {
+        //applicationId = "com.oplus.engineernetwork"
         applicationId = "com.android.speaker.settings"
         minSdk = 24
         targetSdk = 34

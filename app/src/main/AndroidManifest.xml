@@ -65,7 +65,7 @@
     </queries>
 
     <application
-        android:persistent="true"
+
         android:name=".TvSettingsApplication"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

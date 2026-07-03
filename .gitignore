@@ -1,4 +1,5 @@
 *.iml
+/.compose-skill/
 **/build/
 .gradle
 /local.properties
