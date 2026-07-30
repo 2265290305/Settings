@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "tasks": [
+    {
+      "branch_name": "main",
+      "worktree_path": "/home/shanzi/文档/Settings",
+      "status": "active",
+      "created_at": "2026-05-22T05:01:36.940Z",
+      "updated_at": "2026-05-22T05:01:36.940Z"
+    }
+  ]
+}

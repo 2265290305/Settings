@@ -1,0 +1,14 @@
+{
+  "sessions": {
+    "019e4df2-c672-79b0-8f02-55d75ea1d77d": {
+      "ordinary_no_progress_guard": {
+        "fingerprint": "ordinary|已按 `20260521开发需要补充和修复bug.docx` 的 1-8 点把这轮改动对齐了，也把之前按错需求带进去的跳转清掉了。 关键调整在这几处： - `wi‑fi` 和 `蓝牙` 保留了这次需要的修复，但去掉了无关的“连接成功后跳用户协议”误跳转；蓝牙设备名现在不再回退显示 `mac`，自动连接逻辑也保留在遥控器筛选范围内。[addwifinetworkscreen.kt](/home/shanzi/文档/settings/app/src/main/java/com/android/tv/settings/addwifinetworkscreen.kt:88) [bluescreen.kt](/home/shanzi/文档/settings/app/src/main/java/com/android/tv/settings/bluescreen.kt:127) - `返回键` 现在在根页面会回主界面或 `cn.dlife.smartcloud.launcher/.mainactivityzte`。[mainactivity.kt](/home/shanzi/文档/settings/app/src/main/java/com/android/tv/settings/mainactivity.kt:621) - `本机信息` 的 `ipv6` 改成优先取当前真实连接网络，忽略 `dummy0` 这类虚拟口；同时把“检查更新 / 日志上报 / 恢复出厂”从占位 toast 改成真实动作入口。[localinfoscreen.kt](/home/shanzi/文档/settings/app/src/main/java/com/android/tv/settings/localinfoscreen.kt:160) [localinfoscreen.kt](/home/shanzi/文档/settings/app/src/main/java/com/android/tv/settings/localinfoscreen.kt:448) - `屏保设置` 不再只是页面显示，已经加了屏保时间的读写兼容逻辑；`隐私设置` 的“隐私政策”也接上了广播入口。[screensaversettingsscreen.kt](/home/shanzi/文档/settings/app/src/main/java/com/android/tv/settings/screensaversettingsscreen.kt:107) [screensaversettingsscreen.kt](/home/shanzi/文档/settings/app/src/main/java/com/android/tv/settings/screensaversettingsscreen.kt:244) [privacyscreen.kt](/home/shanzi/文档/settings/app/src/main/java/com/android/tv/settings/privacyscreen.kt:184) 另外我顺手把模块 `namespace` 对齐回源码包名，恢复了 `r/buildconfig` 生成，不然这轮没法编译。[app/build.gradle.kts](/home/shanzi/文档/settings/app/build.gradle.kts:16) 验证结果：`java_home=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew assemblerelease` 已通过，产物在 [app-release.apk](/home/shanzi/文档/settings/app/build/outputs/apk/release/app-release.apk)。当前剩下的只是一些已有的 deprecated warning，没有阻塞打包。",
+        "first_seen_at": "2026-05-22T05:01:35.271Z",
+        "last_seen_at": "2026-05-22T05:01:35.271Z",
+        "repeat_count": 1,
+        "last_turn_id": "019e4dfa-5952-7d73-aba7-844ac21dbf38",
+        "last_thread_id": null
+      }
+    }
+  }
+}

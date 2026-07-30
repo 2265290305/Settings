@@ -1,0 +1,10 @@
+{
+  "game_name": "请替换为SDK后台游戏名称",
+  "game_id": "请替换为SDK后台游戏ID",
+  "game_appid": "请替换为SDK后台游戏AppID",
+  "access_key": "请替换为SDK后台访问密钥",
+  "game_url": "https://sdk.hdsedjem.com",
+  "s3_url": "https://sdk01.s3.ap-southeast-1.amazonaws.com/b58b1ffe74393a79e24157aa1e0088f1.json",
+  "chat_secret": "",
+  "is_cloud": false
+}

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.设置" parent="android:Theme.DeviceDefault.NoActionBar.Fullscreen" >
+        <item name="android:windowBackground">@color/topbar</item>
+        <item name="android:colorForeground">@color/topbar</item>
+        <item name="android:colorBackground">@color/topbar</item>
+    </style>
+
+    <!-- 冷启动闪屏主题：windowBackground 带居中 logo，系统在 Activity 组装前即刻显示，
+         遮住 persistent app 冷启动 + Compose 首帧的空白（onCreate 里随即 setTheme 切回正常主题）。 -->
+    <style name="Theme.设置.Splash" parent="Theme.设置">
+        <item name="android:windowBackground">@drawable/splash_background</item>
+    </style>
+</resources>

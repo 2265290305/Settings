@@ -1,0 +1,122 @@
+07-03 17:13:12.383   234   304 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0
+07-03 17:14:12.385   234   304 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0
+07-03 17:15:12.386   234   304 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0
+07-03 17:16:12.387   234   304 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0
+07-03 17:17:12.392   234   304 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0
+07-03 17:18:12.398   234   304 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0
+07-03 17:18:30.660   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_EXIT, actionButton=0, id[0]=0, x[0]=108.0, y[0]=705.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=746988, downTime=417889, deviceId=0, source=0x2002 }
+07-03 17:18:30.661   366   382 D SystemGestures: pointer 0 down pointerIndex=0 trackingIndex=0
+07-03 17:18:30.661   366   382 D SystemGestures: pointer 0 down x=108.0 y=705.0
+07-03 17:18:30.662   366   382 D StatusBarManagerService: handleSystemGestures gesture=5 mBar=true
+07-03 17:18:30.882   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_ENTER, actionButton=0, id[0]=0, x[0]=108.0, y[0]=703.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=747210, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.359   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1148.0, y[0]=790.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=747683, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.419   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1152.0, y[0]=779.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=747746, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.428   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1162.0, y[0]=745.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=747756, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.455   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1181.0, y[0]=707.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=747778, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.469   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1194.0, y[0]=690.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=747797, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.528   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1210.0, y[0]=676.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=747856, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.753   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1222.0, y[0]=694.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748081, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.771   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748099, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.777   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748105, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.785   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748113, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.801   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748129, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.818   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748146, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.823   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748150, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:31.825   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748154, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:32.050   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748378, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:32.074   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748401, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:32.097   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748425, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:32.125   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_SCROLL, actionButton=0, id[0]=0, x[0]=1223.0, y[0]=696.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=748453, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:32.769   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_EXIT, actionButton=0, id[0]=0, x[0]=1680.0, y[0]=671.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=749098, downTime=746986, deviceId=0, source=0x2002 }
+07-03 17:18:32.770   366   382 D SystemGestures: pointer 0 down pointerIndex=0 trackingIndex=0
+07-03 17:18:32.770   366   382 D SystemGestures: pointer 0 down x=1680.0 y=671.0
+07-03 17:18:32.771   366   382 D StatusBarManagerService: handleSystemGestures gesture=5 mBar=true
+07-03 17:18:32.865   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_ENTER, actionButton=0, id[0]=0, x[0]=1682.0, y[0]=672.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=749193, downTime=749097, deviceId=0, source=0x2002 }
+07-03 17:18:33.002   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_EXIT, actionButton=0, id[0]=0, x[0]=1807.0, y[0]=672.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=749330, downTime=749097, deviceId=0, source=0x2002 }
+07-03 17:18:33.002   366   382 D SystemGestures: pointer 0 down pointerIndex=0 trackingIndex=0
+07-03 17:18:33.002   366   382 D SystemGestures: pointer 0 down x=1807.0 y=672.0
+07-03 17:18:33.002   366   382 D StatusBarManagerService: handleSystemGestures gesture=5 mBar=true
+07-03 17:18:33.179   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_ENTER, actionButton=0, id[0]=0, x[0]=1808.0, y[0]=673.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=749506, downTime=749329, deviceId=0, source=0x2002 }
+07-03 17:18:33.442   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_EXIT, actionButton=0, id[0]=0, x[0]=1785.0, y[0]=671.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=749771, downTime=749329, deviceId=0, source=0x2002 }
+07-03 17:18:33.443   366   382 D SystemGestures: pointer 0 down pointerIndex=0 trackingIndex=0
+07-03 17:18:33.443   366   382 D SystemGestures: pointer 0 down x=1785.0 y=671.0
+07-03 17:18:33.443   366   382 D StatusBarManagerService: handleSystemGestures gesture=5 mBar=true
+07-03 17:18:34.225   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_ENTER, actionButton=0, id[0]=0, x[0]=1784.0, y[0]=671.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=750553, downTime=749770, deviceId=0, source=0x2002 }
+07-03 17:18:35.590   366  2029 W NotificationService: Toast already killed. pkg=com.android.speaker.settings callback=android.app.ITransientNotification$Stub$Proxy@ca92bd9
+07-03 17:18:37.082   366   389 W WindowManager: Unable to start animation, surface is null or no children.
+07-03 17:18:46.588   366   366 W WindowManager: removeWindowToken: Attempted to remove non-existing token: android.os.Binder@b2357ab
+07-03 17:18:58.330   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_EXIT, actionButton=0, id[0]=0, x[0]=166.0, y[0]=335.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=774659, downTime=749770, deviceId=0, source=0x2002 }
+07-03 17:18:58.332   366   382 D SystemGestures: pointer 0 down pointerIndex=0 trackingIndex=0
+07-03 17:18:58.332   366   382 D SystemGestures: pointer 0 down x=166.0 y=335.0
+07-03 17:18:58.332   366   382 D StatusBarManagerService: handleSystemGestures gesture=5 mBar=true
+07-03 17:18:58.494   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_ENTER, actionButton=0, id[0]=0, x[0]=165.0, y[0]=334.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=774821, downTime=774658, deviceId=0, source=0x2002 }
+07-03 17:18:58.858   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_EXIT, actionButton=0, id[0]=0, x[0]=165.0, y[0]=387.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=775186, downTime=774658, deviceId=0, source=0x2002 }
+07-03 17:18:58.858   366   382 D SystemGestures: pointer 0 down pointerIndex=0 trackingIndex=0
+07-03 17:18:58.858   366   382 D SystemGestures: pointer 0 down x=165.0 y=387.0
+07-03 17:18:58.858   366   382 D StatusBarManagerService: handleSystemGestures gesture=5 mBar=true
+07-03 17:18:59.020   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_ENTER, actionButton=0, id[0]=0, x[0]=166.0, y[0]=385.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=775348, downTime=775186, deviceId=0, source=0x2002 }
+07-03 17:18:59.410   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_EXIT, actionButton=0, id[0]=0, x[0]=176.0, y[0]=152.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=775739, downTime=775186, deviceId=0, source=0x2002 }
+07-03 17:18:59.410   366   382 D SystemGestures: pointer 0 down pointerIndex=0 trackingIndex=0
+07-03 17:18:59.410   366   382 D SystemGestures: pointer 0 down x=176.0 y=152.0
+07-03 17:18:59.410   366   382 D StatusBarManagerService: handleSystemGestures gesture=5 mBar=true
+07-03 17:18:59.660   366   853 D ConnectivityService: listenForNetwork for uid/pid:1000/3723 NetworkRequest [ LISTEN id=58, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted:  Uid: 1000] ]
+07-03 17:18:59.662   366   443 D ConnectivityService: rematching NetworkAgentInfo [WIFI () - 100]
+07-03 17:18:59.662   366   443 D ConnectivityService:  network has: [ Transports: WIFI Capabilities: NOT_METERED&INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED Unwanted:  LinkUpBandwidth>=1048576Kbps LinkDnBandwidth>=1048576Kbps SignalStrength: -19 SSID: "TP-LINK_DC00"]
+07-03 17:18:59.662   366   443 D ConnectivityService: Network NetworkAgentInfo [WIFI () - 100] was already satisfying request 43. No change.
+07-03 17:18:59.662   366   443 D ConnectivityService:   checking if request is satisfied: NetworkRequest [ BACKGROUND_REQUEST id=2, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted: ] ]
+07-03 17:18:59.662   366   443 D ConnectivityService: Network NetworkAgentInfo [WIFI () - 100] was already satisfying request 7. No change.
+07-03 17:18:59.662   366   443 D ConnectivityService: Network NetworkAgentInfo [WIFI () - 100] was already satisfying request 3. No change.
+07-03 17:18:59.662   366   443 D ConnectivityService: Network NetworkAgentInfo [WIFI () - 100] was already satisfying request 6. No change.
+07-03 17:18:59.663   366   443 D ConnectivityService: Network NetworkAgentInfo [WIFI () - 100] was already satisfying request 1. No change.
+07-03 17:18:59.663   366   443 D ConnectivityService: sending notification CALLBACK_AVAILABLE for NetworkRequest [ LISTEN id=58, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted:  Uid: 1000] ]
+07-03 17:18:59.663   366   443 D ConnectivityService: old network: [type: WIFI[], state: CONNECTED/CONNECTED, reason: (unspecified), extra: (none), failover: false, available: true, roaming: false], networkInfo: [type: WIFI[], state: CONNECTED/CONNECTED, reason: (unspecified), extra: (none), failover: false, available: true, roaming: false]
+07-03 17:18:59.707   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_ENTER, actionButton=0, id[0]=0, x[0]=177.0, y[0]=149.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=776035, downTime=775738, deviceId=0, source=0x2002 }
+07-03 17:19:02.554   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_EXIT, actionButton=0, id[0]=0, x[0]=228.0, y[0]=236.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=778882, downTime=775738, deviceId=0, source=0x2002 }
+07-03 17:19:02.554   366   382 D SystemGestures: pointer 0 down pointerIndex=0 trackingIndex=0
+07-03 17:19:02.554   366   382 D SystemGestures: pointer 0 down x=228.0 y=236.0
+07-03 17:19:02.554   366   382 D StatusBarManagerService: handleSystemGestures gesture=5 mBar=true
+07-03 17:19:02.675   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_ENTER, actionButton=0, id[0]=0, x[0]=228.0, y[0]=237.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=779002, downTime=778882, deviceId=0, source=0x2002 }
+07-03 17:19:02.872   366   853 D ConnectivityService: listenForNetwork for uid/pid:1000/3723 NetworkRequest [ LISTEN id=59, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted:  Uid: 1000] ]
+07-03 17:19:02.873   366   443 D ConnectivityService: rematching NetworkAgentInfo [WIFI () - 100]
+07-03 17:19:02.873   366   443 D ConnectivityService:  network has: [ Transports: WIFI Capabilities: NOT_METERED&INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED Unwanted:  LinkUpBandwidth>=1048576Kbps LinkDnBandwidth>=1048576Kbps SignalStrength: -19 SSID: "TP-LINK_DC00"]
+07-03 17:19:02.873   366   443 D ConnectivityService: Network NetworkAgentInfo [WIFI () - 100] was already satisfying request 43. No change.
+07-03 17:19:02.873   366   443 D ConnectivityService:   checking if request is satisfied: NetworkRequest [ BACKGROUND_REQUEST id=2, [ Transports: CELLULAR Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted: ] ]
+07-03 17:19:02.873   366   443 D ConnectivityService: Network NetworkAgentInfo [WIFI () - 100] was already satisfying request 7. No change.
+07-03 17:19:02.873   366   443 D ConnectivityService: Network NetworkAgentInfo [WIFI () - 100] was already satisfying request 3. No change.
+07-03 17:19:02.873   366   443 D ConnectivityService: Network NetworkAgentInfo [WIFI () - 100] was already satisfying request 6. No change.
+07-03 17:19:02.873   366   443 D ConnectivityService: Network NetworkAgentInfo [WIFI () - 100] was already satisfying request 1. No change.
+07-03 17:19:02.874   366   443 D ConnectivityService: sending notification CALLBACK_AVAILABLE for NetworkRequest [ LISTEN id=59, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted:  Uid: 1000] ]
+07-03 17:19:02.874   366   443 D ConnectivityService: old network: [type: WIFI[], state: CONNECTED/CONNECTED, reason: (unspecified), extra: (none), failover: false, available: true, roaming: false], networkInfo: [type: WIFI[], state: CONNECTED/CONNECTED, reason: (unspecified), extra: (none), failover: false, available: true, roaming: false]
+07-03 17:19:02.883   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_EXIT, actionButton=0, id[0]=0, x[0]=157.0, y[0]=320.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=779212, downTime=778882, deviceId=0, source=0x2002 }
+07-03 17:19:02.883   366   382 D SystemGestures: pointer 0 down pointerIndex=0 trackingIndex=0
+07-03 17:19:02.884   366   382 D SystemGestures: pointer 0 down x=157.0 y=320.0
+07-03 17:19:02.884   366   382 D StatusBarManagerService: handleSystemGestures gesture=5 mBar=true
+07-03 17:19:03.186   366   382 D SystemGestures: Ignoring MotionEvent { action=ACTION_HOVER_ENTER, actionButton=0, id[0]=0, x[0]=156.0, y[0]=322.0, toolType[0]=TOOL_TYPE_MOUSE, buttonState=0, metaState=0, flags=0x0, edgeFlags=0x0, pointerCount=1, historySize=0, eventTime=779514, downTime=779210, deviceId=0, source=0x2002 }
+07-03 17:19:03.357   366   443 D ConnectivityService: releasing NetworkRequest [ LISTEN id=59, [ Transports: WIFI Capabilities: NOT_RESTRICTED&TRUSTED&NOT_VPN Unwanted:  Uid: 1000] ] (release request)
+07-03 17:19:12.400   234   304 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0
+07-03 17:19:43.355  3504  4925 W PackageParser: Unknown element under <manifest>: queries at /storage/emulated/0/Android/data/cn.dlife.smartcloud.launcher/files/com.jxw.xwktobd.apk Binary XML file line #23
+07-03 17:20:12.407   234   304 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0
+07-03 17:20:19.045   366   394 W PackageParser: Unknown element under <manifest>: queries at /data/app/vmdl2133708717.tmp/base.apk Binary XML file line #23
+07-03 17:20:19.213   366   394 I PackageManager: apk sign md5 is [c80959aa1b1839b7dc389c9ec902f807]
+07-03 17:20:19.219   366   394 I PackageManager: com.jxw.xwktobd sign md5 is [c80959aa1b1839b7dc389c9ec902f807]
+07-03 17:20:19.220   366   394 I PackageManager: com.jxw.xwktobd sign md5 is [c80959aa1b1839b7dc389c9ec902f807]
+07-03 17:20:19.225   366   394 I PackageManager: Un-granting permission android.permission.DELETE_PACKAGES from package cn.dlife.smartcloud.launcher (protectionLevel=18 flags=0x28d83e45)
+07-03 17:20:19.225   366   394 I PackageManager: Un-granting permission android.permission.INSTALL_PACKAGES from package cn.dlife.smartcloud.launcher (protectionLevel=18 flags=0x28d83e45)
+07-03 17:20:19.226   366   394 I PackageManager: Un-granting permission android.permission.RECOVERY from package cn.dlife.smartcloud.launcher (protectionLevel=18 flags=0x28d83e45)
+07-03 17:20:19.226   366   394 I PackageManager: Un-granting permission android.permission.BROADCAST_PACKAGE_REMOVED from package cn.dlife.smartcloud.launcher (protectionLevel=2 flags=0x28d83e45)
+07-03 17:20:19.226   366   394 I PackageManager: Un-granting permission android.permission.WRITE_MEDIA_STORAGE from package cn.dlife.smartcloud.launcher (protectionLevel=18 flags=0x28d83e45)
+07-03 17:20:19.227   366   394 I PackageManager: Un-granting permission android.permission.READ_PRIVILEGED_PHONE_STATE from package com.skyworth.angel.voice (protectionLevel=18 flags=0x38183e44)
+07-03 17:20:19.227   366   394 I PackageManager: Un-granting permission android.permission.MEDIA_CONTENT_CONTROL from package com.skyworth.angel.voice (protectionLevel=18 flags=0x38183e44)
+07-03 17:20:19.231   366   394 I PackageManager: Un-granting permission android.permission.BIND_ACCESSIBILITY_SERVICE from package com.tatv.android.TMC (protectionLevel=2 flags=0x28c83e45)
+07-03 17:20:19.232   366   394 I PackageManager: Un-granting permission android.permission.INTERACT_ACROSS_USERS_FULL from package com.tatv.android.TMC (protectionLevel=258 flags=0x28c83e45)
+07-03 17:20:19.232   366   394 I PackageManager: Un-granting permission android.permission.REQUEST_INSTALL_PACKAGES from package com.tatv.android.TMC (protectionLevel=66 flags=0x28c83e45)
+07-03 17:20:19.235   366   394 I PackageManager: Un-granting permission android.permission.INJECT_EVENTS from package ctc.android.smart.terminal.skill (protectionLevel=2 flags=0x38c83a45)
+07-03 17:20:19.235   366   394 I PackageManager: Un-granting permission android.permission.INTERACT_ACROSS_USERS_FULL from package ctc.android.smart.terminal.skill (protectionLevel=258 flags=0x38c83a45)
+07-03 17:20:20.027   366   394 D PackageManager: Instant App installer not found with android.intent.action.INSTALL_INSTANT_APP_PACKAGE
+07-03 17:20:20.027   366   394 D PackageManager: Clear ephemeral installer activity
+07-03 17:20:20.238   366   380 D AutofillManagerServiceImpl: Reset component for user 0 ()
+07-03 17:20:20.238   366   380 D AutofillManagerServiceImpl: Reset component for user 0 ()
+07-03 17:20:20.238   366   380 D FieldClassificationStrategy: reset(): service is not bound. Do nothing.
+07-03 17:20:20.238   366   382 D AutofillUI: destroySaveUiUiThread(): already destroyed
+07-03 17:20:20.241   366   380 W VoiceInteractionManagerService: no available voice recognition services found for user 0
+07-03 17:21:12.409   234   304 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0

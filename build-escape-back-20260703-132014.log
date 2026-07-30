@@ -1,0 +1,60 @@
+Starting a Gradle Daemon, 1 incompatible Daemon could not be reused, use --status for details
+> Task :app:preBuild UP-TO-DATE
+> Task :app:preDebugBuild UP-TO-DATE
+> Task :app:mergeDebugNativeDebugMetadata NO-SOURCE
+> Task :app:compileDebugAidl UP-TO-DATE
+> Task :app:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :app:generateDebugBuildConfig UP-TO-DATE
+> Task :app:checkDebugAarMetadata UP-TO-DATE
+> Task :app:processDebugNavigationResources UP-TO-DATE
+> Task :app:compileDebugNavigationResources UP-TO-DATE
+> Task :app:generateDebugResValues UP-TO-DATE
+> Task :app:mapDebugSourceSetPaths UP-TO-DATE
+> Task :app:generateDebugResources UP-TO-DATE
+> Task :app:mergeDebugResources UP-TO-DATE
+> Task :app:packageDebugResources UP-TO-DATE
+> Task :app:parseDebugLocalResources UP-TO-DATE
+> Task :app:createDebugCompatibleScreenManifests UP-TO-DATE
+> Task :app:extractDeepLinksDebug UP-TO-DATE
+> Task :app:processDebugMainManifest UP-TO-DATE
+> Task :app:processDebugManifest UP-TO-DATE
+> Task :app:processDebugManifestForPackage UP-TO-DATE
+> Task :app:javaPreCompileDebug UP-TO-DATE
+> Task :app:mergeDebugShaders UP-TO-DATE
+> Task :app:compileDebugShaders NO-SOURCE
+> Task :app:generateDebugAssets UP-TO-DATE
+> Task :app:mergeDebugAssets UP-TO-DATE
+> Task :app:compressDebugAssets UP-TO-DATE
+> Task :app:desugarDebugFileDependencies UP-TO-DATE
+> Task :app:checkDebugDuplicateClasses UP-TO-DATE
+> Task :app:mergeExtDexDebug UP-TO-DATE
+> Task :app:mergeLibDexDebug UP-TO-DATE
+> Task :app:mergeDebugJniLibFolders UP-TO-DATE
+> Task :app:mergeDebugNativeLibs UP-TO-DATE
+> Task :app:stripDebugDebugSymbols UP-TO-DATE
+> Task :app:validateSigningDebug UP-TO-DATE
+> Task :app:writeDebugAppMetadata UP-TO-DATE
+> Task :app:writeDebugSigningConfigVersions UP-TO-DATE
+> Task :app:processDebugResources
+
+> Task :app:compileDebugKotlin
+e: The daemon has terminated unexpectedly on startup attempt #1 with error code: 0. The daemon process output:
+    1. Kotlin compile daemon is ready
+w: file:///home/shanzi/%E6%96%87%E6%A1%A3/Settings/app/src/main/java/com/android/tv/settings/MainActivity.kt:318:58 'fun get(p0: String!): Any?' is deprecated. Deprecated in Java.
+w: file:///home/shanzi/%E6%96%87%E6%A1%A3/Settings/app/src/main/java/com/android/tv/settings/MainActivity.kt:471:20 'fun get(p0: String!): Any?' is deprecated. Deprecated in Java.
+w: file:///home/shanzi/%E6%96%87%E6%A1%A3/Settings/app/src/main/java/com/android/tv/settings/MainActivity.kt:478:24 'fun get(p0: String!): Any?' is deprecated. Deprecated in Java.
+w: file:///home/shanzi/%E6%96%87%E6%A1%A3/Settings/app/src/main/java/com/android/tv/settings/MainActivity.kt:952:48 'fun centerAlignedTopAppBarColors(containerColor: Color = ..., scrolledContainerColor: Color = ..., navigationIconContentColor: Color = ..., titleContentColor: Color = ..., actionIconContentColor: Color = ...): TopAppBarColors' is deprecated. Use topAppBarColors instead.
+w: file:///home/shanzi/%E6%96%87%E6%A1%A3/Settings/app/src/main/java/com/android/tv/settings/MainActivity.kt:1247:16 'fun get(p0: String!): Any?' is deprecated. Deprecated in Java.
+
+> Task :app:compileDebugJavaWithJavac UP-TO-DATE
+> Task :app:dexBuilderDebug
+> Task :app:mergeDebugGlobalSynthetics UP-TO-DATE
+> Task :app:processDebugJavaRes UP-TO-DATE
+> Task :app:mergeDebugJavaResource UP-TO-DATE
+> Task :app:mergeProjectDexDebug
+> Task :app:packageDebug
+> Task :app:createDebugApkListingFileRedirect UP-TO-DATE
+> Task :app:assembleDebug
+
+BUILD SUCCESSFUL in 23s
+40 actionable tasks: 5 executed, 35 up-to-date

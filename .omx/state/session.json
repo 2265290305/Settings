@@ -1,0 +1,10 @@
+{
+  "session_id": "019e4df2-c672-79b0-8f02-55d75ea1d77d",
+  "native_session_id": "019e4df2-c672-79b0-8f02-55d75ea1d77d",
+  "started_at": "2026-05-22T04:38:33.287Z",
+  "cwd": "/home/shanzi/文档/Settings",
+  "pid": 339320,
+  "platform": "linux",
+  "pid_start_ticks": 6726127,
+  "pid_cmdline": "codex resume"
+}

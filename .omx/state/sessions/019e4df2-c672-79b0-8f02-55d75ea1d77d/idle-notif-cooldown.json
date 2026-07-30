@@ -1,0 +1,4 @@
+{
+  "lastSentAt": "2026-05-22T05:01:36.933Z",
+  "fingerprint": "{\"phase\":\"idle\",\"summary\":\"验证结果：`JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64 ./gradlew assembleRelease` 已通过，产物在 [app-release.apk](/home/shanzi/文档/Settings/app/build/outputs/apk/release/app-release.apk)。当前剩下的只是一些已有的 deprecated warning，没有阻塞打包。\"}"
+}

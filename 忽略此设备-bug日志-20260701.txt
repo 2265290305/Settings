@@ -1,0 +1,237 @@
+================================================================
+「忽略此设备」死循环 Bug 日志与分析
+设备: SSA012Pro (E8101299007065900000)  遥控器: 28:D4:1E:78:7A:20 电信蓝牙遥控
+抓取时间: 2026-07-01 21:13
+================================================================
+
+【结论】忽略后设备被立刻重新配对回来，两个元凶：
+  A) 我们 app(pid 2005): forgetDevice 后重启扫描 → 扫到遥控器 → 误触发
+     connectDevice(clearIgnored=true) → clear ignored + createBond 配回来
+  B) 系统厂商进程 BtRemoteAutoConnect(pid 512): 强制自动配对/连接电信遥控（ROM 层，app 控不了）
+
+【已修】A：forgetDevice 不再重启扫描 + 清 pendingBleConnectAddress + BOND_BONDED 分支对已忽略设备不重连
+【未解】B：需 ROM 侧禁用 BtRemoteAutoConnect 或赌 connectionPolicy=FORBIDDEN 被尊重
+
+================== 原始关键日志 ==================
+
+07-01 21:13:29.886  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:30.952  2005  2005 I BlueScreen: ignore bluetooth device address=28:D4:1E:78:7A:20
+07-01 21:13:30.956  2005  2005 I BluetoothDevice: removeBond() for device 28:D4:1E:78:7A:20 called by pid: 2005 tid: 2005
+07-01 21:13:30.958  4181  4210 D bt_btif_config: btif_get_device_type: Device [28:d4:1e:78:7a:20] type 2
+07-01 21:13:30.959  4181  4203 E bt_btif : btif_hh_virtual_unplug: Error, device 28:d4:1e:78:7a:20 not opened, status = 5
+07-01 21:13:30.994   150   398 E BufferQueueProducer: [com.android.speaker.settings/com.android.tv.settings.MainActivity#1] disconnect: not connected (req=1)
+07-01 21:13:30.994  2005  2420 W libEGL  : EGLNativeWindowType 0xd3afb808 disconnect failed
+07-01 21:13:32.660  4181  4234 I bt_btm_sec: btm_sec_disconnected clearing pending flag handle:16 reason:22
+07-01 21:13:32.661  4181  4234 E bt_stack: [ERROR:bta_gattc_api.cc(722)] BTA_GATTC_DeregisterForNotifications registration not found bd_addr=28:d4:1e:78:7a:20
+07-01 21:13:32.664   945  2460 D BluetoothGatt: onClientConnectionState() - status=22 clientIf=7 device=28:D4:1E:78:7A:20
+07-01 21:13:32.664  4181  4203 I btif_av : btif_av_acl_disconnected: Peer 28:d4:1e:78:7a:20 : ACL Disconnected
+07-01 21:13:32.667  4181  4203 I btif_av : btif_av_acl_disconnected: Peer 28:d4:1e:78:7a:20 : pay more attention to this case ,role is unkown,take it as source
+07-01 21:13:32.668  4181  4234 I btif_av : BtifAvPeer *BtifAvSource::FindOrCreatePeer(const RawAddress &, tBTA_AV_HNDL): Create peer: peer_address=28:d4:1e:78:7a:20 bta_handle=0x0 peer_id=0
+07-01 21:13:32.668  4181  4234 I btif_av : DeleteIdlePeers: Deleting idle peer: 28:d4:1e:78:7a:20 bta_handle=0x0
+07-01 21:13:32.671   945  2460 I #NanoVoice#: --- onConnectionStateChange:电信蓝牙遥控 status:22 newState:0
+07-01 21:13:32.675   945  2460 I #NanoVoice#: 电信蓝牙遥控 is disconnected.
+07-01 21:13:32.675   945  2460 I #NanoVoice#: Clear Device buff:28:D4:1E:78:7A:20
+07-01 21:13:32.686  4181  4203 I bt_stack: [INFO:btif_hh.cc(461)] btif_hh_remove_device: bda = 28:d4:1e:78:7a:20
+07-01 21:13:32.686  4181  4234 E bt_stack: [ERROR:bta_gattc_api.cc(722)] BTA_GATTC_DeregisterForNotifications registration not found bd_addr=28:d4:1e:78:7a:20
+07-01 21:13:32.687  4181  4234 E bt_stack: [ERROR:bta_gattc_api.cc(722)] BTA_GATTC_DeregisterForNotifications registration not found bd_addr=28:d4:1e:78:7a:20
+07-01 21:13:32.706  4181  4181 D BluetoothHidHostService: Connection state 28:D4:1E:78:7A:20: 2->0
+07-01 21:13:32.709   371   441 I EventHub: Removed device: path=/dev/input/event6 name=电信蓝牙遥控 id=13 fd=166 classes=0x80004003
+07-01 21:13:32.711  4181  4181 D AdapterProperties: PROFILE_CONNECTION_STATE_CHANGE: profile=4, device=28:D4:1E:78:7A:20, 2 -> 0
+07-01 21:13:32.712  4181  4181 W AdapterProperties: PROFILE_CONNECTION_STATE_CHANGE: unexpected transition for profile=4, device=28:D4:1E:78:7A:20, 2 -> 0
+07-01 21:13:32.713  4181  4181 D AdapterProperties: ADAPTER_CONNECTION_STATE_CHANGE: 28:D4:1E:78:7A:20: 2 -> 0
+07-01 21:13:32.713  4181  4181 W AdapterProperties: ADAPTER_CONNECTION_STATE_CHANGE: unexpected transition for profile=4, device=28:D4:1E:78:7A:20, 2 -> 0
+07-01 21:13:32.722   945   945 I #NanoVoice#: 电信蓝牙遥控 is disconnected onReceive
+07-01 21:13:32.727   371   441 I InputReader: Device removed: id=13, name='电信蓝牙遥控', sources=0x00002103
+07-01 21:13:32.730   945   945 I #NanoVoice#: 电信蓝牙遥控 is disconnected onReceive
+07-01 21:13:32.730   945   945 I #NanoVoice#: Clear Device buff:28:D4:1E:78:7A:20
+07-01 21:13:32.758   371   441 I EventHub: Removing device 电信蓝牙遥控 Consumer Control due to epoll hang-up event.
+07-01 21:13:32.758   371   441 I EventHub: Removed device: path=/dev/input/event7 name=电信蓝牙遥控 Consumer Control id=14 fd=186 classes=0x80004121
+07-01 21:13:32.771   371   441 I InputReader: Device removed: id=14, name='电信蓝牙遥控 Consumer Control', sources=0x01002313
+07-01 21:13:32.810   371   441 I EventHub: Removing device 电信蓝牙遥控 Mouse due to epoll hang-up event.
+07-01 21:13:32.810   371   441 I EventHub: Removed device: path=/dev/input/event8 name=电信蓝牙遥控 Mouse id=15 fd=208 classes=0x80000008
+07-01 21:13:32.847   371   441 I InputReader: Device removed: id=15, name='电信蓝牙遥控 Mouse', sources=0x00002002
+07-01 21:13:32.936  4181  4203 D bt_btif_config: btif_get_device_type: Device [28:d4:1e:78:7a:20] type 2
+07-01 21:13:32.937  4181  4203 I BluetoothBondStateMachine: bondStateChangeCallback: Status: 0 Address: 28:D4:1E:78:7A:20 newState: 0
+07-01 21:13:32.937  4181  4210 D AdapterProperties: Removing bonded device:28:D4:1E:78:7A:20
+07-01 21:13:32.940   945   945 I #NanoPaireService#: ACTION_BOND_STATE_CHANGED BLE BOND_NONE
+07-01 21:13:32.941  4181  4181 D A2dpService: Bond state changed for device: 28:D4:1E:78:7A:20 state: 10
+07-01 21:13:32.943  4181  4210 I BluetoothBondStateMachine: Bond State Change Intent:28:D4:1E:78:7A:20 BOND_BONDED => BOND_NONE class=0x500 major:1280
+07-01 21:13:32.960   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_input_device_priority_28:D4:1E:78:7A:20
+07-01 21:13:32.967  4181  4210 D A2dpService: Saved priority 28:D4:1E:78:7A:20 = -1
+07-01 21:13:32.969  4181  4210 I HeadsetService: setPriority: device=28:D4:1E:78:7A:20, priority=-1, uid/pid=1002/4181
+07-01 21:13:33.006   150   754 E BufferQueueProducer: [com.android.speaker.settings/com.android.tv.settings.MainActivity#0] disconnect: not connected (req=1)
+07-01 21:13:33.006  2005  2420 W libEGL  : EGLNativeWindowType 0xe5cf6808 disconnect failed
+07-01 21:13:33.013   512   512 D BluetoothHidHost: connect(28:D4:1E:78:7A:20)
+07-01 21:13:33.024  4181  4181 D BluetoothHidHostService: Connection state 28:D4:1E:78:7A:20: 0->1
+07-01 21:13:33.029  4181  4181 W BluetoothHidHostService: no state change: 1
+07-01 21:13:33.031  4181  4181 D AdapterProperties: PROFILE_CONNECTION_STATE_CHANGE: profile=4, device=28:D4:1E:78:7A:20, 0 -> 1
+07-01 21:13:33.031  4181  4181 D AdapterProperties: ADAPTER_CONNECTION_STATE_CHANGE: 28:D4:1E:78:7A:20: 0 -> 1
+07-01 21:13:33.038   512   512 D BtRemoteAutoConnect: connect 电信蓝牙遥控 -> true
+07-01 21:13:37.550  2005  2005 I BlueScreen: clear ignored bluetooth device address=28:D4:1E:78:7A:20
+07-01 21:13:37.562  2005  2005 I BluetoothDevice: createBond() for device 28:D4:1E:78:7A:20 called by pid: 2005 tid: 2005
+07-01 21:13:37.565  4181  4210 I BluetoothBondStateMachine: Bond address is:28:D4:1E:78:7A:20
+07-01 21:13:37.565  4181  4210 D bt_btif_config: btif_get_device_type: Device [28:d4:1e:78:7a:20] type 2
+07-01 21:13:37.571  4181  4203 D bt_btif_config: btif_get_device_type: Device [28:d4:1e:78:7a:20] type 2
+07-01 21:13:37.572  4181  4203 I BluetoothBondStateMachine: bondStateChangeCallback: Status: 0 Address: 28:D4:1E:78:7A:20 newState: 1
+07-01 21:13:37.574  2005  2005 D BluetoothHidHost: Proxy object connected
+07-01 21:13:37.575  4181  4210 I BluetoothBondStateMachine: Bond State Change Intent:28:D4:1E:78:7A:20 BOND_NONE => BOND_BONDING class=0x500 major:1280
+07-01 21:13:37.575  2005  2005 D BluetoothHidHost: setPriority(28:D4:1E:78:7A:20, 100)
+07-01 21:13:37.578  4181  4181 D A2dpService: Bond state changed for device: 28:D4:1E:78:7A:20 state: 11
+07-01 21:13:37.580   945   945 I #NanoPaireService#: ACTION_BOND_STATE_CHANGED BLE BOND_BONDING
+07-01 21:13:37.581  2005  2005 D BluetoothA2dp: setPriority(28:D4:1E:78:7A:20, 100)
+07-01 21:13:37.580   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_input_device_priority_28:D4:1E:78:7A:20
+07-01 21:13:37.584   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_a2dp_sink_priority_28:D4:1E:78:7A:20
+07-01 21:13:37.585  4181  4194 D A2dpService: Saved priority 28:D4:1E:78:7A:20 = 100
+07-01 21:13:37.630  4181  4203 D bt_btif_dm: remote version info [28:d4:1e:78:7a:20]: 0, 0, 0
+07-01 21:13:37.650  2005  2005 D BluetoothHidHost: Proxy object connected
+07-01 21:13:37.650  2005  2005 D BluetoothHidHost: connect(28:D4:1E:78:7A:20)
+07-01 21:13:37.652  4181  4194 E BluetoothHidHostService: Hid Device not disconnected: 28:D4:1E:78:7A:20
+07-01 21:13:37.677  2005  2005 D BluetoothHeadset: setPriority(28:D4:1E:78:7A:20, 100)
+07-01 21:13:37.681  4181  4194 I HeadsetService: setPriority: device=28:D4:1E:78:7A:20, priority=100, uid/pid=1000/2005
+07-01 21:13:37.682   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_headset_priority_28:D4:1E:78:7A:20
+07-01 21:13:38.142  4181  4203 D bt_btif_config: btif_get_device_type: Device [28:d4:1e:78:7a:20] type 2
+07-01 21:13:38.142  4181  4203 I BluetoothBondStateMachine: bondStateChangeCallback: Status: 10 Address: 28:D4:1E:78:7A:20 newState: 0
+07-01 21:13:38.143  4181  4210 D AdapterProperties: Failed to remove device: 28:D4:1E:78:7A:20
+07-01 21:13:38.144  4181  4181 D BluetoothHidHostService: Connection state 28:D4:1E:78:7A:20: 1->0
+07-01 21:13:38.147   945   945 I #NanoPaireService#: ACTION_BOND_STATE_CHANGED BLE BOND_NONE
+07-01 21:13:38.149  4181  4181 D A2dpService: Bond state changed for device: 28:D4:1E:78:7A:20 state: 10
+07-01 21:13:38.149  4181  4181 D AdapterProperties: PROFILE_CONNECTION_STATE_CHANGE: profile=4, device=28:D4:1E:78:7A:20, 1 -> 0
+07-01 21:13:38.151  4181  4210 I BluetoothBondStateMachine: Bond State Change Intent:28:D4:1E:78:7A:20 BOND_BONDING => BOND_NONE class=0x500 major:1280
+07-01 21:13:38.152  4181  4181 D AdapterProperties: ADAPTER_CONNECTION_STATE_CHANGE: 28:D4:1E:78:7A:20: 1 -> 0
+07-01 21:13:38.157   512   512 D BluetoothHidHost: connect(28:D4:1E:78:7A:20)
+07-01 21:13:38.160   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_input_device_priority_28:D4:1E:78:7A:20
+07-01 21:13:38.163  4181  4210 D A2dpService: Saved priority 28:D4:1E:78:7A:20 = -1
+07-01 21:13:38.163   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_a2dp_sink_priority_28:D4:1E:78:7A:20
+07-01 21:13:38.166  4181  4210 I HeadsetService: setPriority: device=28:D4:1E:78:7A:20, priority=-1, uid/pid=1002/4181
+07-01 21:13:38.167   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_headset_priority_28:D4:1E:78:7A:20
+07-01 21:13:38.183   945   945 I #NanoVoice#: 电信蓝牙遥控 is disconnected onReceive
+07-01 21:13:38.183   512   512 D BtRemoteAutoConnect: connect 电信蓝牙遥控 -> true
+07-01 21:13:38.188  4181  4234 I bt_stack: [INFO:gatt_api.cc(1109)] GATT_Connectgatt_if=4 28:d4:1e:78:7a:20
+07-01 21:13:38.189  4181  4181 D BluetoothHidHostService: Connection state 28:D4:1E:78:7A:20: 0->1
+07-01 21:13:38.189   945   945 I #NanoVoice#: 电信蓝牙遥控 is disconnected onReceive
+07-01 21:13:38.189   945   945 I #NanoVoice#: Clear Device buff:28:D4:1E:78:7A:20
+07-01 21:13:38.193  4181  4181 W BluetoothHidHostService: no state change: 1
+07-01 21:13:38.195  4181  4181 D AdapterProperties: PROFILE_CONNECTION_STATE_CHANGE: profile=4, device=28:D4:1E:78:7A:20, 0 -> 1
+07-01 21:13:38.196  4181  4181 D AdapterProperties: ADAPTER_CONNECTION_STATE_CHANGE: 28:D4:1E:78:7A:20: 0 -> 1
+07-01 21:13:38.262  4181  4234 I bt_stack: [INFO:gatt_api.cc(1212)] GATT_Disconnect conn_id=6
+07-01 21:13:38.389  4181  4234 I bt_stack: [INFO:gatt_api.cc(1109)] GATT_Connectgatt_if=3 28:d4:1e:78:7a:20
+07-01 21:13:38.389  4181  4203 D bt_btif_config: btif_get_device_type: Device [28:d4:1e:78:7a:20] type 2
+07-01 21:13:38.390  4181  4203 I BluetoothBondStateMachine: bondStateChangeCallback: Status: 0 Address: 28:D4:1E:78:7A:20 newState: 1
+07-01 21:13:38.391  4181  4203 D bt_btif_config: btif_get_device_type: Device [28:d4:1e:78:7a:20] type 2
+07-01 21:13:38.391  4181  4203 I BluetoothBondStateMachine: bondStateChangeCallback: Status: 0 Address: 28:D4:1E:78:7A:20 newState: 2
+07-01 21:13:38.395   945   945 I #NanoPaireService#: ACTION_BOND_STATE_CHANGED BLE BOND_BONDING
+07-01 21:13:38.396  4181  4210 I BluetoothBondStateMachine: Bond State Change Intent:28:D4:1E:78:7A:20 BOND_NONE => BOND_BONDING class=0x500 major:1280
+07-01 21:13:38.396  4181  4210 D AdapterProperties: Adding bonded device:28:D4:1E:78:7A:20
+07-01 21:13:38.396  4181  4181 D A2dpService: Bond state changed for device: 28:D4:1E:78:7A:20 state: 11
+07-01 21:13:38.398  4181  4181 I BluetoothPhonePolicy: Received ACTION_UUID for device 28:D4:1E:78:7A:20
+07-01 21:13:38.398  4181  4181 I BluetoothPhonePolicy: processInitProfilePriorities() - device 28:D4:1E:78:7A:20
+07-01 21:13:38.405  4181  4210 I BluetoothBondStateMachine: Bond State Change Intent:28:D4:1E:78:7A:20 BOND_BONDING => BOND_BONDED class=0x500 major:1280
+07-01 21:13:38.406   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_input_device_priority_28:D4:1E:78:7A:20
+07-01 21:13:38.409   512   512 D BtRemoteAutoConnect: bonded: 电信蓝牙遥控
+07-01 21:13:38.415  4181  4181 D A2dpService: Bond state changed for device: 28:D4:1E:78:7A:20 state: 12
+07-01 21:13:38.417   512   512 D BtRemoteAutoConnect: bonded: 电信蓝牙遥控
+07-01 21:13:38.441  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:38.683  2005  2638 D BluetoothHeadset: Proxy object disconnected
+07-01 21:13:38.854  2005  2005 D BluetoothHidHost: Proxy object connected
+07-01 21:13:38.855  2005  2005 D BluetoothHidHost: connect(28:D4:1E:78:7A:20)
+07-01 21:13:38.858  4181  4252 E BluetoothHidHostService: Hid Device not disconnected: 28:D4:1E:78:7A:20
+07-01 21:13:38.873  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:39.390  4181  4234 I bt_stack: [INFO:gatt_api.cc(1212)] GATT_Disconnect conn_id=3
+07-01 21:13:39.552  4181  4234 E bt_stack: [ERROR:bta_gattc_api.cc(722)] BTA_GATTC_DeregisterForNotifications registration not found bd_addr=28:d4:1e:78:7a:20
+07-01 21:13:39.552  4181  4234 I bt_stack: [INFO:gatt_api.cc(1109)] GATT_Connectgatt_if=4 28:d4:1e:78:7a:20
+07-01 21:13:39.553  4181  4203 W bt_btif : btif_hh_upstreams_evt: name = 电信蓝牙遥控
+07-01 21:13:39.553  4181  4203 W bt_btif : bta_hh_co_send_hid_info: fd = 174, name = [电信蓝牙遥控], dscp_len = 127
+07-01 21:13:39.555  4181  4181 D BluetoothHidHostService: Connection state 28:D4:1E:78:7A:20: 1->2
+07-01 21:13:39.556  4181  4203 W bt_stack: [WARNING:btif_hh.cc(436)]  Added device 28:d4:1e:78:7a:20
+07-01 21:13:39.563  4181  4181 D AdapterProperties: PROFILE_CONNECTION_STATE_CHANGE: profile=4, device=28:D4:1E:78:7A:20, 1 -> 2
+07-01 21:13:39.563  4181  4181 D AdapterProperties: ADAPTER_CONNECTION_STATE_CHANGE: 28:D4:1E:78:7A:20: 1 -> 2
+07-01 21:13:39.569   371   441 D EventHub: No input device configuration file found for device '电信蓝牙遥控'.
+07-01 21:13:39.570   945   945 I #NanoVoice#: 电信蓝牙遥控/28:D4:1E:78:7A:20 has connected onReceive
+07-01 21:13:39.577   371   441 I EventHub: New device: id=16, fd=166, path='/dev/input/event6', name='电信蓝牙遥控', classes=0x80004003, configuration='', keyLayout='/system/usr/keylayout/Generic.kl', keyCharacterMap='/system/usr/keychars/Generic.kcm', builtinKeyboard=false, 
+07-01 21:13:39.578   371   441 I InputReader: Device added: id=16, name='电信蓝牙遥控', sources=0x00002103
+07-01 21:13:39.579   945   945 I #NanoVoice#: 电信蓝牙遥控/28:D4:1E:78:7A:20 has connect onReceive
+07-01 21:13:39.579   371   441 D InputDevice: appendInputDeviceConfigurationFileRelativePath origin name:电信蓝牙遥控 Consumer Control
+07-01 21:13:39.579   371   441 D InputDevice: appendInputDeviceConfigurationFileRelativePath origin name:电信蓝牙遥控 Consumer Control
+07-01 21:13:39.579   371   441 D EventHub: No input device configuration file found for device '电信蓝牙遥控 Consumer Control'.
+07-01 21:13:39.579   371   441 D InputDevice: appendInputDeviceConfigurationFileRelativePath origin name:电信蓝牙遥控 Consumer Control
+07-01 21:13:39.580   371   441 D InputDevice: appendInputDeviceConfigurationFileRelativePath origin name:电信蓝牙遥控 Consumer Control
+07-01 21:13:39.582   945   945 I #NanoVoice#: To connectGatt:28:D4:1E:78:7A:20
+07-01 21:13:39.586   945   945 I #NanoVoice#: 6.0 connectGatt:28:D4:1E:78:7A:20
+07-01 21:13:39.587   945   945 D BluetoothGatt: connect() - device: 28:D4:1E:78:7A:20, auto: false
+07-01 21:13:39.591   371   441 I EventHub: New device: id=17, fd=186, path='/dev/input/event7', name='电信蓝牙遥控 Consumer Control', classes=0x80004121, configuration='', keyLayout='/system/usr/keylayout/Generic.kl', keyCharacterMap='/system/usr/keychars/Generic.kcm', builtinKeyboard=false, 
+07-01 21:13:39.592   371   441 I InputReader: Device added: id=17, name='电信蓝牙遥控 Consumer Control', sources=0x01002313
+07-01 21:13:39.593   371   441 D InputDevice: appendInputDeviceConfigurationFileRelativePath origin name:电信蓝牙遥控 Mouse
+07-01 21:13:39.594   371   441 D InputDevice: appendInputDeviceConfigurationFileRelativePath origin name:电信蓝牙遥控 Mouse
+07-01 21:13:39.594   371   441 D EventHub: No input device configuration file found for device '电信蓝牙遥控 Mouse'.
+07-01 21:13:39.595   371   441 I EventHub: New device: id=18, fd=208, path='/dev/input/event8', name='电信蓝牙遥控 Mouse', classes=0x80000008, configuration='', keyLayout='', keyCharacterMap='', builtinKeyboard=false, 
+07-01 21:13:39.603   371   441 I InputReader: Device added: id=18, name='电信蓝牙遥控 Mouse', sources=0x00002002
+07-01 21:13:39.604  4181  4203 D bt_btif_config: btif_get_address_type: Device [28:d4:1e:78:7a:20] address type 0
+07-01 21:13:39.604  4181  4203 D bt_btif_config: btif_get_device_type: Device [28:d4:1e:78:7a:20] type 2
+07-01 21:13:39.604  4181  4234 I bt_stack: [INFO:gatt_api.cc(1109)] GATT_Connectgatt_if=7 28:d4:1e:78:7a:20
+07-01 21:13:39.605   945  2460 D BluetoothGatt: onClientConnectionState() - status=0 clientIf=7 device=28:D4:1E:78:7A:20
+07-01 21:13:39.609   945  2460 I #NanoVoice#: --- onConnectionStateChange:电信蓝牙遥控 status:0 newState:2
+07-01 21:13:39.613   945  2460 I #NanoVoice#: 电信蓝牙遥控 has connected.
+07-01 21:13:39.613   945  2460 D BluetoothGatt: discoverServices() - device: 28:D4:1E:78:7A:20
+07-01 21:13:39.619   945  2460 D BluetoothGatt: onSearchComplete() = Device=28:D4:1E:78:7A:20 Status=0
+07-01 21:13:39.622   945  2460 I #NanoVoice#: --- onServicesDiscovered:电信蓝牙遥控 status:0
+07-01 21:13:39.731  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:39.771  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:40.068  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:40.369  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:42.807   945  2460 D BluetoothGatt: onConnectionUpdated() - Device=28:D4:1E:78:7A:20 interval=16 latency=49 timeout=500 status=0
+07-01 21:13:43.879  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:44.603  2005  2005 I BlueScreen: block bluetooth auto reconnect address=28:D4:1E:78:7A:20
+07-01 21:13:44.625  2005  2005 D BluetoothHidHost: Proxy object connected
+07-01 21:13:44.626  2005  2005 D BluetoothHidHost: setPriority(28:D4:1E:78:7A:20, 0)
+07-01 21:13:44.630   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_input_device_priority_28:D4:1E:78:7A:20
+07-01 21:13:44.630  2005  2005 D BluetoothA2dp: setPriority(28:D4:1E:78:7A:20, 0)
+07-01 21:13:44.633  4181  4193 D A2dpService: Saved priority 28:D4:1E:78:7A:20 = 0
+07-01 21:13:44.633   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_a2dp_sink_priority_28:D4:1E:78:7A:20
+07-01 21:13:44.637  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:44.685   150   352 E BufferQueueProducer: [com.android.speaker.settings/com.android.tv.settings.MainActivity#1] disconnect: not connected (req=1)
+07-01 21:13:44.685  2005  2420 W libEGL  : EGLNativeWindowType 0xd3e54008 disconnect failed
+07-01 21:13:44.711  2005  2005 D BluetoothHidHost: Proxy object connected
+07-01 21:13:44.712  2005  2005 D BluetoothHidHost: disconnect(28:D4:1E:78:7A:20)
+07-01 21:13:44.719  2005  2005 D BluetoothA2dp: disconnect(28:D4:1E:78:7A:20)
+07-01 21:13:44.721  4181  4234 E bt_stack: [ERROR:bta_gattc_api.cc(722)] BTA_GATTC_DeregisterForNotifications registration not found bd_addr=28:d4:1e:78:7a:20
+07-01 21:13:44.721  4181  4234 I bt_stack: [INFO:gatt_api.cc(1212)] GATT_Disconnect conn_id=4
+07-01 21:13:44.722  4181  4234 E bt_stack: [ERROR:bta_gattc_api.cc(722)] BTA_GATTC_DeregisterForNotifications registration not found bd_addr=28:d4:1e:78:7a:20
+07-01 21:13:44.722  4181  4234 E bt_stack: [ERROR:bta_gattc_api.cc(722)] BTA_GATTC_DeregisterForNotifications registration not found bd_addr=28:d4:1e:78:7a:20
+07-01 21:13:44.724  4181  4193 D A2dpService: disconnect(): 28:D4:1E:78:7A:20
+07-01 21:13:44.724  4181  4181 D BluetoothHidHostService: Connection state 28:D4:1E:78:7A:20: 2->3
+07-01 21:13:44.724  4181  4193 E A2dpService: Ignored disconnect request for 28:D4:1E:78:7A:20 : no state machine
+07-01 21:13:44.726   371   441 I EventHub: Removing device 电信蓝牙遥控 due to epoll hang-up event.
+07-01 21:13:44.726   371   441 I EventHub: Removed device: path=/dev/input/event6 name=电信蓝牙遥控 id=16 fd=166 classes=0x80004003
+07-01 21:13:44.729  4181  4181 D AdapterProperties: PROFILE_CONNECTION_STATE_CHANGE: profile=4, device=28:D4:1E:78:7A:20, 2 -> 3
+07-01 21:13:44.729  4181  4181 D AdapterProperties: ADAPTER_CONNECTION_STATE_CHANGE: 28:D4:1E:78:7A:20: 2 -> 3
+07-01 21:13:44.734  2005  2005 D BluetoothHeadset: setPriority(28:D4:1E:78:7A:20, 0)
+07-01 21:13:44.743  4181  4193 I HeadsetService: setPriority: device=28:D4:1E:78:7A:20, priority=0, uid/pid=1000/2005
+07-01 21:13:44.743   371   371 V SettingsProvider: Notifying for 0: content://settings/global/bluetooth_headset_priority_28:D4:1E:78:7A:20
+07-01 21:13:44.743  2005  2005 D BluetoothHeadset: disconnect(28:D4:1E:78:7A:20)
+07-01 21:13:44.745  4181  4241 I HeadsetService: disconnect: device=28:D4:1E:78:7A:20, uid/pid=1000/2005
+07-01 21:13:44.745  4181  4241 W HeadsetService: disconnect: device 28:D4:1E:78:7A:20 not ever connected/connecting
+07-01 21:13:44.747   371   441 I InputReader: Device removed: id=16, name='电信蓝牙遥控', sources=0x00002103
+07-01 21:13:44.765   371   441 I EventHub: Removing device 电信蓝牙遥控 Consumer Control due to epoll hang-up event.
+07-01 21:13:44.765   371   441 I EventHub: Removed device: path=/dev/input/event7 name=电信蓝牙遥控 Consumer Control id=17 fd=186 classes=0x80004121
+07-01 21:13:44.781   371   441 I InputReader: Device removed: id=17, name='电信蓝牙遥控 Consumer Control', sources=0x01002313
+07-01 21:13:44.822   371   441 I EventHub: Removing device 电信蓝牙遥控 Mouse due to epoll hang-up event.
+07-01 21:13:44.822   371   441 I EventHub: Removed device: path=/dev/input/event8 name=电信蓝牙遥控 Mouse id=18 fd=208 classes=0x80000008
+07-01 21:13:44.841  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:44.847   371   441 I InputReader: Device removed: id=18, name='电信蓝牙遥控 Mouse', sources=0x00002002
+07-01 21:13:44.876  4181  4181 D BluetoothHidHostService: Connection state 28:D4:1E:78:7A:20: 3->0
+07-01 21:13:44.884  4181  4181 D AdapterProperties: PROFILE_CONNECTION_STATE_CHANGE: profile=4, device=28:D4:1E:78:7A:20, 3 -> 0
+07-01 21:13:44.884  4181  4181 D AdapterProperties: ADAPTER_CONNECTION_STATE_CHANGE: 28:D4:1E:78:7A:20: 3 -> 0
+07-01 21:13:44.893  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:44.898   945   945 I #NanoVoice#: 电信蓝牙遥控 is disconnected onReceive
+07-01 21:13:44.907   945   945 I #NanoVoice#: 电信蓝牙遥控 is disconnected onReceive
+07-01 21:13:44.907   945   945 I #NanoVoice#: Clear Device buff:28:D4:1E:78:7A:20
+07-01 21:13:44.909  4181  4234 I bt_stack: [INFO:gatt_api.cc(1212)] GATT_Disconnect conn_id=7
+07-01 21:13:45.368  2005  2005 D address : 28:D4:1E:78:7A:20:null
+07-01 21:13:45.744  2005  4173 D BluetoothHeadset: Proxy object disconnected
+07-01 21:13:45.747  2005  4173 D BluetoothHeadset: Proxy object disconnected
+07-01 21:13:46.361  2005  2005 I BlueScreen: ignore bluetooth device address=28:D4:1E:78:7A:20
+07-01 21:13:46.363  2005  2005 I BluetoothDevice: removeBond() for device 28:D4:1E:78:7A:20 called by pid: 2005 tid: 2005
+07-01 21:13:46.365  4181  4210 D bt_btif_config: btif_get_device_type: Device [28:d4:1e:78:7a:20] type 2
+07-01 21:13:46.366  4181  4203 E bt_btif : btif_hh_virtual_unplug: Error, device 28:d4:1e:78:7a:20 not opened, status = 3
+07-01 21:13:46.424   150   206 E BufferQueueProducer: [com.android.speaker.settings/com.android.tv.settings.MainActivity#1] disconnect: not connected (req=1)
+07-01 21:13:46.424  2005  2420 W libEGL  : EGLNativeWindowType 0xd38fe008 disconnect failed

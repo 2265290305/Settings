@@ -1,0 +1,1338 @@
+07-03 17:06:03.670     0     0 I         : Booting Linux on physical CPU 0x0000000000 [0x412fd050]
+07-03 17:06:03.670     0     0 I         : Linux version 4.19.232 (jonah@jonah-MS-7E06) (gcc version 6.3.1 20170404 (Linaro GCC 6.3-2017.05), GNU ld (Linaro_Binutils-2017.05) 2.27.0.20161019) #1 SMP PREEMPT Wed Jul 1 19:25:19 CST 2026
+07-03 17:06:03.670     0     0 I Machine model: Rockchip RK3566PRO EVB2 LP4X V10 Board
+07-03 17:06:03.670     0     0 I earlycon: uart8250 at MMIO32 0x00000000fe660000 (options '')
+07-03 17:06:03.670     0     0 I         : bootconsole [uart8250] enabled
+07-03 17:06:03.670     0     0 I Reserved memory: created CMA memory pool at 0x0000000010000000, size 8 MiB
+07-03 17:06:03.670     0     0 I OF      : reserved mem: initialized node linux,cma, compatible id shared-dma-pool
+07-03 17:06:03.670     0     0 D         : On node 0 totalpages: 519680
+07-03 17:06:03.670     0     0 D DMA32 zone: 8184 pages used for memmap
+07-03 17:06:03.670     0     0 D DMA32 zone: 0 pages reserved
+07-03 17:06:03.670     0     0 D DMA32 zone: 519680 pages, LIFO batch:63
+07-03 17:06:03.670     0     0 I psci    : probing for conduit method from DT.
+07-03 17:06:03.670     0     0 I psci    : PSCIv1.1 detected in firmware.
+07-03 17:06:03.670     0     0 I psci    : Using standard PSCI v0.2 function IDs
+07-03 17:06:03.670     0     0 I psci    : Trusted OS migration not required
+07-03 17:06:03.670     0     0 I psci    : SMC Calling Convention v1.2
+07-03 17:06:03.670     0     0 I percpu  : Embedded 24 pages/cpu s58968 r8192 d31144 u98304
+07-03 17:06:03.670     0     0 D pcpu-alloc: s58968 r8192 d31144 u98304 alloc=24*4096
+07-03 17:06:03.670     0     0 D pcpu-alloc: [0] 0 [0] 1 [0] 2 [0] 3
+07-03 17:06:03.670     0     0 I         : Detected VIPT I-cache on CPU0
+07-03 17:06:03.670     0     0 I CPU features: detected: Virtualization Host Extensions
+07-03 17:06:03.670     0     0 I CPU features: detected: Speculative Store Bypassing Safe (SSBS)
+07-03 17:06:03.670     0     0 I         : Built 1 zonelists, mobility grouping on.  Total pages: 511496
+07-03 17:06:03.670     0     0 I         : Kernel command line: storagemedia=emmc androidboot.storagemedia=emmc androidboot.mode=normal  androidboot.dtbo_idx=0 root=PARTUUID=af01642c-9b84-11e8-9b2a-234eb5e198a0 androidboot.verifiedbootstate=orange androidboot.serialno=E8101299007065900000A8B58ECDD800 console=ttyFIQ0 androidboot.baseband=N/A androidboot.wificountrycode=CN androidboot.veritymode=enforcing androidboot.hardware=rk30board androidboot.console=ttyFIQ0 firmware_class.path=/vendor/etc/firmware init=/init rootwait ro init=/init root=PARTUUID=af01642c-9b84-11e8-9b2a-234eb5e198a0 loop.max_part=7 androidboot.selinux=permissive earlycon=uart8250,mmio32,0xfe660000 androidboot.fwver=ddr-v1.23-03ea844c5d,spl-v1.14,bl31-v1.44,bl32-v2.14,uboot-fc61dde514-07/01/2026
+07-03 17:06:03.670     0     0 I         : Dentry cache hash table entries: 262144 (order: 9, 2097152 bytes)
+07-03 17:06:03.670     0     0 I         : Inode-cache hash table entries: 131072 (order: 8, 1048576 bytes)
+07-03 17:06:03.670     0     0 I mem auto-init: stack:off, heap alloc:off, heap free:off
+07-03 17:06:03.670     0     0 I Memory  : 1975268K/2078720K available (16062K kernel code, 2192K rwdata, 6488K rodata, 4352K init, 971K bss, 95260K reserved, 8192K cma-reserved)
+07-03 17:06:03.670     0     0 I SLUB    : HWalign=64, Order=0-3, MinObjects=0, CPUs=4, Nodes=1
+07-03 17:06:03.670     0     0 I rcu     : Preemptible hierarchical RCU implementation.
+07-03 17:06:03.670     0     0 I rcu     : RCU restricting CPUs from NR_CPUS=8 to nr_cpu_ids=4.
+07-03 17:06:03.670     0     0 I         : Tasks RCU enabled.
+07-03 17:06:03.670     0     0 I rcu     : Adjusting geometry for rcu_fanout_leaf=16, nr_cpu_ids=4
+07-03 17:06:03.670     0     0 I NR_IRQS : 64, nr_irqs: 64, preallocated irqs: 0
+07-03 17:06:03.670     0     0 I GICv3   : GIC: Using split EOI/Deactivate mode
+07-03 17:06:03.670     0     0 I GICv3   : Distributor has no Range Selector support
+07-03 17:06:03.670     0     0 I GICv3   : no VLPI support, no direct LPI support
+07-03 17:06:03.670     0     0 I         : ITS [mem 0xfd440000-0xfd45ffff]
+07-03 17:06:03.670     0     0 I ITS@0x00000000fd440000: allocated 8192 Devices @7b420000 (indirect, esz 8, psz 64K, shr 0)
+07-03 17:06:03.670     0     0 I ITS@0x00000000fd440000: allocated 32768 Interrupt Collections @7b430000 (flat, esz 2, psz 64K, shr 0)
+07-03 17:06:03.670     0     0 I ITS     : using cache flushing for cmd queue
+07-03 17:06:03.670     0     0 I GIC     : using LPI property table @0x000000007b440000
+07-03 17:06:03.670     0     0 I GICv3   : CPU0: found redistributor 0 region 0:0x00000000fd460000
+07-03 17:06:03.670     0     0 I CPU0    : using LPI pending table @0x000000007b450000
+07-03 17:06:03.670     0     0 I GIC     : using cache flushing for LPI property table
+07-03 17:06:03.670     0     0 I random  : random: get_random_bytes called from start_kernel+0x36c/0x4f0 with crng_init=0
+07-03 17:06:03.670     0     0 I arch_timer: cp15 timer(s) running at 24.00MHz (phys).
+07-03 17:06:03.670     0     0 I clocksource: arch_sys_counter: mask: 0xffffffffffffff max_cycles: 0x588fe9dc0, max_idle_ns: 440795202592 ns
+07-03 17:06:03.670     0     0 I sched_clock: 56 bits at 24MHz, resolution 41ns, wraps every 4398046511097ns
+07-03 17:06:03.672     0     0 I         : Calibrating delay loop (skipped), value calculated using timer frequency.. 48.00 BogoMIPS (lpj=80000)
+07-03 17:06:03.673     0     0 I pid_max : default: 32768 minimum: 301
+07-03 17:06:03.673     0     0 I         : Security Framework initialized
+07-03 17:06:03.674     0     0 I SELinux : Initializing.
+07-03 17:06:03.674     0     0 I         : Mount-cache hash table entries: 4096 (order: 3, 32768 bytes)
+07-03 17:06:03.675     0     0 I         : Mountpoint-cache hash table entries: 4096 (order: 3, 32768 bytes)
+07-03 17:06:03.676     0     0 I         : ASID allocator initialised with 32768 entries
+07-03 17:06:03.677     0     0 I rcu     : Hierarchical SRCU implementation.
+07-03 17:06:03.678     0     0 I Platform MSI: interrupt-controller@fd440000 domain created
+07-03 17:06:03.679     0     0 I PCI/MSI : /interrupt-controller@fd400000/interrupt-controller@fd440000 domain created
+07-03 17:06:03.680     0     0 I smp     : Bringing up secondary CPUs ...
+07-03 17:06:03.681     0     0 I         : Detected VIPT I-cache on CPU1
+07-03 17:06:03.681     0     0 I GICv3   : CPU1: found redistributor 100 region 0:0x00000000fd480000
+07-03 17:06:03.681     0     0 I CPU1    : using LPI pending table @0x000000007b5e0000
+07-03 17:06:03.681     0     0 I CPU1    : Booted secondary processor 0x0000000100 [0x412fd050]
+07-03 17:06:03.683     0     0 I         : Detected VIPT I-cache on CPU2
+07-03 17:06:03.683     0     0 I GICv3   : CPU2: found redistributor 200 region 0:0x00000000fd4a0000
+07-03 17:06:03.683     0     0 I CPU2    : using LPI pending table @0x000000007b630000
+07-03 17:06:03.683     0     0 I CPU2    : Booted secondary processor 0x0000000200 [0x412fd050]
+07-03 17:06:03.684     0     0 I         : Detected VIPT I-cache on CPU3
+07-03 17:06:03.684     0     0 I GICv3   : CPU3: found redistributor 300 region 0:0x00000000fd4c0000
+07-03 17:06:03.684     0     0 I CPU3    : using LPI pending table @0x000000007b660000
+07-03 17:06:03.684     0     0 I CPU3    : Booted secondary processor 0x0000000300 [0x412fd050]
+07-03 17:06:03.684     0     0 I smp     : Brought up 1 node, 4 CPUs
+07-03 17:06:03.691     0     0 I SMP     : Total of 4 processors activated.
+07-03 17:06:03.691     0     0 I CPU features: detected: GIC system register CPU interface
+07-03 17:06:03.692     0     0 I CPU features: detected: Privileged Access Never
+07-03 17:06:03.692     0     0 I CPU features: detected: LSE atomic instructions
+07-03 17:06:03.693     0     0 I CPU features: detected: User Access Override
+07-03 17:06:03.693     0     0 I CPU features: detected: 32-bit EL0 Support
+07-03 17:06:03.694     0     0 I CPU features: detected: RAS Extension Support
+07-03 17:06:03.700     0     0 I         : CPU: All CPU(s) started at EL2
+07-03 17:06:03.701     0     0 I alternatives: patching kernel code
+07-03 17:06:03.705     0     0 I devtmpfs: initialized
+07-03 17:06:03.719     0     0 I         : Registered cp15_barrier emulation handler
+07-03 17:06:03.719     0     0 I         : Registered setend emulation handler
+07-03 17:06:03.720     0     0 I clocksource: jiffies: mask: 0xffffffff max_cycles: 0xffffffff, max_idle_ns: 6370867519511994 ns
+07-03 17:06:03.721     0     0 I         : futex hash table entries: 1024 (order: 4, 65536 bytes)
+07-03 17:06:03.722     0     0 I pinctrl core: initialized pinctrl subsystem
+07-03 17:06:03.723     0     0 I NET     : Registered protocol family 16
+07-03 17:06:03.724     0     0 I schedtune: configured to support 6 boost groups
+07-03 17:06:03.724     0     0 I audit   : initializing netlink subsys (disabled)
+07-03 17:06:03.727     0     0 I cpuidle : using governor menu
+07-03 17:06:03.727     0     0 I         : Registered FIQ tty driver
+07-03 17:06:03.728     0     0 I hw-breakpoint: found 6 breakpoint and 4 watchpoint registers.
+07-03 17:06:03.729     0     0 I DMA     : preallocated 256 KiB pool for atomic allocations
+07-03 17:06:03.732     0     0 I ramoops : dmesg-0	0x20000@0x0000000000110000
+07-03 17:06:03.734     0     0 I ramoops : console	0x80000@0x0000000000130000
+07-03 17:06:03.740     0     0 I ramoops : pmsg	0x50000@0x00000000001b0000
+07-03 17:06:03.740     0     0 I         : console [pstore-1] enabled
+07-03 17:06:03.741     0     0 I pstore  : Registered ramoops as persistent store backend
+07-03 17:06:03.741     0     0 I ramoops : attached 0xf0000@0x110000, ecc: 0/0
+07-03 17:06:03.758     0     0 I rockchip-gpio fdd60000.gpio: probed gpio0 (fdd60000.gpio)
+07-03 17:06:03.759     0     0 I rockchip-gpio fe740000.gpio: probed gpio1 (fe740000.gpio)
+07-03 17:06:03.760     0     0 I rockchip-gpio fe750000.gpio: probed gpio2 (fe750000.gpio)
+07-03 17:06:03.760     0     0 I rockchip-gpio fe760000.gpio: probed gpio3 (fe760000.gpio)
+07-03 17:06:03.761     0     0 I rockchip-gpio fe770000.gpio: probed gpio4 (fe770000.gpio)
+07-03 17:06:03.762     0     0 I rockchip-pinctrl pinctrl: probed pinctrl
+07-03 17:06:03.770     0     0 I cryptd  : max_cpu_qlen set to 1000
+07-03 17:06:03.772     0     0 I         : console [ttyFIQ0] enabled
+07-03 17:06:03.772     0     0 I         : bootconsole [uart8250] disabled
+07-03 17:06:03.773     0     0 I         : Registered fiq debugger ttyFIQ0
+07-03 17:06:03.774     0     0 I vcc3v3_sys: supplied by dc_12v
+07-03 17:06:03.775     0     0 I vcc5v0_sys: supplied by dc_12v
+07-03 17:06:03.775     0     0 I vcc5v0_usb: supplied by dc_12v
+07-03 17:06:03.776     0     0 I vcc5v0_host: supplied by vcc5v0_usb
+07-03 17:06:03.777     0     0 I vcc5v0_otg: supplied by vcc5v0_usb
+07-03 17:06:03.777     0     0 I vcc3v3_lcd0_n: supplied by vcc3v3_sys
+07-03 17:06:03.778     0     0 I vcc3v3_lcd1_n: supplied by vcc3v3_sys
+07-03 17:06:03.779     0     0 I vcc3v3_pcie: supplied by dc_12v
+07-03 17:06:03.780     0     0 I rk_iommu fde4b000.iommu: version = 2
+07-03 17:06:03.781     0     0 I rk_iommu fdea0800.iommu: version = 2
+07-03 17:06:03.781     0     0 I rk_iommu fded0480.iommu: version = 2
+07-03 17:06:03.782     0     0 I rk_iommu fdee0800.iommu: version = 2
+07-03 17:06:03.782     0     0 I rk_iommu fdef0800.iommu: version = 2
+07-03 17:06:03.783     0     0 I rk_iommu fdf40f00.iommu: version = 2
+07-03 17:06:03.783     0     0 I rk_iommu fdf80800.iommu: version = 2
+07-03 17:06:03.784     0     0 I rk_iommu fdfe0800.iommu: version = 2
+07-03 17:06:03.785     0     0 I rk_iommu fdff1a00.iommu: version = 2
+07-03 17:06:03.785     0     0 I rk_iommu fe043e00.iommu: version = 2
+07-03 17:06:03.786     0     0 I         : SCSI subsystem initialized
+07-03 17:06:03.786     0     0 D         : libata version 3.00 loaded.
+07-03 17:06:03.787     0     0 I usbcore : registered new interface driver usbfs
+07-03 17:06:03.787     0     0 I usbcore : registered new interface driver hub
+07-03 17:06:03.788     0     0 I usbcore : registered new device driver usb
+07-03 17:06:03.788     0     0 I media   : Linux media interface: v0.10
+07-03 17:06:03.789     0     0 I videodev: Linux video capture interface: v2.00
+07-03 17:06:03.789     0     0 I pps_core: LinuxPPS API ver. 1 registered
+07-03 17:06:03.790     0     0 I pps_core: Software ver. 5.3.6 - Copyright 2005-2007 Rodolfo Giometti <giometti@linux.it>
+07-03 17:06:03.790     0     0 I         : PTP clock support registered
+07-03 17:06:03.791     0     0 I EDAC MC : Ver: 3.0.0
+07-03 17:06:03.792     0     0 I arm-scmi firmware: scmi: SCMI Protocol v2.0 'rockchip:' Firmware version 0x0
+07-03 17:06:03.794     0     0 I         : Advanced Linux Sound Architecture Driver Initialized.
+07-03 17:06:03.795     0     0 I Bluetooth: Core ver 2.22
+07-03 17:06:03.795     0     0 I NET     : Registered protocol family 31
+07-03 17:06:03.796     0     0 I Bluetooth: HCI device and connection manager initialized
+07-03 17:06:03.796     0     0 I Bluetooth: HCI socket layer initialized
+07-03 17:06:03.797     0     0 I Bluetooth: L2CAP socket layer initialized
+07-03 17:06:03.797     0     0 I Bluetooth: SCO socket layer initialized
+07-03 17:06:03.799     0     0 I rockchip-cpuinfo cpuinfo: SoC		: 35673000
+07-03 17:06:03.799     0     0 I rockchip-cpuinfo cpuinfo: Serial		: bb7f1f37b65aefaa
+07-03 17:06:03.801     0     0 I clocksource: Switched to clocksource arch_sys_counter
+07-03 17:06:03.848     0     0 I VFS     : Disk quotas dquot_6.6.0
+07-03 17:06:03.848     0     0 I VFS     : Dquot-cache hash table entries: 512 (order 0, 4096 bytes)
+07-03 17:06:03.850     0     0 W thermal_zone1: power_allocator: sustainable_power will be estimated
+07-03 17:06:03.851     0     0 I NET     : Registered protocol family 2
+07-03 17:06:03.851     0     0 I         : IP idents hash table entries: 32768 (order: 6, 262144 bytes)
+07-03 17:06:03.853     0     0 I         : tcp_listen_portaddr_hash hash table entries: 1024 (order: 2, 16384 bytes)
+07-03 17:06:03.854     0     0 I         : TCP established hash table entries: 16384 (order: 5, 131072 bytes)
+07-03 17:06:03.854     0     0 I         : TCP bind hash table entries: 16384 (order: 6, 262144 bytes)
+07-03 17:06:03.855     0     0 I TCP     : Hash tables configured (established 16384 bind 16384)
+07-03 17:06:03.856     0     0 I         : UDP hash table entries: 1024 (order: 3, 32768 bytes)
+07-03 17:06:03.856     0     0 I         : UDP-Lite hash table entries: 1024 (order: 3, 32768 bytes)
+07-03 17:06:03.857     0     0 I NET     : Registered protocol family 1
+07-03 17:06:03.858     0     0 D PCI     : CLS 0 bytes, default 64
+07-03 17:06:03.859     0     0 I hw perfevents: enabled with armv8_pmuv3 PMU driver, 7 counters available
+07-03 17:06:03.861     0     0 I         : Initialise system trusted keyrings
+07-03 17:06:03.861     0     0 I workingset: timestamp_bits=45 max_order=19 bucket_order=0
+07-03 17:06:03.865     0     0 I exFAT   : file-system version 5.8-2arter97
+07-03 17:06:03.866     0     0 I         : Registering sdcardfs 0.1
+07-03 17:06:03.866     0     0 I         : fuse init (API version 7.27)
+07-03 17:06:03.868     0     0 I         : TEE Core Framework initialization (ver 1:0.1)
+07-03 17:06:03.868     0     0 I         : TEE armv7 Driver initialization
+07-03 17:06:03.869     0     0 I tz_tee_probe: name="armv7sec", id=0, pdev_name="armv7sec.0"
+07-03 17:06:03.870     0     0 I TEE core: Alloc the misc device "opteearmtz00" (id=0)
+07-03 17:06:03.870     0     0 I TEE Core: Register the misc device "opteearmtz00" (id=0,minor=62)
+07-03 17:06:03.872     0     0 I         : Key type asymmetric registered
+07-03 17:06:03.872     0     0 I         : Asymmetric key parser 'x509' registered
+07-03 17:06:03.873     0     0 I         : Block layer SCSI generic (bsg) driver version 0.4 loaded (major 242)
+07-03 17:06:03.873     0     0 I         : io scheduler noop registered
+07-03 17:06:03.874     0     0 I         : io scheduler cfq registered (default)
+07-03 17:06:03.874     0     0 I         : io scheduler mq-deadline registered
+07-03 17:06:03.875     0     0 I         : io scheduler kyber registered
+07-03 17:06:03.875     0     0 I         : io scheduler bfq registered
+07-03 17:06:03.876     0     0 I rockchip-csi2-dphy csi2-dphy0: csi2 dphy0 probe successfully!
+07-03 17:06:03.877     0     0 I rockchip-csi2-dphy-hw fe870000.csi2-dphy-hw: csi2 dphy hw probe successfully!
+07-03 17:06:03.879     0     0 I phy-fe8a0000.usb2-phy.0: Linked as a consumer to regulator.5
+07-03 17:06:03.880     0     0 I phy-fe8a0000.usb2-phy.1: Linked as a consumer to regulator.6
+07-03 17:06:03.881     0     0 E extcon1 : failed to create extcon usb2-phy link
+07-03 17:06:03.882     0     0 I phy-fe8b0000.usb2-phy.2: Linked as a consumer to regulator.5
+07-03 17:06:03.883     0     0 I phy-fe8b0000.usb2-phy.3: Linked as a consumer to regulator.5
+07-03 17:06:03.883     0     0 W phy-fe8b0000.usb2-phy.3: No vbus specified for otg port
+07-03 17:06:03.889     0     0 W pwm-backlight backlight: backlight supply power not found, using dummy regulator
+07-03 17:06:03.890     0     0 I pwm-backlight backlight: Linked as a consumer to regulator.0
+07-03 17:06:03.891     0     0 I iep     : Module initialized.
+07-03 17:06:03.891     0     0 I mpp_service mpp-srv: 310d09c31eaf author: Xueman Ruan 2024-07-01 video: rockchip: mpp: fix iep2 page-fault issue
+07-03 17:06:03.892     0     0 I mpp_service mpp-srv: probe start
+07-03 17:06:03.894     0     0 I iommu   : Adding device fdf40000.rkvenc to group 5
+07-03 17:06:03.894     0     0 I mpp_rkvenc fdf40000.rkvenc: Linked as a consumer to fdf40f00.iommu
+07-03 17:06:03.895     0     0 I mpp_rkvenc fdf40000.rkvenc: probing start
+07-03 17:06:03.896     0     0 W mpp_rkvenc fdf40000.rkvenc: venc regulator not ready, retry
+07-03 17:06:03.896     0     0 E rkvenc_init: 1213: failed to add venc devfreq
+07-03 17:06:03.897     0     0 I iommu   : Adding device fdea0400.vdpu to group 1
+07-03 17:06:03.898     0     0 I mpp_vdpu2 fdea0400.vdpu: Linked as a consumer to fdea0800.iommu
+07-03 17:06:03.899     0     0 I mpp_vdpu2 fdea0400.vdpu: probe device
+07-03 17:06:03.899     0     0 I mpp_vdpu2 fdea0400.vdpu: probing finish
+07-03 17:06:03.900     0     0 I iommu   : Adding device fdee0000.vepu to group 3
+07-03 17:06:03.901     0     0 I mpp_vepu2 fdee0000.vepu: Linked as a consumer to fdee0800.iommu
+07-03 17:06:03.901     0     0 I mpp_vepu2 fdee0000.vepu: probe device
+07-03 17:06:03.902     0     0 I mpp_vepu2 fdee0000.vepu: probing finish
+07-03 17:06:03.903     0     0 I iommu   : Adding device fdef0000.iep to group 4
+07-03 17:06:03.903     0     0 I mpp-iep2 fdef0000.iep: Linked as a consumer to fdef0800.iommu
+07-03 17:06:03.904     0     0 I mpp-iep2 fdef0000.iep: probe device
+07-03 17:06:03.905     0     0 E mpp-iep2 fdef0000.iep: allocate roi buffer failed
+07-03 17:06:03.905     0     0 I mpp-iep2 fdef0000.iep: probing finish
+07-03 17:06:03.906     0     0 I iommu   : Adding device fded0000.jpegd to group 2
+07-03 17:06:03.907     0     0 I mpp_jpgdec fded0000.jpegd: Linked as a consumer to fded0480.iommu
+07-03 17:06:03.907     0     0 I mpp_jpgdec fded0000.jpegd: probe device
+07-03 17:06:03.908     0     0 I mpp_jpgdec fded0000.jpegd: probing finish
+07-03 17:06:03.909     0     0 I iommu   : Adding device fdf80200.rkvdec to group 6
+07-03 17:06:03.909     0     0 I mpp_rkvdec2 fdf80200.rkvdec: Linked as a consumer to fdf80800.iommu
+07-03 17:06:03.910     0     0 I mpp_rkvdec2 fdf80200.rkvdec: probing start
+07-03 17:06:03.911     0     0 I mpp_rkvdec2 fdf80200.rkvdec: 16 task capacity link mode detected
+07-03 17:06:03.911     0     0 E mpp_rkvdec2 fdf80200.rkvdec: shared_niu_a is not found!
+07-03 17:06:03.912     0     0 E rkvdec2_init: 961: No niu aclk reset resource define
+07-03 17:06:03.912     0     0 E mpp_rkvdec2 fdf80200.rkvdec: shared_niu_h is not found!
+07-03 17:06:03.913     0     0 E rkvdec2_init: 964: No niu hclk reset resource define
+07-03 17:06:03.914     0     0 W mpp_rkvdec2 fdf80200.rkvdec: vdec regulator not ready, retry
+07-03 17:06:03.914     0     0 E rkvdec2_init: 978: failed to add vdec devfreq
+07-03 17:06:03.915     0     0 E mpp_rkvdec2 fdf80200.rkvdec: probe sub driver failed
+07-03 17:06:03.916     0     0 I mpp_service mpp-srv: probe success
+07-03 17:06:03.919     0     0 I dma-pl330 fe530000.dmac: Loaded driver for PL330 DMAC-241330
+07-03 17:06:03.919     0     0 I dma-pl330 fe530000.dmac: DBUFF-128x8bytes Num_Chans-8 Num_Peri-32 Num_Events-16
+07-03 17:06:03.921     0     0 I dma-pl330 fe550000.dmac: Loaded driver for PL330 DMAC-241330
+07-03 17:06:03.922     0     0 I dma-pl330 fe550000.dmac: DBUFF-128x8bytes Num_Chans-8 Num_Peri-32 Num_Events-16
+07-03 17:06:03.924     0     0 I         : rockchip-system-monitor rockchip-system-monitor: system monitor probe
+07-03 17:06:03.925     0     0 I Serial  : 8250/16550 driver, 10 ports, IRQ sharing disabled
+07-03 17:06:03.926     0     0 I fe650000.serial: ttyS1 at MMIO 0xfe650000 (irq = 60, base_baud = 1500000) is a 16550A
+07-03 17:06:03.928     0     0 I random  : fast init done
+07-03 17:06:03.928     0     0 I iommu   : Adding device fe040000.vop to group 9
+07-03 17:06:03.929     0     0 I rockchip-vop2 fe040000.vop: Linked as a consumer to fe043e00.iommu
+07-03 17:06:03.929     0     0 I random  : crng init done
+07-03 17:06:03.933     0     0 I rockchip-drm display-subsystem: Linked as a consumer to fe040000.vop
+07-03 17:06:03.934     0     0 I rockchip-drm display-subsystem: Linked as a consumer to fe0a0000.hdmi
+07-03 17:06:03.935     0     0 I rockchip-drm display-subsystem: Linked as a consumer to fe060000.dsi
+07-03 17:06:03.937     0     0 W rockchip-drm display-subsystem: defer getting devfreq
+07-03 17:06:03.938     0     0 I rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp0 assign plane mask: 0x5, primary plane phy id: 2
+07-03 17:06:03.938     0     0 I rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp1 assign plane mask: 0x3a, primary plane phy id: 3
+07-03 17:06:03.939     0     0 I rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp2 assign plane mask: 0x0, primary plane phy id: -1
+07-03 17:06:03.941     0     0 W         : [drm] unsupported AFBC format[3432564e]
+07-03 17:06:03.941     0     0 I rockchip-drm display-subsystem: bound fe040000.vop (ops vop2_component_ops)
+07-03 17:06:03.942     0     0 I dwhdmi-rockchip fe0a0000.hdmi: Detected HDMI TX controller v2.11a with HDCP (DWC HDMI 2.0 TX PHY)
+07-03 17:06:03.943     0     0 I dwhdmi-rockchip fe0a0000.hdmi: registered DesignWare HDMI I2C bus driver
+07-03 17:06:03.944     0     0 I rockchip-drm display-subsystem: bound fe0a0000.hdmi (ops dw_hdmi_rockchip_ops)
+07-03 17:06:03.945     0     0 E dw-mipi-dsi fe060000.dsi: [drm:dw_mipi_dsi_bind] *ERROR* Failed to find panel or bridge: -517
+07-03 17:06:03.951     0     0 I panel-simple-dsi fe060000.dsi.0: Linked as a consumer to regulator.7
+07-03 17:06:03.952     0     0 W panel-simple-dsi fe060000.dsi.0: fe060000.dsi.0 supply vsp not found, using dummy regulator
+07-03 17:06:03.952     0     0 I panel-simple-dsi fe060000.dsi.0: Linked as a consumer to regulator.0
+07-03 17:06:03.953     0     0 W panel-simple-dsi fe060000.dsi.0: fe060000.dsi.0 supply vsn not found, using dummy regulator
+07-03 17:06:03.955     0     0 I mali fde60000.gpu: Kernel DDK version g7p1-01bet0
+07-03 17:06:03.955     0     0 W cacheinfo: Unable to detect cache hierarchy for CPU 0
+07-03 17:06:03.955     0     0 I mali fde60000.gpu: Device initialization Deferred
+07-03 17:06:03.960     0     0 I brd     : module loaded
+07-03 17:06:03.971     0     0 I loop    : module loaded
+07-03 17:06:03.971     0     0 I zram    : Added device: zram0
+07-03 17:06:03.972     0     0 I         : SCSI Media Changer driver v0.25
+07-03 17:06:03.975     0     0 I tun     : Universal TUN/TAP device driver, 1.6
+07-03 17:06:03.976     0     0 W         : Jonah maybe goto rk_get_eth_addr
+07-03 17:06:03.977     0     0 E rk_gmac-dwmac fe010000.ethernet: no regulator found
+07-03 17:06:03.977     0     0 I rk_gmac-dwmac fe010000.ethernet: clock input or output? (input).
+07-03 17:06:03.978     0     0 I rk_gmac-dwmac fe010000.ethernet: TX delay(0x40).
+07-03 17:06:03.978     0     0 I rk_gmac-dwmac fe010000.ethernet: RX delay(0x0).
+07-03 17:06:03.979     0     0 I rk_gmac-dwmac fe010000.ethernet: integrated PHY? (no).
+07-03 17:06:03.979     0     0 I rk_gmac-dwmac fe010000.ethernet: clock input from PHY
+07-03 17:06:03.980     0     0 I rk_gmac-dwmac fe010000.ethernet: init for RGMII
+07-03 17:06:03.981     0     0 I rk_gmac-dwmac fe010000.ethernet: User ID: 0x30, Synopsys ID: 0x51
+07-03 17:06:03.981     0     0 I rk_gmac-dwmac fe010000.ethernet: DWMAC4/5
+07-03 17:06:03.982     0     0 I rk_gmac-dwmac fe010000.ethernet: DMA HW capability register supported
+07-03 17:06:03.983     0     0 I rk_gmac-dwmac fe010000.ethernet: RX Checksum Offload Engine supported
+07-03 17:06:03.983     0     0 I rk_gmac-dwmac fe010000.ethernet: TX Checksum insertion supported
+07-03 17:06:03.984     0     0 I rk_gmac-dwmac fe010000.ethernet: Wake-Up On Lan supported
+07-03 17:06:03.984     0     0 I rk_gmac-dwmac fe010000.ethernet: TSO supported
+07-03 17:06:03.985     0     0 I rk_gmac-dwmac fe010000.ethernet: Enable RX Mitigation via HW Watchdog Timer
+07-03 17:06:03.986     0     0 I rk_gmac-dwmac fe010000.ethernet: TSO feature enabled
+07-03 17:06:04.198     0     0 I         : yzhang..read phyaddr=1, phyid=001cc916
+07-03 17:06:04.199     0     0 I         : PPP generic driver version 2.4.2
+07-03 17:06:04.199     0     0 I         : PPP BSD Compression module registered
+07-03 17:06:04.200     0     0 I         : PPP Deflate Compression module registered
+07-03 17:06:04.200     0     0 I         : PPP MPPE Compression module registered
+07-03 17:06:04.200     0     0 I NET     : Registered protocol family 24
+07-03 17:06:04.201     0     0 I         : PPTP driver version 0.8.5
+07-03 17:06:04.201     0     0 I SLIP    : version 0.8.4-NET3.019-NEWTTY (dynamic channels, max=256) (6 bit encapsulation enabled).
+07-03 17:06:04.202     0     0 I CSLIP   : code copyright 1989 Regents of the University of California.
+07-03 17:06:04.203     0     0 I usbcore : registered new interface driver catc
+07-03 17:06:04.203     0     0 I usbcore : registered new interface driver kaweth
+07-03 17:06:04.204     0     0 I pegasus : v0.9.3 (2013/04/25), Pegasus/Pegasus II USB Ethernet driver
+07-03 17:06:04.205     0     0 I usbcore : registered new interface driver pegasus
+07-03 17:06:04.205     0     0 I usbcore : registered new interface driver rtl8150
+07-03 17:06:04.206     0     0 I usbcore : registered new interface driver r8152
+07-03 17:06:04.206     0     0 I hso     : drivers/net/usb/hso.c: Option Wireless
+07-03 17:06:04.207     0     0 I usbcore : registered new interface driver hso
+07-03 17:06:04.207     0     0 I usbcore : registered new interface driver asix
+07-03 17:06:04.208     0     0 I usbcore : registered new interface driver ax88179_178a
+07-03 17:06:04.208     0     0 I usbcore : registered new interface driver cdc_ether
+07-03 17:06:04.209     0     0 I usbcore : registered new interface driver cdc_eem
+07-03 17:06:04.209     0     0 I usbcore : registered new interface driver dm9601
+07-03 17:06:04.210     0     0 I usbcore : registered new interface driver smsc75xx
+07-03 17:06:04.210     0     0 I usbcore : registered new interface driver smsc95xx
+07-03 17:06:04.211     0     0 I usbcore : registered new interface driver gl620a
+07-03 17:06:04.211     0     0 I usbcore : registered new interface driver net1080
+07-03 17:06:04.212     0     0 I usbcore : registered new interface driver plusb
+07-03 17:06:04.212     0     0 I usbcore : registered new interface driver rndis_host
+07-03 17:06:04.213     0     0 I usbcore : registered new interface driver cdc_subset
+07-03 17:06:04.214     0     0 I usbcore : registered new interface driver zaurus
+07-03 17:06:04.214     0     0 I usbcore : registered new interface driver MOSCHIP usb-ethernet driver
+07-03 17:06:04.215     0     0 I usbcore : registered new interface driver int51x1
+07-03 17:06:04.215     0     0 I usbcore : registered new interface driver kalmia
+07-03 17:06:04.216     0     0 I usbcore : registered new interface driver ipheth
+07-03 17:06:04.216     0     0 I usbcore : registered new interface driver sierra_net
+07-03 17:06:04.217     0     0 I usbcore : registered new interface driver cx82310_eth
+07-03 17:06:04.217     0     0 I usbcore : registered new interface driver cdc_ncm
+07-03 17:06:04.218     0     0 I usbcore : registered new interface driver qmi_wwan
+07-03 17:06:04.218     0     0 I usbcore : registered new interface driver cdc_mbim
+07-03 17:06:04.220     0     0 E dwc3 fcc00000.dwc3: Failed to get clk 'ref': -2
+07-03 17:06:04.224     0     0 E dwc3 fd000000.dwc3: Failed to get clk 'ref': -2
+07-03 17:06:04.226     0     0 W naneng-combphy fe830000.phy: wait phy status ready timeout
+07-03 17:06:04.231     0     0 I ehci_hcd: USB 2.0 'Enhanced' Host Controller (EHCI) Driver
+07-03 17:06:04.231     0     0 I ehci-pci: EHCI PCI platform driver
+07-03 17:06:04.232     0     0 I ehci-platform: EHCI generic platform driver
+07-03 17:06:04.235     0     0 I ehci-platform fd800000.usb: EHCI Host Controller
+07-03 17:06:04.235     0     0 I ehci-platform fd800000.usb: new USB bus registered, assigned bus number 1
+07-03 17:06:04.236     0     0 I ehci-platform fd800000.usb: irq 11, io mem 0xfd800000
+07-03 17:06:04.247     0     0 I ehci-platform fd800000.usb: USB 2.0 started, EHCI 1.00
+07-03 17:06:04.248     0     0 I usb1    : New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 4.19
+07-03 17:06:04.249     0     0 I usb1    : New USB device strings: Mfr=3, Product=2, SerialNumber=1
+07-03 17:06:04.249     0     0 I usb1    : Product: EHCI Host Controller
+07-03 17:06:04.250     0     0 I usb1    : Manufacturer: Linux 4.19.232 ehci_hcd
+07-03 17:06:04.250     0     0 I usb1    : SerialNumber: fd800000.usb
+07-03 17:06:04.251     0     0 I hub 1-0 : 1.0: USB hub found
+07-03 17:06:04.251     0     0 I hub 1-0 : 1.0: 1 port detected
+07-03 17:06:04.254     0     0 I ehci-platform fd880000.usb: EHCI Host Controller
+07-03 17:06:04.255     0     0 I ehci-platform fd880000.usb: new USB bus registered, assigned bus number 2
+07-03 17:06:04.255     0     0 I ehci-platform fd880000.usb: irq 13, io mem 0xfd880000
+07-03 17:06:04.267     0     0 I ehci-platform fd880000.usb: USB 2.0 started, EHCI 1.00
+07-03 17:06:04.268     0     0 I usb2    : New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 4.19
+07-03 17:06:04.269     0     0 I usb2    : New USB device strings: Mfr=3, Product=2, SerialNumber=1
+07-03 17:06:04.269     0     0 I usb2    : Product: EHCI Host Controller
+07-03 17:06:04.270     0     0 I usb2    : Manufacturer: Linux 4.19.232 ehci_hcd
+07-03 17:06:04.270     0     0 I usb2    : SerialNumber: fd880000.usb
+07-03 17:06:04.271     0     0 I hub 2-0 : 1.0: USB hub found
+07-03 17:06:04.271     0     0 I hub 2-0 : 1.0: 1 port detected
+07-03 17:06:04.272     0     0 I ohci_hcd: USB 1.1 'Open' Host Controller (OHCI) Driver
+07-03 17:06:04.273     0     0 I ohci-platform: OHCI generic platform driver
+07-03 17:06:04.273     0     0 I ohci-platform fd840000.usb: Generic Platform OHCI controller
+07-03 17:06:04.275     0     0 I ohci-platform fd840000.usb: new USB bus registered, assigned bus number 3
+07-03 17:06:04.275     0     0 I ohci-platform fd840000.usb: irq 12, io mem 0xfd840000
+07-03 17:06:04.335     0     0 I usb3    : New USB device found, idVendor=1d6b, idProduct=0001, bcdDevice= 4.19
+07-03 17:06:04.335     0     0 I usb3    : New USB device strings: Mfr=3, Product=2, SerialNumber=1
+07-03 17:06:04.336     0     0 I usb3    : Product: Generic Platform OHCI controller
+07-03 17:06:04.337     0     0 I usb3    : Manufacturer: Linux 4.19.232 ohci_hcd
+07-03 17:06:04.337     0     0 I usb3    : SerialNumber: fd840000.usb
+07-03 17:06:04.338     0     0 I hub 3-0 : 1.0: USB hub found
+07-03 17:06:04.338     0     0 I hub 3-0 : 1.0: 1 port detected
+07-03 17:06:04.339     0     0 I ohci-platform fd8c0000.usb: Generic Platform OHCI controller
+07-03 17:06:04.340     0     0 I ohci-platform fd8c0000.usb: new USB bus registered, assigned bus number 4
+07-03 17:06:04.340     0     0 I ohci-platform fd8c0000.usb: irq 14, io mem 0xfd8c0000
+07-03 17:06:04.401     0     0 I usb4    : New USB device found, idVendor=1d6b, idProduct=0001, bcdDevice= 4.19
+07-03 17:06:04.402     0     0 I usb4    : New USB device strings: Mfr=3, Product=2, SerialNumber=1
+07-03 17:06:04.403     0     0 I usb4    : Product: Generic Platform OHCI controller
+07-03 17:06:04.403     0     0 I usb4    : Manufacturer: Linux 4.19.232 ohci_hcd
+07-03 17:06:04.404     0     0 I usb4    : SerialNumber: fd8c0000.usb
+07-03 17:06:04.404     0     0 I hub 4-0 : 1.0: USB hub found
+07-03 17:06:04.405     0     0 I hub 4-0 : 1.0: 1 port detected
+07-03 17:06:04.406     0     0 I xhci-hcd.1.auto: xHCI Host Controller
+07-03 17:06:04.407     0     0 I xhci-hcd.1.auto: new USB bus registered, assigned bus number 5
+07-03 17:06:04.408     0     0 I xhci-hcd.1.auto: hcc params 0x0220fe64 hci version 0x110 quirks 0x0000011002010010
+07-03 17:06:04.409     0     0 I xhci-hcd.1.auto: irq 73, io mem 0xfd000000
+07-03 17:06:04.409     0     0 I usb5    : New USB device found, idVendor=1d6b, idProduct=0002, bcdDevice= 4.19
+07-03 17:06:04.410     0     0 I usb5    : New USB device strings: Mfr=3, Product=2, SerialNumber=1
+07-03 17:06:04.411     0     0 I usb5    : Product: xHCI Host Controller
+07-03 17:06:04.411     0     0 I usb5    : Manufacturer: Linux 4.19.232 xhci-hcd
+07-03 17:06:04.412     0     0 I usb5    : SerialNumber: xhci-hcd.1.auto
+07-03 17:06:04.412     0     0 I hub 5-0 : 1.0: USB hub found
+07-03 17:06:04.413     0     0 I hub 5-0 : 1.0: 1 port detected
+07-03 17:06:04.413     0     0 I xhci-hcd.1.auto: xHCI Host Controller
+07-03 17:06:04.414     0     0 I xhci-hcd.1.auto: new USB bus registered, assigned bus number 6
+07-03 17:06:04.415     0     0 I xhci-hcd.1.auto: Host supports USB 3.0 SuperSpeed
+07-03 17:06:04.415     0     0 I usb6    : We don't know the algorithms for LPM for this host, disabling LPM.
+07-03 17:06:04.416     0     0 I usb6    : New USB device found, idVendor=1d6b, idProduct=0003, bcdDevice= 4.19
+07-03 17:06:04.417     0     0 I usb6    : New USB device strings: Mfr=3, Product=2, SerialNumber=1
+07-03 17:06:04.417     0     0 I usb6    : Product: xHCI Host Controller
+07-03 17:06:04.418     0     0 I usb6    : Manufacturer: Linux 4.19.232 xhci-hcd
+07-03 17:06:04.418     0     0 I usb6    : SerialNumber: xhci-hcd.1.auto
+07-03 17:06:04.419     0     0 I hub 6-0 : 1.0: USB hub found
+07-03 17:06:04.419     0     0 E hub 6-0 : 1.0: config failed, hub doesn't have any ports! (err -19)
+07-03 17:06:04.420     0     0 I usbcore : registered new interface driver cdc_acm
+07-03 17:06:04.421     0     0 I cdc_acm : USB Abstract Control Model driver for USB modems and ISDN adapters
+07-03 17:06:04.421     0     0 I usbcore : registered new interface driver usblp
+07-03 17:06:04.422     0     0 I usbcore : registered new interface driver cdc_wdm
+07-03 17:06:04.423     0     0 I usbcore : registered new interface driver uas
+07-03 17:06:04.423     0     0 I usbcore : registered new interface driver usb-storage
+07-03 17:06:04.424     0     0 I usbcore : registered new interface driver ums-alauda
+07-03 17:06:04.424     0     0 I usbcore : registered new interface driver ums-cypress
+07-03 17:06:04.425     0     0 I usbcore : registered new interface driver ums-datafab
+07-03 17:06:04.425     0     0 I usbcore : registered new interface driver ums_eneub6250
+07-03 17:06:04.426     0     0 I usbcore : registered new interface driver ums-freecom
+07-03 17:06:04.427     0     0 I usbcore : registered new interface driver ums-isd200
+07-03 17:06:04.427     0     0 I usbcore : registered new interface driver ums-jumpshot
+07-03 17:06:04.428     0     0 I usbcore : registered new interface driver ums-karma
+07-03 17:06:04.428     0     0 I usbcore : registered new interface driver ums-onetouch
+07-03 17:06:04.429     0     0 I usbcore : registered new interface driver ums-sddr09
+07-03 17:06:04.429     0     0 I usbcore : registered new interface driver ums-sddr55
+07-03 17:06:04.430     0     0 I usbcore : registered new interface driver ums-usbat
+07-03 17:06:04.430     0     0 I usbcore : registered new interface driver usbserial_generic
+07-03 17:06:04.431     0     0 I usbserial: USB Serial support registered for generic
+07-03 17:06:04.432     0     0 I usbcore : registered new interface driver option
+07-03 17:06:04.432     0     0 I usbserial: USB Serial support registered for GSM modem (1-port)
+07-03 17:06:04.433     0     0 I usbcore : registered new interface driver trancevibrator
+07-03 17:06:04.434     0     0 I usbcore : registered new interface driver xpad
+07-03 17:06:04.434     0     0 I usbcore : registered new interface driver usb_acecad
+07-03 17:06:04.435     0     0 I usbcore : registered new interface driver aiptek
+07-03 17:06:04.435     0     0 I usbcore : registered new interface driver gtco
+07-03 17:06:04.436     0     0 I usbcore : registered new interface driver hanwang
+07-03 17:06:04.437     0     0 I usbcore : registered new interface driver kbtab
+07-03 17:06:04.437     0     0 I cyttsp5_loader_init: Parade TTSP FW Loader Driver (Built TTDA.03.08.874312) rc=0
+07-03 17:06:04.438     0     0 I cyttsp5_device_access_init: Parade TTSP Device Access Driver (Built TTDA.03.08.874312) rc=0
+07-03 17:06:04.440     0     0 I         : i2c /dev entries driver
+07-03 17:06:04.442     0     0 I fan53555-regulator 0-0040: FAN53555 Option[8] Rev[1] Detected!
+07-03 17:06:04.445     0     0 I vdd_cpu : supplied by vcc5v0_sys
+07-03 17:06:04.451     0     0 I rk808 0-0020: chip id: 0x8090
+07-03 17:06:04.451     0     0 W rk808 0-0020: No cache defaults, reading back from HW
+07-03 17:06:04.476     0     0 I rk808 0-0020: source: on=0x80, off=0x04
+07-03 17:06:04.476     0     0 I rk808 0-0020: support dcdc3 fb mode:-22, 63
+07-03 17:06:04.477     0     0 I rk808 0-0020: support pmic reset mode:0,1
+07-03 17:06:04.481     0     0 I         : rk808-regulator rk808-regulator: there is no dvs0 gpio
+07-03 17:06:04.482     0     0 I         : rk808-regulator rk808-regulator: there is no dvs1 gpio
+07-03 17:06:04.482     0     0 I vdd_logic: supplied by vcc3v3_sys
+07-03 17:06:04.483     0     0 I vdd_gpu : supplied by vcc3v3_sys
+07-03 17:06:04.483     0     0 I vcc_ddr : supplied by vcc3v3_sys
+07-03 17:06:04.484     0     0 I vdd_npu : supplied by vcc3v3_sys
+07-03 17:06:04.484     0     0 I vcc_1v8 : supplied by vcc3v3_sys
+07-03 17:06:04.485     0     0 I vdda0v9_image: supplied by vcc3v3_sys
+07-03 17:06:04.486     0     0 I vdda_0v9: supplied by vcc3v3_sys
+07-03 17:06:04.486     0     0 I vdda0v9_pmu: supplied by vcc3v3_sys
+07-03 17:06:04.487     0     0 I vccio_acodec: supplied by vcc3v3_sys
+07-03 17:06:04.487     0     0 I vccio_sd: supplied by vcc3v3_sys
+07-03 17:06:04.488     0     0 I vcc3v3_pmu: supplied by vcc3v3_sys
+07-03 17:06:04.488     0     0 I vcca_1v8: supplied by vcc3v3_sys
+07-03 17:06:04.489     0     0 I vcca1v8_pmu: supplied by vcc3v3_sys
+07-03 17:06:04.490     0     0 I vcca1v8_image: supplied by vcc3v3_sys
+07-03 17:06:04.490     0     0 I vcc_3v3 : supplied by vcc3v3_sys
+07-03 17:06:04.491     0     0 I vcc3v3_sd: supplied by vcc3v3_sys
+07-03 17:06:04.494     0     0 I input   : rk805 pwrkey as /devices/platform/fdd40000.i2c/i2c-0/0-0020/rk805-pwrkey/input/input0
+07-03 17:06:04.501     0     0 I         : rk808-rtc rk808-rtc: registered as rtc0
+07-03 17:06:04.503     0     0 I         : rk808-rtc rk808-rtc: setting system clock to 2026-07-03 09:06:04 UTC (1783069564)
+07-03 17:06:04.504     0     0 E i2c-0   : 1 i2c clients have been registered at 0x40
+07-03 17:06:04.507     0     0 I vdd_cpu : supplied by vcc5v0_sys
+07-03 17:06:04.512     0     0 W vdd_cpu : Failed to create debugfs directory
+07-03 17:06:04.513     0     0 W         : <<GTP-INF>>[gt1x_ts_probe:537] GTP Driver Version: V1.4<2015/07/10>
+07-03 17:06:04.513     0     0 I input   : gsl3673_800x1280 as /devices/platform/fe5a0000.i2c/i2c-1/1-0040/input/input1
+07-03 17:06:04.514     0     0 W         : <<GTP-INF>>[gt1x_ts_probe:538] GTP I2C Address: 0x14
+07-03 17:06:04.515     0     0 W         : <<GTP-ERR>>[gt1x_parse_dt:334] vdd_ana not specified, fallback to power-supply
+07-03 17:06:04.516     0     0 W         : <<GTP-ERR>>[gt1x_parse_dt:337] power not specified, ignore power ctrl
+07-03 17:06:04.517     0     0 W         : <<GTP-ERR>>[gt1x_request_io_port:416] Failed to request GPIO:14, ERRNO:-16
+07-03 17:06:04.517     0     0 W         : <<GTP-ERR>>[gt1x_ts_probe:558] GTP request IO port failed.
+07-03 17:06:04.518     0     0 W Goodix-TS-GT1X: probe of 1-0014 failed with error -16
+07-03 17:06:04.588     0     0 E i2c-2   : 1 i2c clients have been registered at 0x37
+07-03 17:06:04.590     0     0 I iommu   : Adding device fdfe0000.rkcif to group 7
+07-03 17:06:04.590     0     0 I rkcifhw fdfe0000.rkcif: Linked as a consumer to fdfe0800.iommu
+07-03 17:06:04.591     0     0 E rkcifhw fdfe0000.rkcif: can't request region for resource [mem 0xfdfe0000-0xfdfe7fff]
+07-03 17:06:04.592     0     0 I rkcif_mipi_lvds: rkcif driver version: v00.01.0a
+07-03 17:06:04.593     0     0 I rkcif_mipi_lvds: attach to cif hw node
+07-03 17:06:04.593     0     0 I rkcif_mipi_lvds: rkcif wait line 0
+07-03 17:06:04.594     0     0 E OF      : graph: no port node found in /rkcif_mipi_lvds
+07-03 17:06:04.595     0     0 W rkcif_mipi_lvds: cif_subdev_notifier: no subdev be found!
+07-03 17:06:04.595     0     0 E rkcif_mipi_lvds: Failed to register subdev notifier(-19)
+07-03 17:06:04.596     0     0 I rkcif_mipi_lvds: detach to cif hw node
+07-03 17:06:04.598     0     0 I iommu   : Adding device fdff0000.rkisp to group 8
+07-03 17:06:04.599     0     0 I rkisp_hw fdff0000.rkisp: Linked as a consumer to fdff1a00.iommu
+07-03 17:06:04.599     0     0 I rkisp_hw fdff0000.rkisp: is_thunderboot: 0
+07-03 17:06:04.600     0     0 I rkisp_hw fdff0000.rkisp: max input:0x0@0fps
+07-03 17:06:04.600     0     0 E rkisp_hw fdff0000.rkisp: can't request region for resource [mem 0xfdff0000-0xfdffffff]
+07-03 17:06:04.602     0     0 I rkisp-vir0: rkisp driver version: v01.09.00
+07-03 17:06:04.602     0     0 W rkisp-vir0: Entity type for entity rkisp-isp-subdev was not initialized!
+07-03 17:06:04.603     0     0 W rkisp-vir0: Entity type for entity rkisp-csi-subdev was not initialized!
+07-03 17:06:04.605     0     0 I usbcore : registered new interface driver uvcvideo
+07-03 17:06:04.606     0     0 I         : USB Video Class driver (1.1.1)
+07-03 17:06:04.606     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: Linked as a consumer to regulator.24
+07-03 17:06:04.607     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: pmuio2(3300000 uV) supplied by vcc3v3_pmu
+07-03 17:06:04.608     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: Linked as a consumer to regulator.22
+07-03 17:06:04.609     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: vccio1(3300000 uV) supplied by vccio_acodec
+07-03 17:06:04.610     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: Linked as a consumer to regulator.23
+07-03 17:06:04.610     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: vccio3(3300000 uV) supplied by vccio_sd
+07-03 17:06:04.611     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: Linked as a consumer to regulator.18
+07-03 17:06:04.612     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: vccio4(1800000 uV) supplied by vcc_1v8
+07-03 17:06:04.613     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: vccio5(1800000 uV) supplied by vcc_1v8
+07-03 17:06:04.614     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: vccio6(1800000 uV) supplied by vcc_1v8
+07-03 17:06:04.614     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: Linked as a consumer to regulator.28
+07-03 17:06:04.615     0     0 I rockchip-iodomain fdc20000.syscon: io-domains: vccio7(3300000 uV) supplied by vcc_3v3
+07-03 17:06:04.617     0     0 W __power_supply_register: Expected proper parent device for 'test_ac'
+07-03 17:06:04.618     0     0 W __power_supply_register: Expected proper parent device for 'test_battery'
+07-03 17:06:04.619     0     0 W thermal_zone2: power_allocator: sustainable_power will be estimated
+07-03 17:06:04.619     0     0 W __power_supply_register: Expected proper parent device for 'test_usb'
+07-03 17:06:04.621     0     0 I rockchip-thermal fe710000.tsadc: tsadc is probed successfully!
+07-03 17:06:04.623     0     0 I device-mapper: uevent: version 1.0.3
+07-03 17:06:04.623     0     0 I device-mapper: ioctl: 4.39.0-ioctl (2018-04-03) initialised: dm-devel@redhat.com
+07-03 17:06:04.624     0     0 I device-mapper: verity-avb: AVB error handler initialized with vbmeta device:
+07-03 17:06:04.625     0     0 I Bluetooth: HCI UART driver ver 2.3
+07-03 17:06:04.625     0     0 I Bluetooth: HCI UART protocol H4 registered
+07-03 17:06:04.626     0     0 I rtk_btusb: RTKBT_RELEASE_NAME: 20180702_BT_ANDROID_8.1
+07-03 17:06:04.626     0     0 I rtk_btusb: Realtek Bluetooth USB driver module init, version 4.1.5
+07-03 17:06:04.627     0     0 I rtk_btusb: Register usb char device interface for BT driver
+07-03 17:06:04.628     0     0 I usbcore : registered new interface driver rtk_btusb
+07-03 17:06:04.629     0     0 I cpu0    : bin=0
+07-03 17:06:04.629     0     0 I cpu0    : leakage=21
+07-03 17:06:04.629     0     0 I cpu0    : pvtm = 87120, from nvmem
+07-03 17:06:04.630     0     0 I cpu0    : pvtm-volt-sel=2
+07-03 17:06:04.630     0     0 I cpu0    : soc version=0, speed=2
+07-03 17:06:04.631     0     0 I cpu0    : Linked as a consumer to regulator.30
+07-03 17:06:04.632     0     0 I cpu0    : Dropping the link to regulator.30
+07-03 17:06:04.633     0     0 I cpu0    : Linked as a consumer to regulator.30
+07-03 17:06:04.634     0     0 I cpu0    : adjust opp-table by otp: min=1104M, max=1992M, volt=25mV
+07-03 17:06:04.635     0     0 I cpu0    : avs=0
+07-03 17:06:04.635     0     0 W energy_model: pd0: hertz/watts ratio non-monotonically decreasing: em_cap_state 2 >= em_cap_state1
+07-03 17:06:04.636     0     0 D energy_model: Created perf domain 0-3
+07-03 17:06:04.636     0     0 I cpu0    : l=0 h=2147483647 hyst=5000 l_limit=0 h_limit=0 h_table=0
+07-03 17:06:04.642     0     0 E cpu0    : failed to find power_model node
+07-03 17:06:04.643     0     0 I sdhci   : Secure Digital Host Controller Interface driver
+07-03 17:06:04.644     0     0 I sdhci   : Copyright(c) Pierre Ossman
+07-03 17:06:04.644     0     0 I         : Synopsys Designware Multimedia Card Interface Driver
+07-03 17:06:04.645     0     0 I sdhci-pltfm: SDHCI platform and OF driver helper
+07-03 17:06:04.645     0     0 W dwmmc_rockchip fe2b0000.dwmmc: No normal pinctrl state
+07-03 17:06:04.645     0     0 W dwmmc_rockchip fe2c0000.dwmmc: No normal pinctrl state
+07-03 17:06:04.645     0     0 W dwmmc_rockchip fe2c0000.dwmmc: No idle pinctrl state
+07-03 17:06:04.645     0     0 I dwmmc_rockchip fe2c0000.dwmmc: IDMAC supports 32-bit address mode.
+07-03 17:06:04.645     0     0 I dwmmc_rockchip fe2c0000.dwmmc: Using internal DMA controller.
+07-03 17:06:04.645     0     0 I dwmmc_rockchip fe2c0000.dwmmc: Version ID is 270a
+07-03 17:06:04.645     0     0 I dwmmc_rockchip fe2c0000.dwmmc: DW MMC controller at irq 46,32 bit host data width,256 deep fifo
+07-03 17:06:04.645     0     0 I dwmmc_rockchip fe2c0000.dwmmc: allocated mmc-pwrseq
+07-03 17:06:04.646     0     0 W dwmmc_rockchip fe2b0000.dwmmc: No idle pinctrl state
+07-03 17:06:04.646     0     0 E mmc2    : Unknown controller version (5). You may experience problems.
+07-03 17:06:04.646     0     0 I         : mmc_host mmc1: card is non-removable.
+07-03 17:06:04.647     0     0 E rk-crypto fe380000.crypto: invalid resource
+07-03 17:06:04.647     0     0 I dwmmc_rockchip fe2b0000.dwmmc: IDMAC supports 32-bit address mode.
+07-03 17:06:04.647     0     0 I rk-crypto fe380000.crypto: register to cryptodev ok!
+07-03 17:06:04.647     0     0 I rk-crypto fe380000.crypto: CRYPTO V2.0.0.0 Accelerator successfully registered
+07-03 17:06:04.648     0     0 I cryptodev: driver 1.12 loaded.
+07-03 17:06:04.648     0     0 I dwmmc_rockchip fe2b0000.dwmmc: Using internal DMA controller.
+07-03 17:06:04.649     0     0 I hidraw  : raw HID events driver (C) Jiri Kosina
+07-03 17:06:04.650     0     0 I dwmmc_rockchip fe2b0000.dwmmc: Version ID is 270a
+07-03 17:06:04.652     0     0 I usbcore : registered new interface driver usbhid
+07-03 17:06:04.652     0     0 I dwmmc_rockchip fe2b0000.dwmmc: DW MMC controller at irq 45,32 bit host data width,256 deep fifo
+07-03 17:06:04.653     0     0 I usbhid  : USB HID core driver
+07-03 17:06:04.653     0     0 I dwmmc_rockchip fe2b0000.dwmmc: Linked as a consumer to regulator.29
+07-03 17:06:04.654     0     0 I ion_device_add_heap: ion_system_contig_heap id=0 type=1
+07-03 17:06:04.654     0     0 I dwmmc_rockchip fe2b0000.dwmmc: Linked as a consumer to regulator.23
+07-03 17:06:04.655     0     0 I ion_device_add_heap: ion_system_heap id=1 type=0
+07-03 17:06:04.660     0     0 I ion_device_add_heap: linux,cma id=2 type=4
+07-03 17:06:04.661     0     0 I ashmem  : initialized
+07-03 17:06:04.661     0     0 I rockchip,bus bus-npu: Linked as a consumer to regulator.14
+07-03 17:06:04.662     0     0 I rockchip,bus bus-npu: bin=0
+07-03 17:06:04.662     0     0 E rockchip,bus bus-npu: Failed to get leakage
+07-03 17:06:04.663     0     0 I rockchip,bus bus-npu: pvtm = 87120, from nvmem
+07-03 17:06:04.663     0     0 I rockchip,bus bus-npu: pvtm-volt-sel=1
+07-03 17:06:04.664     0     0 I rockchip,bus bus-npu: avs=0
+07-03 17:06:04.667     0     0 I rockchip-saradc fe720000.saradc: Linked as a consumer to regulator.25
+07-03 17:06:04.669     0     0 I         : mmc_host mmc0: Bus speed (slot 0) = 375000Hz (slot req 400000Hz, actual 375000HZ div = 0)
+07-03 17:06:04.669     0     0 I optee   : probing for conduit method from DT.
+07-03 17:06:04.670     0     0 I optee   : revision 3.13 (6c78a7d8)
+07-03 17:06:04.670     0     0 I optee   : initialized driver
+07-03 17:06:04.671     0     0 E         : rknandbase v1.2 2021-01-07
+07-03 17:06:04.672     0     0 I rknand fe330000.nandc: rknand_probe clk rate = 148500000
+07-03 17:06:04.677     0     0 I mmc2    : SDHCI controller on fe310000.sdhci [fe310000.sdhci] using ADMA
+07-03 17:06:04.712     0     0 I mmc2    : Host Software Queue enabled
+07-03 17:06:04.712     0     0 I mmc2    : new HS200 MMC card at address 0001
+07-03 17:06:04.713     0     0 I mmcblk2 : mmc2:0001 eMMC   29.1 GiB
+07-03 17:06:04.714     0     0 I mmcblk2boot0: mmc2:0001 eMMC   partition 1 4.00 MiB
+07-03 17:06:04.715     0     0 I mmcblk2boot1: mmc2:0001 eMMC   partition 2 4.00 MiB
+07-03 17:06:04.716     0     0 I mmcblk2rpmb: mmc2:0001 eMMC   partition 3 4.00 MiB, chardev (235:0)
+07-03 17:06:04.719     0     0 I mmcblk2 : p1 p2 p3 p4 p5 p6 p7 p8 p9 p10 p11 p12 p13 p14 p15 p16 p17 p18 p19 p20
+07-03 17:06:04.864     0     0 I         : mmc_host mmc1: Bus speed (slot 0) = 375000Hz (slot req 400000Hz, actual 375000HZ div = 0)
+07-03 17:06:04.884     0     0 W dwmmc_rockchip fe2c0000.dwmmc: card claims to support voltages below defined range
+07-03 17:06:05.404     0     0 W dwmmc_rockchip fe2c0000.dwmmc: Unexpected CMD11 timeout
+07-03 17:06:05.405     0     0 E         : mmc_host mmc1: Timeout sending command (cmd 0x10202000 arg 0x0 status 0x90202000)
+07-03 17:06:05.479     0     0 I phy-fe8a0000.usb2-phy.1: charger = USB_SDP_CHARGER
+07-03 17:06:05.483     0     0 W         : ftl_init fffffffe
+07-03 17:06:05.483     0     0 E         : rk_ftl_init fail
+07-03 17:06:05.484     0     0 I usbcore : registered new interface driver snd-usb-audio
+07-03 17:06:05.486     0     0 W         : rk817-codec rk817-codec: DMA mask not set
+07-03 17:06:05.488     0     0 I rockchip-i2s-tdm fe410000.i2s: Register PCM for TRCM mode
+07-03 17:06:05.491     0     0 I netem   : version 1.3
+07-03 17:06:05.491     0     0 I         : u32 classifier
+07-03 17:06:05.492     0     0 I         : Actions configured
+07-03 17:06:05.492     0     0 I xt_time : kernel timezone is -0000
+07-03 17:06:05.493     0     0 I gre     : GRE over IPv4 demultiplexor driver
+07-03 17:06:05.493     0     0 I         : IPv4 over IPsec tunneling driver
+07-03 17:06:05.494     0     0 I         : Initializing XFRM netlink socket
+07-03 17:06:05.495     0     0 I         : IPsec XFRM device driver
+07-03 17:06:05.495     0     0 I NET     : Registered protocol family 10
+07-03 17:06:05.496     0     0 I         : Segment Routing with IPv6
+07-03 17:06:05.497     0     0 I mip6    : Mobile IPv6
+07-03 17:06:05.497     0     0 I sit     : IPv6, IPv4 and MPLS over IPv4 tunneling driver
+07-03 17:06:05.499     0     0 I NET     : Registered protocol family 17
+07-03 17:06:05.499     0     0 I NET     : Registered protocol family 15
+07-03 17:06:05.499     0     0 I         : Bridge firewalling registered
+07-03 17:06:05.500     0     0 I Bluetooth: RFCOMM TTY layer initialized
+07-03 17:06:05.500     0     0 I Bluetooth: RFCOMM socket layer initialized
+07-03 17:06:05.501     0     0 I Bluetooth: RFCOMM ver 1.11
+07-03 17:06:05.501     0     0 I Bluetooth: BNEP (Ethernet Emulation) ver 1.3
+07-03 17:06:05.502     0     0 I Bluetooth: BNEP filters: protocol multicast
+07-03 17:06:05.502     0     0 I Bluetooth: BNEP socket layer initialized
+07-03 17:06:05.503     0     0 I Bluetooth: HIDP (Human Interface Emulation) ver 1.2
+07-03 17:06:05.503     0     0 I Bluetooth: HIDP socket layer initialized
+07-03 17:06:05.504     0     0 I l2tp_core: L2TP core driver, V2.0
+07-03 17:06:05.504     0     0 I l2tp_ppp: PPPoL2TP kernel driver, V2.0
+07-03 17:06:05.504     0     0 I [BT_RFKILL]: Enter rfkill_rk_init
+07-03 17:06:05.505     0     0 I [WLAN_RFKILL]: Enter rfkill_wlan_init
+07-03 17:06:05.506     0     0 I [WLAN_RFKILL]: Enter rfkill_wlan_probe
+07-03 17:06:05.506     0     0 I [WLAN_RFKILL]: wlan_platdata_parse_dt: wifi_chip_type = rtl8822cs
+07-03 17:06:05.507     0     0 I [WLAN_RFKILL]: wlan_platdata_parse_dt: enable wifi power control.
+07-03 17:06:05.507     0     0 I [WLAN_RFKILL]: wlan_platdata_parse_dt: wifi power controled by gpio.
+07-03 17:06:05.508     0     0 I [WLAN_RFKILL]: wlan_platdata_parse_dt: WIFI,host_wake_irq = 74, flags = 0.
+07-03 17:06:05.509     0     0 I [WLAN_RFKILL]: wlan_platdata_parse_dt: The ref_wifi_clk not found !
+07-03 17:06:05.509     0     0 I [WLAN_RFKILL]: rfkill_wlan_probe: init gpio
+07-03 17:06:05.510     0     0 I [WLAN_RFKILL]: rfkill_set_wifi_bt_power: 1
+07-03 17:06:05.510     0     0 I [WLAN_RFKILL]: Exit rfkill_wlan_probe
+07-03 17:06:05.511     0     0 I [BT_RFKILL]: bluetooth_platdata_parse_dt: get property: uart_rts_gpios = 77.
+07-03 17:06:05.512     0     0 I [BT_RFKILL]: bluetooth_platdata_parse_dt: get property: BT,reset_gpio = 79.
+07-03 17:06:05.513     0     0 I [BT_RFKILL]: bluetooth_platdata_parse_dt: get property: BT,wake_gpio = 81.
+07-03 17:06:05.513     0     0 I [BT_RFKILL]: bluetooth_platdata_parse_dt: get property: BT,wake_host_irq = 80.
+07-03 17:06:05.514     0     0 I [BT_RFKILL]: Request irq for bt wakeup host
+07-03 17:06:05.515     0     0 I [BT_RFKILL]: ** disable irq
+07-03 17:06:05.515     0     0 I [BT_RFKILL]: bt_default device registered.
+07-03 17:06:05.516     0     0 I input   : bt-powerkey as /devices/virtual/input/input2
+07-03 17:06:05.517     0     0 I ov5695 2-0036: driver version: 00.01.04
+07-03 17:06:05.518     0     0 W ov5695 2-0036: 2-0036 supply avdd not found, using dummy regulator
+07-03 17:06:05.518     0     0 I ov5695 2-0036: Linked as a consumer to regulator.0
+07-03 17:06:05.519     0     0 W ov5695 2-0036: 2-0036 supply dovdd not found, using dummy regulator
+07-03 17:06:05.520     0     0 W ov5695 2-0036: 2-0036 supply dvdd not found, using dummy regulator
+07-03 17:06:05.522     0     0 E ov5695 2-0036: Unexpected sensor id(000000), ret(-5)
+07-03 17:06:05.523     0     0 I gc02m1 2-0037: driver version: 00.01.03
+07-03 17:06:05.524     0     0 I gc02m1 2-0037: Linked as a consumer to regulator.12
+07-03 17:06:05.524     0     0 I gc02m1 2-0037: Linked as a consumer to regulator.11
+07-03 17:06:05.525     0     0 I gc02m1 2-0037: Linked as a consumer to regulator.9
+07-03 17:06:05.526     0     0 E gc02m1 2-0037: could not get default pinstate
+07-03 17:06:05.526     0     0 E gc02m1 2-0037: could not get sleep pinstate
+07-03 17:06:05.527     0     0 E gc02m1 2-0037: v4l2_i2c_subdev_init
+07-03 17:06:05.527     0     0 E gc02m1 2-0037: may be
+07-03 17:06:05.532     0     0 I gc02m1 2-0037: detected gc02e0 sensor
+07-03 17:06:05.537     0     0 I chatty  : uid=0(root) logd identical 3 lines
+07-03 17:06:05.538     0     0 I gc02m1 2-0037: detected gc02e0 sensor
+07-03 17:06:05.539     0     0 I vendor storage: 20190527 ret = 0
+07-03 17:06:05.539     0     0 I rockchip-csi2-dphy csi2-dphy0: dphy0 matches m00_f_gc02m1 2-0037:bus type 4
+07-03 17:06:05.540     0     0 I gc8034 2-0037-1: driver version: 00.01.06
+07-03 17:06:05.541     0     0 W gc8034 2-0037-1: Failed to get power-gpios, maybe no use
+07-03 17:06:05.541     0     0 W gc8034 2-0037-1: 2-0037-1 supply avdd not found, using dummy regulator
+07-03 17:06:05.542     0     0 I gc8034 2-0037-1: Linked as a consumer to regulator.0
+07-03 17:06:05.542     0     0 W gc8034 2-0037-1: 2-0037-1 supply dovdd not found, using dummy regulator
+07-03 17:06:05.543     0     0 W gc8034 2-0037-1: 2-0037-1 supply dvdd not found, using dummy regulator
+07-03 17:06:05.544     0     0 I gc8034 2-0037-1: lane_num(4)  pixel_rate(319887360)
+07-03 17:06:05.544     0     0 E gc8034 2-0037-1: could not get default pinstate
+07-03 17:06:05.545     0     0 E gc8034 2-0037-1: could not get sleep pinstate
+07-03 17:06:05.550     0     0 E gc8034 2-0037-1: gc8034 read reg:0xf0 failed !
+07-03 17:06:05.551     0     0 E gc8034 2-0037-1: gc8034 read reg:0xf1 failed !
+07-03 17:06:05.552     0     0 E gc8034 2-0037-1: Unexpected sensor id(000000), ret(-6)
+07-03 17:06:05.553     0     0 I         : registered taskstats version 1
+07-03 17:06:05.554     0     0 I         : Loading compiled-in X.509 certificates
+07-03 17:06:05.554     0     0 I         : Key type ._fscrypt registered
+07-03 17:06:05.554     0     0 I         : Key type .fscrypt registered
+07-03 17:06:05.555     0     0 I         : Key type fscrypt-provisioning registered
+07-03 17:06:05.555     0     0 I pstore  : Using compression: deflate
+07-03 17:06:05.557     0     0 I rga     : rga2, irq = 22, match scheduler
+07-03 17:06:05.558     0     0 I rga     : rga2 hardware loaded successfully, hw_version:3.2.63318.
+07-03 17:06:05.558     0     0 I rga     : rga2 probe successfully
+07-03 17:06:05.559     0     0 I rga_iommu: IOMMU binding successfully, default mapping core[0x4]
+07-03 17:06:05.560     0     0 I rga     : Module initialized. v1.2.26
+07-03 17:06:05.580     0     0 I mpp_rkvenc fdf40000.rkvenc: probing start
+07-03 17:06:05.581     0     0 I mpp_rkvenc fdf40000.rkvenc: Linked as a consumer to regulator.14
+07-03 17:06:05.582     0     0 I mpp_rkvenc fdf40000.rkvenc: bin=0
+07-03 17:06:05.582     0     0 E mpp_rkvenc fdf40000.rkvenc: Failed to get leakage
+07-03 17:06:05.583     0     0 I mpp_rkvenc fdf40000.rkvenc: pvtm = 87120, from nvmem
+07-03 17:06:05.583     0     0 I mpp_rkvenc fdf40000.rkvenc: pvtm-volt-sel=1
+07-03 17:06:05.584     0     0 I mpp_rkvenc fdf40000.rkvenc: avs=0
+07-03 17:06:05.584     0     0 E mpp_rkvenc fdf40000.rkvenc: failed to find power_model node
+07-03 17:06:05.585     0     0 E mpp_rkvenc fdf40000.rkvenc: failed to initialize power model
+07-03 17:06:05.585     0     0 E mpp_rkvenc fdf40000.rkvenc: failed to get dynamic-coefficient
+07-03 17:06:05.586     0     0 I mpp_rkvenc fdf40000.rkvenc: probing finish
+07-03 17:06:05.587     0     0 I mpp_rkvdec2 fdf80200.rkvdec: probing start
+07-03 17:06:05.587     0     0 I mpp_rkvdec2 fdf80200.rkvdec: 16 task capacity link mode detected
+07-03 17:06:05.588     0     0 E mpp_rkvdec2 fdf80200.rkvdec: shared_niu_a is not found!
+07-03 17:06:05.589     0     0 E rkvdec2_init: 961: No niu aclk reset resource define
+07-03 17:06:05.589     0     0 E mpp_rkvdec2 fdf80200.rkvdec: shared_niu_h is not found!
+07-03 17:06:05.590     0     0 E rkvdec2_init: 964: No niu hclk reset resource define
+07-03 17:06:05.591     0     0 I mpp_rkvdec2 fdf80200.rkvdec: Linked as a consumer to regulator.14
+07-03 17:06:05.591     0     0 I mpp_rkvdec2 fdf80200.rkvdec: bin=0
+07-03 17:06:05.592     0     0 I mpp_rkvdec2 fdf80200.rkvdec: leakage=39
+07-03 17:06:05.592     0     0 I mpp_rkvdec2 fdf80200.rkvdec: leakage-volt-sel=0
+07-03 17:06:05.593     0     0 I mpp_rkvdec2 fdf80200.rkvdec: pvtm = 87120, from nvmem
+07-03 17:06:05.593     0     0 I mpp_rkvdec2 fdf80200.rkvdec: pvtm-volt-sel=1
+07-03 17:06:05.594     0     0 I mpp_rkvdec2 fdf80200.rkvdec: avs=0
+07-03 17:06:05.594     0     0 E mpp_rkvdec2 fdf80200.rkvdec: failed to find power_model node
+07-03 17:06:05.595     0     0 E mpp_rkvdec2 fdf80200.rkvdec: failed to initialize power model
+07-03 17:06:05.595     0     0 E mpp_rkvdec2 fdf80200.rkvdec: failed to get dynamic-coefficient
+07-03 17:06:05.596     0     0 I mpp_rkvdec2 fdf80200.rkvdec: sram_start 0x00000000fdcc0000
+07-03 17:06:05.597     0     0 I mpp_rkvdec2 fdf80200.rkvdec: rcb_iova 0x0000000010000000
+07-03 17:06:05.597     0     0 I mpp_rkvdec2 fdf80200.rkvdec: sram_size 45056
+07-03 17:06:05.598     0     0 I mpp_rkvdec2 fdf80200.rkvdec: rcb_size 65536
+07-03 17:06:05.598     0     0 I mpp_rkvdec2 fdf80200.rkvdec: min_width 512
+07-03 17:06:05.599     0     0 I mpp_rkvdec2 fdf80200.rkvdec: link mode probe finish
+07-03 17:06:05.599     0     0 I mpp_rkvdec2 fdf80200.rkvdec: probing finish
+07-03 17:06:05.603     0     0 W rockchip-drm display-subsystem: defer getting devfreq
+07-03 17:06:05.603     0     0 I rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp0 assign plane mask: 0x5, primary plane phy id: 2
+07-03 17:06:05.604     0     0 I rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp1 assign plane mask: 0x3a, primary plane phy id: 3
+07-03 17:06:05.605     0     0 I rockchip-vop2 fe040000.vop: [drm:vop2_bind] vp2 assign plane mask: 0x0, primary plane phy id: -1
+07-03 17:06:05.607     0     0 I rockchip-drm display-subsystem: bound fe040000.vop (ops vop2_component_ops)
+07-03 17:06:05.607     0     0 I dwhdmi-rockchip fe0a0000.hdmi: Detected HDMI TX controller v2.11a with HDCP (DWC HDMI 2.0 TX PHY)
+07-03 17:06:05.609     0     0 I dwhdmi-rockchip fe0a0000.hdmi: registered DesignWare HDMI I2C bus driver
+07-03 17:06:05.611     0     0 I input   : hdmi_cec_key as /devices/platform/fe0a0000.hdmi/dw-hdmi-cec.4.auto/input/input3
+07-03 17:06:05.613     0     0 I rockchip-drm display-subsystem: bound fe0a0000.hdmi (ops dw_hdmi_rockchip_ops)
+07-03 17:06:05.613     0     0 I rockchip-drm display-subsystem: bound fe060000.dsi (ops dw_mipi_dsi_ops)
+07-03 17:06:05.614     0     0 I         : [drm] Supports vblank timestamp caching Rev 2 (21.10.2013).
+07-03 17:06:05.615     0     0 I         : [drm] No driver support for vblank timestamp query.
+07-03 17:06:05.616     0     0 E get_framebuffer_by_node: failed to get logo,offset
+07-03 17:06:05.636     0     0 I rockchip-drm display-subsystem: fb0:  frame buffer device
+07-03 17:06:05.637     0     0 I         : [drm] Initialized rockchip 2.0.0 20140818 for display-subsystem on minor 0
+07-03 17:06:05.638     0     0 I mali fde60000.gpu: Kernel DDK version g7p1-01bet0
+07-03 17:06:05.638     0     0 I input   : adc-keys as /devices/platform/adc-keys/input/input4
+07-03 17:06:05.639     0     0 I mali fde60000.gpu: Linked as a consumer to regulator.15
+07-03 17:06:05.640     0     0 E mali fde60000.gpu: dev_pm_opp_set_regulators: no regulator (shadercores) found: -19
+07-03 17:06:05.641     0     0 I mali fde60000.gpu: bin=0
+07-03 17:06:05.641     0     0 I rockchip-dmc dmc: Linked as a consumer to regulator.14
+07-03 17:06:05.641     0     0 I mali fde60000.gpu: leakage=5
+07-03 17:06:05.642     0     0 I rockchip-dmc dmc: bin=0
+07-03 17:06:05.642     0     0 I mali fde60000.gpu: pvtm = 87120, from nvmem
+07-03 17:06:05.643     0     0 I rockchip-dmc dmc: leakage=39
+07-03 17:06:05.643     0     0 I mali fde60000.gpu: pvtm-volt-sel=2
+07-03 17:06:05.643     0     0 I rockchip-dmc dmc: leakage-volt-sel=0
+07-03 17:06:05.644     0     0 I mali fde60000.gpu: soc version=0, speed=2
+07-03 17:06:05.644     0     0 I rockchip-dmc dmc: pvtm = 87120, from nvmem
+07-03 17:06:05.645     0     0 I mali fde60000.gpu: adjust opp-table by otp: min=600M, max=800M, volt=25mV
+07-03 17:06:05.645     0     0 I rockchip-dmc dmc: pvtm-volt-sel=1
+07-03 17:06:05.646     0     0 I mali fde60000.gpu: avs=0
+07-03 17:06:05.646     0     0 I rockchip-dmc dmc: soc version=0, speed=1
+07-03 17:06:05.647     0     0 W         : W : [File] : drivers/gpu/arm/bifrost/platform/rk/mali_kbase_config_rk.c; [Line] : 112; [Func] : kbase_platform_rk_init(); power-off-delay-ms not available.
+07-03 17:06:05.647     0     0 I rockchip-dmc dmc: avs=0
+07-03 17:06:05.649     0     0 I rockchip-dmc dmc: current ATF version 0x102
+07-03 17:06:05.649     0     0 I mali fde60000.gpu: GPU identified as 0x2 arch 7.4.0 r1p0 status 0
+07-03 17:06:05.649     0     0 I mali fde60000.gpu: No priority control manager is configured
+07-03 17:06:05.650     0     0 I rockchip-dmc dmc: normal_rate = 780000000
+07-03 17:06:05.650     0     0 I mali fde60000.gpu: No memory group manager is configured
+07-03 17:06:05.650     0     0 I rockchip-dmc dmc: reboot_rate = 1560000000
+07-03 17:06:05.651     0     0 I mali fde60000.gpu: l=0 h=2147483647 hyst=5000 l_limit=700000000 h_limit=0 h_table=0
+07-03 17:06:05.652     0     0 I rockchip-dmc dmc: suspend_rate = 324000000
+07-03 17:06:05.653     0     0 I rockchip-dmc dmc: video_4k_rate = 780000000
+07-03 17:06:05.653     0     0 I mali fde60000.gpu: Probed as mali0
+07-03 17:06:05.654     0     0 I rockchip-dmc dmc: video_4k_10b_rate = 780000000
+07-03 17:06:05.654     0     0 I rockchip-dmc dmc: boost_rate = 1560000000
+07-03 17:06:05.655     0     0 I rockchip-dmc dmc: fixed_rate(isp|cif0|cif1|dualview) = 1560000000
+07-03 17:06:05.656     0     0 I rockchip-dmc dmc: performance_rate = 1560000000
+07-03 17:06:05.656     0     0 E rockchip-dmc dmc: failed to get vop pn to msch rl
+07-03 17:06:05.657     0     0 I rockchip-dmc dmc: l=0 h=2147483647 hyst=5000 l_limit=0 h_limit=0 h_table=0
+07-03 17:06:05.657     0     0 E rockchip-dmc dmc: could not find power_model node
+07-03 17:06:05.659     0     0 I         : mmc_host mmc1: Bus speed (slot 0) = 50000000Hz (slot req 50000000Hz, actual 50000000HZ div = 0)
+07-03 17:06:05.661     0     0 I mmc1    : new high speed SDIO card at address 0001
+07-03 17:06:05.667     0     0 I         : rk817-codec rk817-codec: rk817_probe: chip_name:0x80, chip_ver:0x9a
+07-03 17:06:05.677     0     0 E asoc-simple-card rk809-sound: control 2:0:0:Receive PATH3 Source Select:0 is already present
+07-03 17:06:05.678     0     0 E rockchip-pdm fe440000.pdm: ASoC: Failed to add Receive PATH3 Source Select: -16
+07-03 17:06:05.679     0     0 I asoc-simple-card rk809-sound: rk817-hifi <-> fe410000.i2s mapping ok
+07-03 17:06:05.681     0     0 I asoc-simple-card rk809-sound: rk817-voice <-> fe440000.pdm mapping ok
+07-03 17:06:05.681     0     0 E asoc-simple-card rk809-sound: ASoC: no source widget found for MICBIAS1
+07-03 17:06:05.682     0     0 E asoc-simple-card rk809-sound: ASoC: Failed to add route MICBIAS1 -> direct -> Mic Jack
+07-03 17:06:05.683     0     0 E asoc-simple-card rk809-sound: ASoC: no sink widget found for IN1P
+07-03 17:06:05.683     0     0 E asoc-simple-card rk809-sound: ASoC: Failed to add route Mic Jack -> direct -> IN1P
+07-03 17:06:05.684     0     0 E asoc-simple-card rk809-sound: ASoC: no source widget found for HPOL
+07-03 17:06:05.685     0     0 E asoc-simple-card rk809-sound: ASoC: Failed to add route HPOL -> direct -> Headphone Jack
+07-03 17:06:05.686     0     0 E asoc-simple-card rk809-sound: ASoC: no source widget found for HPOR
+07-03 17:06:05.686     0     0 E asoc-simple-card rk809-sound: ASoC: Failed to add route HPOR -> direct -> Headphone Jack
+07-03 17:06:05.691     0     0 I rk-hdmi-sound hdmi-sound: i2s-hifi <-> fe400000.i2s mapping ok
+07-03 17:06:05.692     0     0 I input   : rockchip,hdmi rockchip,hdmi as /devices/platform/hdmi-sound/sound/card1/input5
+07-03 17:06:05.697     0     0 W         : It doesn't contain Rogue gpu
+07-03 17:06:05.699     0     0 I iommu   : Adding device fde40000.npu to group 0
+07-03 17:06:05.699     0     0 I RKNPU fde40000.npu: Linked as a consumer to fde4b000.iommu
+07-03 17:06:05.701     0     0 I RKNPU fde40000.npu: RKNPU: rknpu iommu is enabled, using iommu mode
+07-03 17:06:05.702     0     0 I RKNPU fde40000.npu: Linked as a consumer to regulator.17
+07-03 17:06:05.703     0     0 E RKNPU fde40000.npu: can't request region for resource [mem 0xfde40000-0xfde4ffff]
+07-03 17:06:05.705     0     0 I         : [drm] Initialized rknpu 0.8.2 20220829 for fde40000.npu on minor 1
+07-03 17:06:05.706     0     0 I RKNPU fde40000.npu: bin=0
+07-03 17:06:05.706     0     0 I RKNPU fde40000.npu: leakage=3
+07-03 17:06:05.706     0     0 I RKNPU fde40000.npu: pvtm = 87120, from nvmem
+07-03 17:06:05.707     0     0 I RKNPU fde40000.npu: pvtm-volt-sel=2
+07-03 17:06:05.708     0     0 I RKNPU fde40000.npu: soc version=0, speed=2
+07-03 17:06:05.709     0     0 I RKNPU fde40000.npu: adjust opp-table by otp: min=600M, max=1000M, volt=25mV
+07-03 17:06:05.709     0     0 I RKNPU fde40000.npu: avs=0
+07-03 17:06:05.711     0     0 I RKNPU fde40000.npu: l=0 h=2147483647 hyst=5000 l_limit=0 h_limit=0 h_table=0
+07-03 17:06:05.711     0     0 E RKNPU fde40000.npu: failed to find power_model node
+07-03 17:06:05.712     0     0 E RKNPU fde40000.npu: RKNPU: failed to initialize power model
+07-03 17:06:05.713     0     0 E RKNPU fde40000.npu: RKNPU: failed to get dynamic-coefficient
+07-03 17:06:05.715     0     0 I cfg80211: Loading compiled-in X.509 certificates for regulatory database
+07-03 17:06:05.717     0     0 I cfg80211: Loaded X.509 cert 'sforshee: 00b28ddf47aef9cea7'
+07-03 17:06:05.718     0     0 W platform regulatory.0: Direct firmware load for regulatory.db failed with error -2
+07-03 17:06:05.718     0     0 I cfg80211: failed to load regulatory.db
+07-03 17:06:05.721     0     0 W rockchip-pm rockchip-suspend: not set pwm-regulator-config
+07-03 17:06:05.722     0     0 I         : rockchip-suspend not set sleep-mode-config for mem-lite
+07-03 17:06:05.722     0     0 I         : rockchip-suspend not set wakeup-config for mem-lite
+07-03 17:06:05.723     0     0 I         : rockchip-suspend not set sleep-mode-config for mem-ultra
+07-03 17:06:05.723     0     0 I         : rockchip-suspend not set wakeup-config for mem-ultra
+07-03 17:06:05.725     0     0 I         : I : [File] : drivers/gpu/arm/mali400/mali/linux/mali_kernel_linux.c; [Line] : 418; [Func] : mali_module_init(); svn_rev_string_from_arm of this mali_ko is '', rk_ko_ver is '5', built at '19:26:07', on 'Jul  1 2026'.
+07-03 17:06:05.727     0     0 W Mali    :  
+07-03 17:06:05.727     0     0 W         : Mali device driver loaded
+07-03 17:06:05.728     0     0 I rkisp-vir0: clear unready subdev num: 3
+07-03 17:06:05.729     0     0 I rkisp-vir0: Async subdev notifier completed
+07-03 17:06:05.730     0     0 I         : ALSA device list:
+07-03 17:06:05.730     0     0 I         : #0: rockchip,rk809-codec
+07-03 17:06:05.731     0     0 I         : #1: rockchip,hdmi
+07-03 17:06:05.737     0     0 I EXT4-fs (mmcblk2p16): mounted filesystem without journal. Opts: (null)
+07-03 17:06:05.738     0     0 I VFS     : Mounted root (ext4 filesystem) readonly on device 179:16.
+07-03 17:06:05.745     0     0 I         : Freeing unused kernel memory: 4352K
+07-03 17:06:05.746     0     0 I         : Run /init as init process
+07-03 17:06:05.756     0     0 E devfreq fde60000.gpu: Couldn't update frequency transition information.
+07-03 17:06:05.770     0     0 I init    : init first stage started!
+07-03 17:06:05.771     0     0 I init    : Using Android DT directory /proc/device-tree/firmware/android/
+07-03 17:06:05.845     0     0 I init    : [libfs_mgr]Returning avb_handle with status: 3
+07-03 17:06:05.845     0     0 I init    : [libfs_mgr]AVB HASHTREE disabled on: /vendor
+07-03 17:06:05.849     0     0 I EXT4-fs (mmcblk2p18): mounted filesystem without journal. Opts: barrier=1,inode_readahead_blks=8
+07-03 17:06:05.850     0     0 I init    : [libfs_mgr]__mount(source=/dev/block/by-name/vendor,target=/vendor,type=ext4)=0: Success
+07-03 17:06:05.853     0     0 I init    : Skipped setting INIT_AVB_VERSION (not in recovery mode)
+07-03 17:06:05.854     0     0 I init    : Loading SELinux policy
+07-03 17:06:05.882     0     0 I SELinux : Class process2 not defined in policy.
+07-03 17:06:05.883     0     0 I SELinux : Permission nlmsg_readpriv in class netlink_route_socket not defined in policy.
+07-03 17:06:05.884     0     0 I SELinux : Permission nlmsg_getneigh in class netlink_route_socket not defined in policy.
+07-03 17:06:05.885     0     0 I SELinux : Permission name_connect in class sctp_socket not defined in policy.
+07-03 17:06:05.885     0     0 I SELinux : Permission association in class sctp_socket not defined in policy.
+07-03 17:06:05.886     0     0 I SELinux : Class infiniband_pkey not defined in policy.
+07-03 17:06:05.887     0     0 I SELinux : Class infiniband_endport not defined in policy.
+07-03 17:06:05.887     0     0 I SELinux : Class xdp_socket not defined in policy.
+07-03 17:06:05.888     0     0 I SELinux : Class perf_event not defined in policy.
+07-03 17:06:05.888     0     0 I SELinux : the above unknown classes and permissions will be denied
+07-03 17:06:05.889     0     0 I SELinux : policy capability network_peer_controls=1
+07-03 17:06:05.890     0     0 I SELinux : policy capability open_perms=1
+07-03 17:06:05.890     0     0 I SELinux : policy capability extended_socket_class=1
+07-03 17:06:05.890     0     0 I SELinux : policy capability always_check_network=0
+07-03 17:06:05.891     0     0 I SELinux : policy capability cgroup_seclabel=0
+07-03 17:06:05.892     0     0 I SELinux : policy capability nnp_nosuid_transition=0
+07-03 17:06:06.051     0     0 I selinux : SELinux: Loaded policy from /vendor/etc/selinux/precompiled_sepolicy
+07-03 17:06:06.060     0     0 I selinux : SELinux: Loaded file_contexts
+07-03 17:06:06.066     0     0 I init    : init second stage started!
+07-03 17:06:06.095     0     0 I init    : Using Android DT directory /proc/device-tree/firmware/android/
+07-03 17:06:06.101     0     0 I selinux : SELinux: Loaded file_contexts
+07-03 17:06:06.102     0     0 I init    : Running restorecon...
+07-03 17:06:06.112     0     0 E init    : waitid failed: No child processes
+07-03 17:06:06.118     0     0 W init    : Couldn't load property file '/odm/default.prop': open() failed: No such file or directory: No such file or directory
+07-03 17:06:06.121     0     0 E selinux : avc:  denied  { set } for  scontext=u:r:vendor_init:s0 tcontext=u:object_r:default_prop:s0 tclass=property_service permissive=1
+07-03 17:06:06.123     0     0 E selinux : avc:  denied  { set } for  scontext=u:r:vendor_init:s0 tcontext=u:object_r:exported_secure_prop:s0 tclass=property_service permissive=1
+07-03 17:06:06.125     0     0 I init    : Created socket '/dev/socket/property_service', mode 666, user 0, group 0
+07-03 17:06:06.128     0     0 I init    : Forked subcontext for 'u:r:vendor_init:s0' with pid 114
+07-03 17:06:06.204     0     0 I ueventd : ueventd started!
+07-03 17:06:06.208     0     0 I selinux : SELinux: Loaded file_contexts
+07-03 17:06:06.209     0     0 I ueventd : Parsing file /ueventd.rc...
+07-03 17:06:06.213     0     0 I ueventd : Parsing file /vendor/ueventd.rc...
+07-03 17:06:06.215     0     0 E ueventd : /vendor/ueventd.rc: 121: invalid gid 'trace'
+07-03 17:06:06.216     0     0 I ueventd : Parsing file /odm/ueventd.rc...
+07-03 17:06:06.217     0     0 E ueventd : Unable to read config file '/odm/ueventd.rc': open() failed: No such file or directory
+07-03 17:06:06.218     0     0 I ueventd : Parsing file /ueventd.rk30board.rc...
+07-03 17:06:06.218     0     0 E ueventd : Unable to read config file '/ueventd.rk30board.rc': open() failed: No such file or directory
+07-03 17:06:06.518     0     0 I ueventd : Coldboot took 0.297 seconds
+07-03 17:06:06.552     0     0 I         : Registered swp emulation handler
+07-03 17:06:06.569     0     0 W EXT4-fs (mmcblk2p19): Ignoring removed nomblk_io_submit option
+07-03 17:06:06.571     0     0 I EXT4-fs (mmcblk2p19): mounted filesystem without journal. Opts: errors=remount-ro,nomblk_io_submit
+07-03 17:06:06.625     0     0 I e2fsck  : e2fsck 1.43.3 (04-Sep-2016)
+07-03 17:06:06.626     0     0 I e2fsck  : oem: clean, 15/16384 files, 534/16384 blocks
+07-03 17:06:06.628     0     0 I EXT4-fs (mmcblk2p19): mounted filesystem without journal. Opts: noauto_da_alloc
+07-03 17:06:06.632     0     0 I EXT4-fs (mmcblk2p17): mounted filesystem with ordered data mode. Opts: noauto_da_alloc,discard
+07-03 17:06:06.635     0     0 W EXT4-fs (mmcblk2p15): Ignoring removed nomblk_io_submit option
+07-03 17:06:06.637     0     0 I EXT4-fs (mmcblk2p15): mounted filesystem with ordered data mode. Opts: errors=remount-ro,nomblk_io_submit
+07-03 17:06:06.679     0     0 I e2fsck  : e2fsck 1.43.3 (04-Sep-2016)
+07-03 17:06:06.680     0     0 I e2fsck  : /dev/block/by-name/cache: clean, 38/65536 files, 6383/65536 blocks
+07-03 17:06:06.683     0     0 I EXT4-fs (mmcblk2p15): mounted filesystem with ordered data mode. Opts: noauto_da_alloc,discard
+07-03 17:06:06.685     0     0 W EXT4-fs (mmcblk2p20): Ignoring removed nomblk_io_submit option
+07-03 17:06:06.689     0     0 I EXT4-fs (mmcblk2p20): mounted filesystem with ordered data mode. Opts: errors=remount-ro,nomblk_io_submit
+07-03 17:06:06.760     0     0 I e2fsck  : e2fsck 1.43.3 (04-Sep-2016)
+07-03 17:06:06.761     0     0 I e2fsck  : /dev/block/by-name/userdata: clean, 2099/1689120 files, 184221/6756344 blocks
+07-03 17:06:06.767     0     0 I EXT4-fs (mmcblk2p20): mounted filesystem with ordered data mode. Opts: discard,noauto_da_alloc,data=ordered,user_xattr,barrier=1
+07-03 17:06:06.826     0     0 I logd.auditd: start
+07-03 17:06:07.006     0     0 D vdc     : Waited 20ms for vold
+07-03 17:06:07.141     0     0 I rkisp-vir0: first params buf queue
+07-03 17:06:07.379     0     0 W healthd : BatteryCurrentNowPath not found
+07-03 17:06:07.380     0     0 W healthd : BatteryCycleCountPath not found
+07-03 17:06:07.386     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:06:07.448     0     0 E init    : property 'ro.serialno' doesn't exist while expanding '${ro.serialno}'
+07-03 17:06:07.466     0     0 I         : file system registered
+07-03 17:06:07.501     0     0 W         : using random self ethernet address
+07-03 17:06:07.502     0     0 W         : using random host ethernet address
+07-03 17:06:07.522     0     0 W healthd : BatteryCurrentNowPath not found
+07-03 17:06:07.522     0     0 W healthd : BatteryCycleCountPath not found
+07-03 17:06:07.555     0     0 W rockchip-usb2phy fe8a0000.usb2-phy: Same as current mode
+07-03 17:06:07.567     0     0 E android.hardware.health@2.0-impl: wakealarm_init: timerfd_create failed
+07-03 17:06:07.569     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:06:07.741     0     0 I         : read descriptors
+07-03 17:06:07.741     0     0 I         : read strings
+07-03 17:06:07.771     0     0 E configfs-gadget fcc00000.dwc3: failed to start g1: -19
+07-03 17:06:07.909     0     0 I         : Generic PHY stmmac-1:01: attached PHY driver [Generic PHY] (mii_bus:phy_addr=stmmac-1:01, irq=POLL)
+07-03 17:06:08.008     0     0 I dwmac4  : Master AXI performs any burst length
+07-03 17:06:08.008     0     0 I         : rk_gmac-dwmac fe010000.ethernet eth0: No Safety Features support found
+07-03 17:06:08.009     0     0 I         : rk_gmac-dwmac fe010000.ethernet eth0: IEEE 1588-2008 Advanced Timestamp supported
+07-03 17:06:08.040     0     0 I x_tables: ip_tables: owner match: used from hooks INPUT, but only valid from OUTPUT/POSTROUTING
+07-03 17:06:08.051     0     0 I x_tables: ip6_tables: owner match: used from hooks INPUT, but only valid from OUTPUT/POSTROUTING
+07-03 17:06:08.070     0     0 I         : rk_gmac-dwmac fe010000.ethernet eth0: registered PTP clock
+07-03 17:06:08.071     0     0 I IPv6    : ADDRCONF(NETDEV_UP): eth0: link is not ready
+07-03 17:06:09.248     0     0 W audit_log_lost: 14 callbacks suppressed
+07-03 17:06:09.248     0     0 W audit   : audit_lost=101 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:09.249     0     0 E audit   : rate limit exceeded
+07-03 17:06:09.383     0     0 I         : Freeing drm_logo memory: 27000K
+07-03 17:06:10.334     0     0 I capability: warning: `main' uses 32-bit capabilities (legacy support in use)
+07-03 17:06:12.357     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:06:12.360     0     0 I chatty  : uid=0(root) logd identical 1 line
+07-03 17:06:12.371     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:06:12.594     0     0 I init    : starting service 'adbd'...
+07-03 17:06:12.595     0     0 W audit   : audit_lost=112 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:12.596     0     0 E audit   : rate limit exceeded
+07-03 17:06:12.597     0     0 I init    : Created socket '/dev/socket/adbd', mode 660, user 1000, group 1000
+07-03 17:06:12.603     0     0 I         : read descriptors
+07-03 17:06:12.604     0     0 I         : read strings
+07-03 17:06:12.608     0     0 I init    : processing action (sys.usb.config=mtp,adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1) from (/init.usb.configfs.rc:35)
+07-03 17:06:12.610     0     0 E configfs-gadget fcc00000.dwc3: failed to start g1: -19
+07-03 17:06:12.611     0     0 I init    : Command 'write /config/usb_gadget/g1/UDC ${sys.usb.controller}' action=sys.usb.config=mtp,adb && sys.usb.configfs=1 && sys.usb.ffs.ready=1 (/init.usb.configfs.rc:39) took 0ms and failed: Unable to write to file '/config/usb_gadget/g1/UDC': Unable to write file contents: No such device
+07-03 17:06:12.646     0     0 I init    : processing action (sys.sysctl.extra_free_kbytes=*) from (/init.rc:720)
+07-03 17:06:14.107     0     0 I         : read descriptors
+07-03 17:06:14.108     0     0 I         : read strings
+07-03 17:06:14.108     0     0 I         : read descriptors
+07-03 17:06:14.108     0     0 I         : read strings
+07-03 17:06:14.428     0     0 I init    : Received control message 'start' for 'preinstallservice' from pid: 366 (system_server)
+07-03 17:06:14.428     0     0 E init    : No such service 'preinstallservice' for ctl.start
+07-03 17:06:14.586     0     0 W audit   : audit_lost=113 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:14.588     0     0 E audit   : rate limit exceeded
+07-03 17:06:14.612     0     0 I         : sdcardfs version 2.0
+07-03 17:06:14.612     0     0 I sdcardfs: dev_name -> /data/media
+07-03 17:06:14.613     0     0 I sdcardfs: options -> fsuid=1023,fsgid=1023,multiuser,derive_gid,default_normal,mask=6,userid=0,gid=1015
+07-03 17:06:14.613     0     0 I sdcardfs: mnt -> 00000000b3c54cef
+07-03 17:06:14.614     0     0 I sdcardfs: mounted on top of /data/media type ext4
+07-03 17:06:14.615     0     0 I         : Remount options were mask=23,gid=9997 for vfsmnt 000000005ca73934.
+07-03 17:06:14.616     0     0 I sdcardfs: options - debug:1
+07-03 17:06:14.616     0     0 I sdcardfs: options - gid:9997
+07-03 17:06:14.616     0     0 I sdcardfs: options - mask:23
+07-03 17:06:14.617     0     0 I         : Remount options were mask=7,gid=9997 for vfsmnt 00000000912c1b70.
+07-03 17:06:14.618     0     0 I sdcardfs: options - debug:1
+07-03 17:06:14.618     0     0 I sdcardfs: options - gid:9997
+07-03 17:06:14.619     0     0 I sdcardfs: options - mask:7
+07-03 17:06:15.268     0     0 E selinux : avc:  denied  { set } for property=persist.vendor.vivid.hdr_capacity pid=200 uid=1000 gid=1000 scontext=u:r:rk_output_hal:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=property_service permissive=1
+07-03 17:06:15.308     0     0 E selinux : avc:  denied  { set } for property=persist.sys.tv.name pid=200 uid=1000 gid=1000 scontext=u:r:rk_output_hal:s0 tcontext=u:object_r:system_prop:s0 tclass=property_service permissive=1
+07-03 17:06:15.430     0     0 I [WLAN_RFKILL]: rockchip_wifi_mac_addr: enter.
+07-03 17:06:15.431     0     0 I [WLAN_RFKILL]: get_wifi_addr_vendor: rk_vendor_read wifi mac address: 24:d9:04:d6:2e:14
+07-03 17:06:15.431     0     0 I [WLAN_RFKILL]: falsh wifi_custom_mac_addr=[24:d9:04:d6:2e:14]
+07-03 17:06:15.432     0     0 W         : get mac address from flash=[24:d9:04:d6:2e:14]
+07-03 17:06:15.450     0     0 I init    : processing action (wlan.driver.status=ok) from (/vendor/etc/init/hw/init.connectivity.rc:67)
+07-03 17:06:15.657     0     0 W audit   : audit_lost=120 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:15.666     0     0 E audit   : rate limit exceeded
+07-03 17:06:15.972     0     0 I zram0   : detected capacity change from 0 to 1232867328
+07-03 17:06:16.056     0     0 I mkswap  : Swapspace size: 1203968k, UUID=7226350d-0709-4577-b5ea-d7d789c11b8d
+07-03 17:06:16.059     0     0 I         : Adding 1203968k swap on /dev/block/zram0.  Priority:-2 extents:1 across:1203968k SS
+07-03 17:06:16.093     0     0 I         : read descriptors
+07-03 17:06:16.094     0     0 I         : read strings
+07-03 17:06:16.252     0     0 I dwc3 fcc00000.dwc3: device reset
+07-03 17:06:16.367     0     0 I dwc3 fcc00000.dwc3: device reset
+07-03 17:06:16.368     0     0 I android_work: did not send uevent (0 0           (null))
+07-03 17:06:16.489     0     0 I android_work: sent uevent USB_STATE=CONNECTED
+07-03 17:06:16.490     0     0 I configfs-gadget gadget: high-speed config #1: b
+07-03 17:06:16.492     0     0 I android_work: sent uevent USB_STATE=CONFIGURED
+07-03 17:06:16.544     0     0 I [BT_RFKILL]: bt shut off power
+07-03 17:06:16.703     0     0 W audit   : audit_lost=236 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:16.703     0     0 E audit   : rate limit exceeded
+07-03 17:06:16.745     0     0 I [BT_RFKILL]: rfkill_rk_set_power: set bt wake_host high!
+07-03 17:06:16.797     0     0 I [BT_RFKILL]: ENABLE UART_RTS
+07-03 17:06:16.902     0     0 W         : start_addr=(0x20000), end_addr=(0x40000), buffer_size=(0x20000), smp_number_max=(16384)
+07-03 17:06:16.904     0     0 I [BT_RFKILL]: DISABLE UART_RTS
+07-03 17:06:16.904     0     0 I [BT_RFKILL]: bt turn on power
+07-03 17:06:16.905     0     0 I [BT_RFKILL]: Request irq for bt wakeup host
+07-03 17:06:16.911     0     0 I [BT_RFKILL]: ** disable irq
+07-03 17:06:16.938     0     0 I IPv6    : ADDRCONF(NETDEV_UP): wlan0: link is not ready
+07-03 17:06:17.112     0     0 E of_dma_request_slave_channel: dma-names property of node '/serial@fe650000' missing or empty
+07-03 17:06:17.113     0     0 W         : ttyS1 - failed to request DMA, use interrupt mode
+07-03 17:06:17.730     0     0 W audit   : audit_lost=308 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:17.730     0     0 E audit   : rate limit exceeded
+07-03 17:06:17.741     0     0 D random mac_addr: 00000000: da c2 8b 3a 27 6c                                ...:'l
+07-03 17:06:18.031     0     0 I init    : Service 'bootanim' (pid 149) exited with status 0
+07-03 17:06:18.033     0     0 I init    : processing action (init.svc.bootanim=stopped) from (/init.rc:813)
+07-03 17:06:18.132     0     0 D logd    : logdr: UID=2000 GID=2000 PID=1052 b tail=0 logMask=19 pid=0 start=0ns timeout=0ns
+07-03 17:06:18.543     0     0 I init    : Untracked pid 913 exited with status 0
+07-03 17:06:18.941     0     0 W audit   : audit_lost=395 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:18.942     0     0 E audit   : rate limit exceeded
+07-03 17:06:19.948     0     0 W audit   : audit_lost=441 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:19.948     0     0 E audit   : rate limit exceeded
+07-03 17:06:21.173     0     0 W audit   : audit_lost=460 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:21.174     0     0 E audit   : rate limit exceeded
+07-03 17:06:21.473     0     0 W         : start_addr=(0x20000), end_addr=(0x40000), buffer_size=(0x20000), smp_number_max=(16384)
+07-03 17:06:22.096     0     0 E selinux : avc:  denied  { set } for property=wifi.ipaddress.wlan0 pid=366 uid=1000 gid=1000 scontext=u:r:system_server:s0 tcontext=u:object_r:default_prop:s0 tclass=property_service permissive=1
+07-03 17:06:22.108     0     0 I init    : Received control message 'stop' for 'dhclient_wlan0' from pid: 366 (system_server)
+07-03 17:06:22.317     0     0 I init    : Received control message 'stop' for 'dhclient_wlan0_s' from pid: 366 (system_server)
+07-03 17:06:22.821     0     0 I init    : processing action (sys.sysctl.tcp_def_init_rwnd=*) from (/init.rc:724)
+07-03 17:06:22.851     0     0 W audit   : audit_lost=490 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:22.852     0     0 E audit   : rate limit exceeded
+07-03 17:06:23.873     0     0 W audit   : audit_lost=599 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:23.873     0     0 E audit   : rate limit exceeded
+07-03 17:06:25.068     0     0 W audit   : audit_lost=666 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:25.069     0     0 E audit   : rate limit exceeded
+07-03 17:06:25.778     0     0 I binder  : send failed reply for transaction 19388 to 366:377
+07-03 17:06:25.779     0     0 I binder  : undelivered transaction 19443, process died.
+07-03 17:06:26.072     0     0 W audit   : audit_lost=715 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:26.073     0     0 E audit   : rate limit exceeded
+07-03 17:06:26.809     0     0 I binder  : undelivered transaction 20253, process died.
+07-03 17:06:27.107     0     0 W audit   : audit_lost=787 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:27.108     0     0 E audit   : rate limit exceeded
+07-03 17:06:28.032     0     0 I binder  : send failed reply for transaction 21658 to 1821:1821
+07-03 17:06:28.119     0     0 W audit   : audit_lost=851 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:28.119     0     0 E audit   : rate limit exceeded
+07-03 17:06:28.234     0     0 E selinux : avc:  denied  { set } for property=config.market.opt pid=2026 uid=10016 gid=10016 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:config_prop:s0 tclass=property_service permissive=1
+07-03 17:06:29.163     0     0 W audit   : audit_lost=905 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:29.163     0     0 E audit   : rate limit exceeded
+07-03 17:06:30.195     0     0 W audit   : audit_lost=945 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:30.196     0     0 E audit   : rate limit exceeded
+07-03 17:06:30.226     0     0 I binder  : undelivered TRANSACTION_COMPLETE
+07-03 17:06:30.226     0     0 I binder  : undelivered transaction 22799, process died.
+07-03 17:06:30.227     0     0 I binder  : undelivered transaction 22803, process died.
+07-03 17:06:30.227     0     0 I binder  : undelivered transaction 22819, process died.
+07-03 17:06:30.761     0     0 I binder  : send failed reply for transaction 23491 to 2087:2087
+07-03 17:06:31.203     0     0 W audit   : audit_lost=1013 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:31.204     0     0 E audit   : rate limit exceeded
+07-03 17:06:32.460     0     0 W audit   : audit_lost=1026 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:32.460     0     0 E audit   : rate limit exceeded
+07-03 17:06:33.476     0     0 W audit   : audit_lost=1065 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:33.477     0     0 E audit   : rate limit exceeded
+07-03 17:06:34.439     0     0 I binder  : send failed reply for transaction 25101 to 2227:2227
+07-03 17:06:34.540     0     0 I binder  : undelivered TRANSACTION_COMPLETE
+07-03 17:06:34.540     0     0 I binder  : undelivered transaction 25138, process died.
+07-03 17:06:34.541     0     0 I binder  : undelivered transaction 25148, process died.
+07-03 17:06:35.633     0     0 W audit   : audit_lost=1124 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:35.634     0     0 E audit   : rate limit exceeded
+07-03 17:06:36.648     0     0 W audit   : audit_lost=1176 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:36.649     0     0 E audit   : rate limit exceeded
+07-03 17:06:36.865     0     0 I binder  : send failed reply for transaction 26099 to 2426:2426
+07-03 17:06:37.431     0     0 I vcc5v0_otg: disabling
+07-03 17:06:37.431     0     0 I vcc3v3_lcd1_n: disabling
+07-03 17:06:37.431     0     0 I vcc3v3_pcie: disabling
+07-03 17:06:38.007     0     0 W audit   : audit_lost=1203 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:38.007     0     0 E audit   : rate limit exceeded
+07-03 17:06:41.068     0     0 W audit   : audit_lost=1208 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:41.069     0     0 E audit   : rate limit exceeded
+07-03 17:06:42.089     0     0 W audit   : audit_lost=1246 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:42.090     0     0 E audit   : rate limit exceeded
+07-03 17:06:42.449     0     0 I binder  : send failed reply for transaction 27198 to 2577:2577
+07-03 17:06:42.520     0     0 I binder  : undelivered TRANSACTION_COMPLETE
+07-03 17:06:42.520     0     0 I binder  : undelivered transaction 27225, process died.
+07-03 17:06:44.463     0     0 W audit   : audit_lost=1296 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:44.464     0     0 E audit   : rate limit exceeded
+07-03 17:06:44.481     0     0 E selinux : avc:  denied  { set } for property=vendor.rga_api.version pid=236 uid=1046 gid=1006 scontext=u:r:mediacodec:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=property_service permissive=1
+07-03 17:06:45.547     0     0 W audit   : audit_lost=1307 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:45.548     0     0 E audit   : rate limit exceeded
+07-03 17:06:46.635     0     0 W audit   : audit_lost=1331 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:46.636     0     0 E audit   : rate limit exceeded
+07-03 17:06:47.061     0     0 I binder  : 506:506 transaction failed 29189/-22, size 248-0 line 3063
+07-03 17:06:47.267     0     0 W         : tmp1=00008e00,buf[0]=00,buf[1]=8e,buf[2]=00,buf[3]=00
+07-03 17:06:47.595     0     0 I binder  : 506:506 transaction failed 29189/-22, size 256-0 line 3063
+07-03 17:06:47.675     0     0 W audit   : audit_lost=1394 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:47.676     0     0 E audit   : rate limit exceeded
+07-03 17:06:48.152     0     0 I binder  : send failed reply for transaction 30820 to 2788:2788
+07-03 17:06:48.275     0     0 I binder  : undelivered TRANSACTION_COMPLETE
+07-03 17:06:48.276     0     0 I binder  : undelivered transaction 30881, process died.
+07-03 17:06:49.238     0     0 W audit   : audit_lost=1466 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:49.238     0     0 E audit   : rate limit exceeded
+07-03 17:06:49.496     0     0 I binder  : undelivered transaction 31766, process died.
+07-03 17:06:50.280     0     0 W audit   : audit_lost=1539 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:50.280     0     0 E audit   : rate limit exceeded
+07-03 17:06:51.106     0     0 I binder  : send failed reply for transaction 33987 to 3012:3012
+07-03 17:06:51.255     0     0 I binder  : undelivered TRANSACTION_COMPLETE
+07-03 17:06:51.256     0     0 I binder  : undelivered transaction 34017, process died.
+07-03 17:06:51.259     0     0 I init    : Untracked pid 3154 received signal 9
+07-03 17:06:51.612     0     0 W audit   : audit_lost=1579 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:51.612     0     0 E audit   : rate limit exceeded
+07-03 17:06:52.641     0     0 W audit   : audit_lost=1617 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:52.642     0     0 E audit   : rate limit exceeded
+07-03 17:06:53.897     0     0 W audit   : audit_lost=1638 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:53.898     0     0 E audit   : rate limit exceeded
+07-03 17:06:54.936     0     0 W audit   : audit_lost=1666 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:54.937     0     0 E audit   : rate limit exceeded
+07-03 17:06:55.996     0     0 W audit   : audit_lost=1700 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:55.996     0     0 E audit   : rate limit exceeded
+07-03 17:06:57.456     0     0 W audit   : audit_lost=1736 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:57.457     0     0 E audit   : rate limit exceeded
+07-03 17:06:58.463     0     0 W audit   : audit_lost=1785 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:58.464     0     0 E audit   : rate limit exceeded
+07-03 17:06:58.762     0     0 I binder  : 506:506 transaction failed 29189/-22, size 248-0 line 3063
+07-03 17:06:59.615     0     0 W audit   : audit_lost=1834 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:06:59.615     0     0 E audit   : rate limit exceeded
+07-03 17:07:00.713     0     0 W audit   : audit_lost=1873 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:00.715     0     0 E audit   : rate limit exceeded
+07-03 17:07:01.733     0     0 W audit   : audit_lost=1911 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:01.734     0     0 E audit   : rate limit exceeded
+07-03 17:07:02.660     0     0 E selinux : avc:  denied  { set } for property=vendor.voice.mic.mute pid=830 uid=10038 gid=10038 scontext=u:r:platform_app:s0:c512,c768 tcontext=u:object_r:vendor_default_prop:s0 tclass=property_service permissive=1
+07-03 17:07:02.814     0     0 W audit   : audit_lost=1929 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:02.815     0     0 E audit   : rate limit exceeded
+07-03 17:07:03.818     0     0 W audit   : audit_lost=1958 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:03.819     0     0 E audit   : rate limit exceeded
+07-03 17:07:05.911     0     0 W audit   : audit_lost=1980 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:05.911     0     0 E audit   : rate limit exceeded
+07-03 17:07:07.029     0     0 W audit   : audit_lost=1988 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:07.030     0     0 E audit   : rate limit exceeded
+07-03 17:07:07.385     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:07:08.816     0     0 W audit   : audit_lost=1996 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:08.821     0     0 E audit   : rate limit exceeded
+07-03 17:07:16.788     0     0 W audit   : audit_lost=2002 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:16.788     0     0 E audit   : rate limit exceeded
+07-03 17:07:18.171     0     0 W audit   : audit_lost=2086 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:18.172     0     0 E audit   : rate limit exceeded
+07-03 17:07:27.761     0     0 W audit   : audit_lost=2092 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:27.762     0     0 E audit   : rate limit exceeded
+07-03 17:07:28.813     0     0 W audit   : audit_lost=2128 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:28.813     0     0 E audit   : rate limit exceeded
+07-03 17:07:39.107     0     0 I input   : 电信蓝牙遥控 as /devices/virtual/misc/uhid/0005:006E:2712.0001/input/input6
+07-03 17:07:39.115     0     0 I input   : 电信蓝牙遥控 Consumer Control as /devices/virtual/misc/uhid/0005:006E:2712.0001/input/input7
+07-03 17:07:39.119     0     0 I input   : 电信蓝牙遥控 Mouse as /devices/virtual/misc/uhid/0005:006E:2712.0001/input/input8
+07-03 17:07:39.129     0     0 I hid-generic 0005: 006E:2712.0001: input,hidraw0: BLUETOOTH HID v1.11 Keyboard [电信蓝牙遥控] on
+07-03 17:07:40.455     0     0 W audit   : audit_lost=2129 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:40.455     0     0 E audit   : rate limit exceeded
+07-03 17:07:56.837     0     0 W audit   : audit_lost=2135 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:07:56.837     0     0 E audit   : rate limit exceeded
+07-03 17:07:58.863     0     0 I input   : 电信蓝牙遥控 as /devices/virtual/misc/uhid/0005:006E:2712.0002/input/input10
+07-03 17:07:58.867     0     0 I input   : 电信蓝牙遥控 Consumer Control as /devices/virtual/misc/uhid/0005:006E:2712.0002/input/input11
+07-03 17:07:58.872     0     0 I input   : 电信蓝牙遥控 Mouse as /devices/virtual/misc/uhid/0005:006E:2712.0002/input/input12
+07-03 17:07:58.879     0     0 I hid-generic 0005: 006E:2712.0002: input,hidraw0: BLUETOOTH HID v1.11 Keyboard [电信蓝牙遥控] on
+07-03 17:08:07.385     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:08:16.842     0     0 W audit   : audit_lost=2140 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:16.844     0     0 E audit   : rate limit exceeded
+07-03 17:08:17.082     0     0 I init    : Untracked pid 4693 exited with status 0
+07-03 17:08:17.100     0     0 I init    : Untracked pid 4695 exited with status 0
+07-03 17:08:17.148     0     0 I binder  : send failed reply for transaction 103246 to 185:889
+07-03 17:08:17.161     0     0 I [BT_RFKILL]: bt shut off power
+07-03 17:08:17.724     0     0 I [BT_RFKILL]: bt shut off power
+07-03 17:08:17.925     0     0 I [BT_RFKILL]: rfkill_rk_set_power: set bt wake_host high!
+07-03 17:08:17.977     0     0 I [BT_RFKILL]: ENABLE UART_RTS
+07-03 17:08:18.084     0     0 I [BT_RFKILL]: DISABLE UART_RTS
+07-03 17:08:18.085     0     0 I [BT_RFKILL]: bt turn on power
+07-03 17:08:18.085     0     0 I [BT_RFKILL]: Request irq for bt wakeup host
+07-03 17:08:18.086     0     0 I [BT_RFKILL]: ** disable irq
+07-03 17:08:19.421     0     0 W audit   : audit_lost=2253 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:19.422     0     0 E audit   : rate limit exceeded
+07-03 17:08:21.756     0     0 W audit   : audit_lost=2265 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:21.757     0     0 E audit   : rate limit exceeded
+07-03 17:08:28.008     0     0 W audit   : audit_lost=2266 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:28.010     0     0 E audit   : rate limit exceeded
+07-03 17:08:29.119     0     0 W audit   : audit_lost=2289 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:29.119     0     0 E audit   : rate limit exceeded
+07-03 17:08:32.873     0     0 W audit   : audit_lost=2290 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:32.876     0     0 E audit   : rate limit exceeded
+07-03 17:08:33.096     0     0 D logd    : logdr: UID=1002 GID=1002 PID=4988 n tail=0 logMask=8 pid=4723 start=0ns timeout=0ns
+07-03 17:08:33.124     0     0 D logd    : logdr: UID=1002 GID=1002 PID=4988 n tail=0 logMask=1 pid=4723 start=0ns timeout=0ns
+07-03 17:08:33.208     0     0 I init    : Untracked pid 4988 exited with status 0
+07-03 17:08:33.225     0     0 I init    : Untracked pid 4990 exited with status 0
+07-03 17:08:33.367     0     0 I binder  : send failed reply for transaction 112034 to 1627:1627
+07-03 17:08:33.383     0     0 I [BT_RFKILL]: bt shut off power
+07-03 17:08:36.155     0     0 W audit   : audit_lost=2301 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:36.156     0     0 E audit   : rate limit exceeded
+07-03 17:08:37.234     0     0 W audit   : audit_lost=2308 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:37.235     0     0 E audit   : rate limit exceeded
+07-03 17:08:37.235     0     0 I [BT_RFKILL]: bt shut off power
+07-03 17:08:37.436     0     0 I [BT_RFKILL]: rfkill_rk_set_power: set bt wake_host high!
+07-03 17:08:37.487     0     0 I [BT_RFKILL]: ENABLE UART_RTS
+07-03 17:08:37.594     0     0 I [BT_RFKILL]: DISABLE UART_RTS
+07-03 17:08:37.594     0     0 I [BT_RFKILL]: bt turn on power
+07-03 17:08:37.595     0     0 I [BT_RFKILL]: Request irq for bt wakeup host
+07-03 17:08:37.642     0     0 I [BT_RFKILL]: ** disable irq
+07-03 17:08:39.991     0     0 W audit   : audit_lost=2314 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:39.999     0     0 E audit   : rate limit exceeded
+07-03 17:08:41.688     0     0 W audit   : audit_lost=2322 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:41.688     0     0 E audit   : rate limit exceeded
+07-03 17:08:50.560     0     0 W audit   : audit_lost=2324 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:50.560     0     0 E audit   : rate limit exceeded
+07-03 17:08:50.742     0     0 D logd    : logdr: UID=1002 GID=1002 PID=5233 n tail=50 logMask=8 pid=5018 start=0ns timeout=0ns
+07-03 17:08:50.854     0     0 D logd    : logdr: UID=1002 GID=1002 PID=5233 n tail=50 logMask=1 pid=5018 start=0ns timeout=0ns
+07-03 17:08:51.975     0     0 I init    : Untracked pid 5233 exited with status 0
+07-03 17:08:51.988     0     0 I init    : Untracked pid 5237 exited with status 0
+07-03 17:08:52.082     0     0 I binder  : release 5018:5178 transaction 127265 in, still active
+07-03 17:08:52.082     0     0 I binder  : send failed reply for transaction 127265 to 3723:3723
+07-03 17:08:52.084     0     0 I binder  : undelivered TRANSACTION_COMPLETE
+07-03 17:08:52.084     0     0 I binder  : undelivered transaction 127274, process died.
+07-03 17:08:52.115     0     0 I [BT_RFKILL]: bt shut off power
+07-03 17:08:52.475     0     0 W audit   : audit_lost=2332 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:52.476     0     0 E audit   : rate limit exceeded
+07-03 17:08:56.082     0     0 W audit   : audit_lost=2334 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:08:56.083     0     0 E audit   : rate limit exceeded
+07-03 17:08:56.128     0     0 I [BT_RFKILL]: bt shut off power
+07-03 17:08:56.329     0     0 I [BT_RFKILL]: rfkill_rk_set_power: set bt wake_host high!
+07-03 17:08:56.381     0     0 I [BT_RFKILL]: ENABLE UART_RTS
+07-03 17:08:56.487     0     0 I [BT_RFKILL]: DISABLE UART_RTS
+07-03 17:08:56.488     0     0 I [BT_RFKILL]: bt turn on power
+07-03 17:08:56.488     0     0 I [BT_RFKILL]: Request irq for bt wakeup host
+07-03 17:08:56.528     0     0 I [BT_RFKILL]: ** disable irq
+07-03 17:09:00.668     0     0 W audit   : audit_lost=2348 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:09:00.668     0     0 E audit   : rate limit exceeded
+07-03 17:09:04.224     0     0 I input   : 电信蓝牙遥控 as /devices/virtual/misc/uhid/0005:006E:2712.0003/input/input14
+07-03 17:09:04.238     0     0 I input   : 电信蓝牙遥控 Consumer Control as /devices/virtual/misc/uhid/0005:006E:2712.0003/input/input15
+07-03 17:09:04.253     0     0 I input   : 电信蓝牙遥控 Mouse as /devices/virtual/misc/uhid/0005:006E:2712.0003/input/input16
+07-03 17:09:04.258     0     0 I hid-generic 0005: 006E:2712.0003: input,hidraw0: BLUETOOTH HID v1.11 Keyboard [电信蓝牙遥控] on
+07-03 17:09:05.776     0     0 W audit   : audit_lost=2352 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:09:05.778     0     0 E audit   : rate limit exceeded
+07-03 17:09:07.385     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:09:10.256     0     0 I dw-mipi-dsi fe060000.dsi: [drm:dw_mipi_dsi_encoder_enable] final DSI-Link bandwidth: 462 x 4 Mbps
+07-03 17:09:10.278     0     0 W         : hotal time = 736,hactive time =669
+07-03 17:09:10.434     0     0 I rockchip-vop2 fe040000.vop: [drm:vop2_crtc_atomic_disable] Crtc atomic disable vp1
+07-03 17:09:10.847     0     0 W audit   : audit_lost=2370 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:09:10.848     0     0 E audit   : rate limit exceeded
+07-03 17:09:11.705     0     0 I rockchip-vop2 fe040000.vop: [drm:vop2_crtc_atomic_enable] Update mode to 800x1280p60, type: 16 for vp1
+07-03 17:09:11.706     0     0 I dw-mipi-dsi fe060000.dsi: [drm:dw_mipi_dsi_encoder_enable] final DSI-Link bandwidth: 462 x 4 Mbps
+07-03 17:09:11.732     0     0 W         : hotal time = 736,hactive time =669
+07-03 17:09:11.964     0     0 W ===>mode: 0x8
+07-03 17:09:12.112     0     0 W ====>mode: 0xc
+07-03 17:09:14.688     0     0 W audit   : audit_lost=2380 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:09:14.688     0     0 E audit   : rate limit exceeded
+07-03 17:09:16.546     0     0 W audit   : audit_lost=2383 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:09:16.549     0     0 E audit   : rate limit exceeded
+07-03 17:09:18.293     0     0 W audit   : audit_lost=2485 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:09:18.294     0     0 E audit   : rate limit exceeded
+07-03 17:09:19.802     0     0 W audit   : audit_lost=2497 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:09:19.802     0     0 E audit   : rate limit exceeded
+07-03 17:09:26.031     0     0 W audit   : audit_lost=2498 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:09:26.031     0     0 E audit   : rate limit exceeded
+07-03 17:09:33.711     0     0 W audit   : audit_lost=2499 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:09:33.712     0     0 E audit   : rate limit exceeded
+07-03 17:09:35.096     0     0 W audit   : audit_lost=2512 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:09:35.096     0     0 E audit   : rate limit exceeded
+07-03 17:09:41.906     0     0 I nf_conntrack: default automatic helper assignment has been turned off for security reasons and CT-based  firewall rule not found. Use the iptables CT target to attach helpers instead.
+07-03 17:10:04.803     0     0 W audit   : audit_lost=2514 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:04.803     0     0 E audit   : rate limit exceeded
+07-03 17:10:07.386     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:10:07.994     0     0 I input   : 电信蓝牙遥控 as /devices/virtual/misc/uhid/0005:006E:2712.0004/input/input18
+07-03 17:10:08.000     0     0 I input   : 电信蓝牙遥控 Consumer Control as /devices/virtual/misc/uhid/0005:006E:2712.0004/input/input19
+07-03 17:10:08.005     0     0 I input   : 电信蓝牙遥控 Mouse as /devices/virtual/misc/uhid/0005:006E:2712.0004/input/input20
+07-03 17:10:08.018     0     0 I hid-generic 0005: 006E:2712.0004: input,hidraw0: BLUETOOTH HID v1.11 Keyboard [电信蓝牙遥控] on
+07-03 17:10:08.726     0     0 W audit   : audit_lost=2516 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:08.726     0     0 E audit   : rate limit exceeded
+07-03 17:10:11.039     0     0 W audit   : audit_lost=2521 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:11.040     0     0 E audit   : rate limit exceeded
+07-03 17:10:13.367     0     0 W audit   : audit_lost=2555 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:13.367     0     0 E audit   : rate limit exceeded
+07-03 17:10:15.951     0     0 W audit   : audit_lost=2564 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:15.952     0     0 E audit   : rate limit exceeded
+07-03 17:10:16.642     0     0 E selinux : avc:  denied  { set } for property=sys.gmali.version pid=3504 uid=1000 gid=1000 scontext=u:r:zygote:s0 tcontext=u:object_r:system_prop:s0 tclass=property_service permissive=1
+07-03 17:10:16.978     0     0 W audit   : audit_lost=2608 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:16.979     0     0 E audit   : rate limit exceeded
+07-03 17:10:17.451     0     0 W         : tmp1=00008e00,buf[0]=00,buf[1]=8e,buf[2]=00,buf[3]=00
+07-03 17:10:17.996     0     0 W audit   : audit_lost=2707 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:17.997     0     0 E audit   : rate limit exceeded
+07-03 17:10:21.118     0     0 W audit   : audit_lost=2738 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:21.119     0     0 E audit   : rate limit exceeded
+07-03 17:10:22.872     0     0 W audit   : audit_lost=2739 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:22.873     0     0 E audit   : rate limit exceeded
+07-03 17:10:24.949     0     0 W audit   : audit_lost=2752 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:24.957     0     0 E audit   : rate limit exceeded
+07-03 17:10:38.577     0     0 W audit   : audit_lost=2763 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:38.578     0     0 E audit   : rate limit exceeded
+07-03 17:10:39.990     0     0 W audit   : audit_lost=2769 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:39.991     0     0 E audit   : rate limit exceeded
+07-03 17:10:42.486     0     0 W audit   : audit_lost=2793 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:42.487     0     0 E audit   : rate limit exceeded
+07-03 17:10:47.901     0     0 W audit   : audit_lost=2798 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:10:47.902     0     0 E audit   : rate limit exceeded
+07-03 17:11:01.234     0     0 W audit   : audit_lost=2808 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:11:01.235     0     0 E audit   : rate limit exceeded
+07-03 17:11:07.385     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:11:07.846     0     0 W audit   : audit_lost=2836 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:11:07.846     0     0 E audit   : rate limit exceeded
+07-03 17:11:14.385     0     0 W audit   : audit_lost=2872 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:11:14.387     0     0 E audit   : rate limit exceeded
+07-03 17:11:15.883     0     0 W audit   : audit_lost=2873 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:11:15.883     0     0 E audit   : rate limit exceeded
+07-03 17:11:16.953     0     0 W audit   : audit_lost=2885 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:11:16.956     0     0 E audit   : rate limit exceeded
+07-03 17:11:18.196     0     0 W audit   : audit_lost=3004 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:11:18.197     0     0 E audit   : rate limit exceeded
+07-03 17:11:20.541     0     0 W audit   : audit_lost=3015 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:11:20.542     0     0 E audit   : rate limit exceeded
+07-03 17:11:54.093     0     0 W audit   : audit_lost=3016 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:11:54.093     0     0 E audit   : rate limit exceeded
+07-03 17:12:04.688     0     0 E selinux : avc:  denied  { set } for property=vendor.voice.mic.mute pid=3526 uid=1000 gid=1000 scontext=u:r:system_app:s0 tcontext=u:object_r:vendor_default_prop:s0 tclass=property_service permissive=1
+07-03 17:12:07.386     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:12:15.478     0     0 W audit   : audit_lost=3044 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:12:15.480     0     0 E audit   : rate limit exceeded
+07-03 17:12:17.225     0     0 W audit   : audit_lost=3046 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:12:17.225     0     0 E audit   : rate limit exceeded
+07-03 17:12:20.350     0     0 W audit   : audit_lost=3134 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:12:20.350     0     0 E audit   : rate limit exceeded
+07-03 17:12:22.668     0     0 W audit   : audit_lost=3136 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:12:22.668     0     0 E audit   : rate limit exceeded
+07-03 17:13:07.390     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:13:08.272     0     0 W audit   : audit_lost=3139 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:13:08.273     0     0 E audit   : rate limit exceeded
+07-03 17:13:17.290     0     0 W audit   : audit_lost=3157 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:13:17.290     0     0 E audit   : rate limit exceeded
+07-03 17:14:07.386     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:14:17.350     0     0 W audit   : audit_lost=3238 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:14:17.351     0     0 E audit   : rate limit exceeded
+07-03 17:15:07.389     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:15:17.417     0     0 W audit   : audit_lost=3254 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:15:17.418     0     0 E audit   : rate limit exceeded
+07-03 17:16:07.386     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:16:15.788     0     0 W audit   : audit_lost=3265 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:16:15.788     0     0 E audit   : rate limit exceeded
+07-03 17:16:17.505     0     0 W audit   : audit_lost=3266 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:16:17.506     0     0 E audit   : rate limit exceeded
+07-03 17:17:07.387     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:17:17.570     0     0 W audit   : audit_lost=3314 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:17:17.571     0     0 E audit   : rate limit exceeded
+07-03 17:18:07.386     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:18:17.649     0     0 W audit   : audit_lost=3328 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:18:17.650     0     0 E audit   : rate limit exceeded
+07-03 17:18:31.937     0     0 W audit   : audit_lost=3347 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:18:31.938     0     0 E audit   : rate limit exceeded
+07-03 17:19:07.386     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:19:17.727     0     0 W audit   : audit_lost=3348 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:19:17.728     0     0 E audit   : rate limit exceeded
+07-03 17:19:43.501     0     0 W audit   : audit_lost=3415 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:19:43.502     0     0 E audit   : rate limit exceeded
+07-03 17:19:44.533     0     0 W audit   : audit_lost=3418 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:19:44.534     0     0 E audit   : rate limit exceeded
+07-03 17:20:07.386     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:20:17.798     0     0 W audit   : audit_lost=3419 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:20:17.799     0     0 E audit   : rate limit exceeded
+07-03 17:20:20.065     0     0 W audit   : audit_lost=3476 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:20:20.066     0     0 E audit   : rate limit exceeded
+07-03 17:21:03.466     0     0 W audit   : audit_lost=3516 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:21:03.468     0     0 E audit   : rate limit exceeded
+07-03 17:21:07.386     0     0 W healthd : battery l=50 v=3 t=2.6 h=2 st=3 fc=100 chg=au
+07-03 17:21:15.186     0     0 W audit   : audit_lost=3580 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:21:15.186     0     0 E audit   : rate limit exceeded
+07-03 17:21:17.861     0     0 W audit   : audit_lost=3581 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:21:17.861     0     0 E audit   : rate limit exceeded
+07-03 17:21:19.430     0     0 D logd    : logdr: UID=2000 GID=2000 PID=12605 n tail=0 logMask=10 pid=0 start=0ns timeout=0ns
+07-03 17:21:19.467     0     0 D logd    : logdr: UID=2000 GID=2000 PID=12608 n tail=0 logMask=2 pid=0 start=0ns timeout=0ns
+07-03 17:21:19.515     0     0 D logd    : logdr: UID=2000 GID=2000 PID=12614 n tail=0 logMask=80 pid=0 start=0ns timeout=0ns
+07-03 17:21:19.544     0     0 W audit   : audit_lost=3621 audit_rate_limit=5 audit_backlog_limit=64
+07-03 17:21:19.544     0     0 E audit   : rate limit exceeded

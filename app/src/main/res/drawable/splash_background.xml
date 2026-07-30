@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 冷启动闪屏：纯色底 + 居中 app 齿轮 logo，遮住 persistent app 冷启动与 Compose 首帧组装的空白。 -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@color/topbar" />
+    <!-- 尺寸必须写在 item 上：bitmap 标签没有 width/height 属性，写在 bitmap 上会被忽略，
+         导致按原图 1254px（且 drawable/ 目录按 mdpi 在 240dpi 设备上再放大 1.5 倍）铺满全屏。 -->
+    <item
+        android:gravity="center"
+        android:width="180dp"
+        android:height="180dp">
+        <bitmap
+            android:src="@drawable/icon"
+            android:gravity="fill" />
+    </item>
+</layer-list>

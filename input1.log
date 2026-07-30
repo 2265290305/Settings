@@ -1,0 +1,462 @@
+INPUT MANAGER (dumpsys input)
+
+Input Manager State:
+  Interactive: true
+  System UI Visibility: 0x0
+  Pointer Speed: 0
+  Pointer Gestures Enabled: true
+  Show Touches: false
+  Pointer Capture Enabled: false
+
+Event Hub State:
+  BuiltInKeyboardId: -2
+  Devices:
+    -1: Virtual
+      Classes: 0x40000023
+      Path: <virtual>
+      Enabled: true
+      Descriptor: a718a782d34bc767f4689c232d64d527998ea7fd
+      Location: 
+      ControllerNumber: 0
+      UniqueId: <virtual>
+      Identifier: bus=0x0000, vendor=0x0000, product=0x0000, version=0x0000
+      KeyLayoutFile: /system/usr/keylayout/Generic.kl
+      KeyCharacterMapFile: /system/usr/keychars/Virtual.kcm
+      ConfigurationFile: 
+      HaveKeyboardLayoutOverlay: false
+    1: bt-powerkey
+      Classes: 0x00004001
+      Path: /dev/input/event2
+      Enabled: true
+      Descriptor: debcacb7cafad5bf002bdcaf74d6f0bcbc043d19
+      Location: 
+      ControllerNumber: 0
+      UniqueId: 
+      Identifier: bus=0x0019, vendor=0x0000, product=0x0000, version=0x0000
+      KeyLayoutFile: /system/usr/keylayout/Generic.kl
+      KeyCharacterMapFile: /system/usr/keychars/Generic.kcm
+      ConfigurationFile: 
+      HaveKeyboardLayoutOverlay: false
+    2: gsl3673_800x1280
+      Classes: 0x00000014
+      Path: /dev/input/event1
+      Enabled: true
+      Descriptor: 0e4cc3a8e6c2fd38176d2927d9693c005542a0cc
+      Location: 
+      ControllerNumber: 0
+      UniqueId: 
+      Identifier: bus=0x0018, vendor=0x0000, product=0x0000, version=0x0000
+      KeyLayoutFile: 
+      KeyCharacterMapFile: 
+      ConfigurationFile: 
+      HaveKeyboardLayoutOverlay: false
+    3: rockchip,hdmi rockchip,hdmi
+      Classes: 0x00000080
+      Path: /dev/input/event5
+      Enabled: true
+      Descriptor: 99a6eaf183a7df0dd83a4372b1ca69acc49deb66
+      Location: ALSA
+      ControllerNumber: 0
+      UniqueId: 
+      Identifier: bus=0x0000, vendor=0x0000, product=0x0000, version=0x0000
+      KeyLayoutFile: 
+      KeyCharacterMapFile: 
+      ConfigurationFile: 
+      HaveKeyboardLayoutOverlay: false
+    4: adc-keys
+      Classes: 0x00004001
+      Path: /dev/input/event4
+      Enabled: true
+      Descriptor: 485d69228e24f5e46da1598745890b214130dbc4
+      Location: adc-keys/input0
+      ControllerNumber: 0
+      UniqueId: 
+      Identifier: bus=0x0019, vendor=0x0001, product=0x0001, version=0x0100
+      KeyLayoutFile: /system/usr/keylayout/Generic.kl
+      KeyCharacterMapFile: /system/usr/keychars/Generic.kcm
+      ConfigurationFile: 
+      HaveKeyboardLayoutOverlay: false
+    5: hdmi_cec_key
+      Classes: 0x00004001
+      Path: /dev/input/event3
+      Enabled: true
+      Descriptor: d2c52ff0f656fac4cd7b7a118d575e0109a9fe1c
+      Location: hdmi_cec_key/input0
+      ControllerNumber: 0
+      UniqueId: 
+      Identifier: bus=0x0019, vendor=0x0001, product=0x0001, version=0x0100
+      KeyLayoutFile: /system/usr/keylayout/Generic.kl
+      KeyCharacterMapFile: /system/usr/keychars/Generic.kcm
+      ConfigurationFile: 
+      HaveKeyboardLayoutOverlay: false
+    6: rk805 pwrkey
+      Classes: 0x00004001
+      Path: /dev/input/event0
+      Enabled: true
+      Descriptor: a18e9bc089e5609b309e12da9322f25f4164e298
+      Location: rk805_pwrkey/input0
+      ControllerNumber: 0
+      UniqueId: 
+      Identifier: bus=0x0019, vendor=0x0000, product=0x0000, version=0x0000
+      KeyLayoutFile: /system/usr/keylayout/Generic.kl
+      KeyCharacterMapFile: /system/usr/keychars/Generic.kcm
+      ConfigurationFile: 
+      HaveKeyboardLayoutOverlay: false
+    18: 电信蓝牙遥控
+      Classes: 0x80004003
+      Path: /dev/input/event6
+      Enabled: true
+      Descriptor: 8cfe66433c0f39509ad6e8c7129206f68ea5ccee
+      Location: 
+      ControllerNumber: 0
+      UniqueId: 28:d4:1e:78:7a:20
+      Identifier: bus=0x0005, vendor=0x006e, product=0x2712, version=0x0111
+      KeyLayoutFile: /system/usr/keylayout/Generic.kl
+      KeyCharacterMapFile: /system/usr/keychars/Generic.kcm
+      ConfigurationFile: 
+      HaveKeyboardLayoutOverlay: false
+    19: 电信蓝牙遥控 Consumer Control
+      Classes: 0x80004121
+      Path: /dev/input/event7
+      Enabled: true
+      Descriptor: 8cfe66433c0f39509ad6e8c7129206f68ea5ccee
+      Location: 
+      ControllerNumber: 0
+      UniqueId: 28:d4:1e:78:7a:20
+      Identifier: bus=0x0005, vendor=0x006e, product=0x2712, version=0x0111
+      KeyLayoutFile: /system/usr/keylayout/Generic.kl
+      KeyCharacterMapFile: /system/usr/keychars/Generic.kcm
+      ConfigurationFile: 
+      HaveKeyboardLayoutOverlay: false
+    20: 电信蓝牙遥控 Mouse
+      Classes: 0x80000008
+      Path: /dev/input/event8
+      Enabled: true
+      Descriptor: 8cfe66433c0f39509ad6e8c7129206f68ea5ccee
+      Location: 
+      ControllerNumber: 0
+      UniqueId: 28:d4:1e:78:7a:20
+      Identifier: bus=0x0005, vendor=0x006e, product=0x2712, version=0x0111
+      KeyLayoutFile: 
+      KeyCharacterMapFile: 
+      ConfigurationFile: 
+      HaveKeyboardLayoutOverlay: false
+
+Input Reader State:
+  Device -1: Virtual
+    Generation: 2
+    IsExternal: false
+    HasMic:     false
+    Sources: 0x00000301
+    KeyboardType: 2
+    Keyboard Input Mapper:
+      Parameters:
+        HasAssociatedDisplay: false
+        OrientationAware: false
+        HandlesKeyRepeat: false
+      KeyboardType: 2
+      Orientation: 0
+      KeyDowns: 0 keys currently down
+      MetaState: 0x0
+      DownTime: 0
+  Device 1: bt-powerkey
+    Generation: 14
+    IsExternal: false
+    HasMic:     false
+    Sources: 0x00002103
+    KeyboardType: 1
+    Keyboard Input Mapper:
+      Parameters:
+        HasAssociatedDisplay: false
+        OrientationAware: false
+        HandlesKeyRepeat: false
+      KeyboardType: 1
+      Orientation: 0
+      KeyDowns: 0 keys currently down
+      MetaState: 0x0
+      DownTime: 0
+  Device 2: gsl3673_800x1280
+    Generation: 16
+    IsExternal: false
+    HasMic:     false
+    Sources: 0x00001002
+    KeyboardType: 0
+    Motion Ranges:
+      X: source=0x00001002, min=0.000, max=1919.000, flat=0.000, fuzz=0.000, resolution=0.000
+      Y: source=0x00001002, min=0.000, max=1199.000, flat=0.000, fuzz=0.000, resolution=0.000
+      PRESSURE: source=0x00001002, min=0.000, max=1.000, flat=0.000, fuzz=0.000, resolution=0.000
+      SIZE: source=0x00001002, min=0.000, max=1.000, flat=0.000, fuzz=0.000, resolution=0.000
+      TOUCH_MAJOR: source=0x00001002, min=0.000, max=2264.156, flat=0.000, fuzz=0.000, resolution=0.000
+      TOUCH_MINOR: source=0x00001002, min=0.000, max=2264.156, flat=0.000, fuzz=0.000, resolution=0.000
+      TOOL_MAJOR: source=0x00001002, min=0.000, max=2264.156, flat=0.000, fuzz=0.000, resolution=0.000
+      TOOL_MINOR: source=0x00001002, min=0.000, max=2264.156, flat=0.000, fuzz=0.000, resolution=0.000
+    Touch Input Mapper (mode - direct):
+      Parameters:
+        GestureMode: multi-touch
+        DeviceType: touchScreen
+        AssociatedDisplay: hasAssociatedDisplay=true, isExternal=false, displayId=''
+        OrientationAware: true
+      Raw Touch Axes:
+        X: min=0, max=1280, flat=0, fuzz=0, resolution=0
+        Y: min=0, max=800, flat=0, fuzz=0, resolution=0
+        Pressure: unknown range
+        TouchMajor: min=0, max=255, flat=0, fuzz=0, resolution=0
+        TouchMinor: unknown range
+        ToolMajor: min=0, max=200, flat=0, fuzz=0, resolution=0
+        ToolMinor: unknown range
+        Orientation: unknown range
+        Distance: unknown range
+        TiltX: unknown range
+        TiltY: unknown range
+        TrackingId: min=0, max=65535, flat=0, fuzz=0, resolution=0
+        Slot: min=0, max=10, flat=0, fuzz=0, resolution=0
+      Calibration:
+        touch.size.calibration: geometric
+        touch.pressure.calibration: none
+        touch.orientation.calibration: none
+        touch.distance.calibration: none
+        touch.coverage.calibration: none
+      Affine Transformation:
+        X scale: 1.000
+        X ymix: 0.000
+        X offset: 0.000
+        Y xmix: 0.000
+        Y scale: 1.000
+        Y offset: 0.000
+      Viewport: displayId=0, orientation=0, logicalFrame=[0, 0, 1920, 1200], physicalFrame=[0, 0, 1920, 1200], deviceSize=[1920, 1200]
+      SurfaceWidth: 1920px
+      SurfaceHeight: 1200px
+      SurfaceLeft: 0
+      SurfaceTop: 0
+      PhysicalWidth: 1920px
+      PhysicalHeight: 1200px
+      PhysicalLeft: 0
+      PhysicalTop: 0
+      SurfaceOrientation: 0
+      Translation and Scaling Factors:
+        XTranslate: 0.000
+        YTranslate: 0.000
+        XScale: 1.499
+        YScale: 1.498
+        XPrecision: 0.667
+        YPrecision: 0.668
+        GeometricScale: 1.498
+        PressureScale: 0.000
+        SizeScale: 0.004
+        OrientationScale: 0.000
+        DistanceScale: 0.000
+        HaveTilt: false
+        TiltXCenter: 0.000
+        TiltXScale: 0.000
+        TiltYCenter: 0.000
+        TiltYScale: 0.000
+      Last Raw Button State: 0x00000000
+      Last Raw Touch: pointerCount=0
+      Last Cooked Button State: 0x00000000
+      Last Cooked Touch: pointerCount=0
+      Stylus Fusion:
+        ExternalStylusConnected: false
+        External Stylus ID: -1
+        External Stylus Data Timeout: 9223372036854775807
+      External Stylus State:
+        When: 9223372036854775807
+        Pressure: 0.000000
+        Button State: 0x00000000
+        Tool Type: 0
+  Device 3: rockchip,hdmi rockchip,hdmi
+    Generation: 10
+    IsExternal: false
+    HasMic:     false
+    Sources: 0x80000000
+    KeyboardType: 0
+    Switch Input Mapper:
+      SwitchValues: 0
+  Device 4: adc-keys
+    Generation: 8
+    IsExternal: false
+    HasMic:     false
+    Sources: 0x00002103
+    KeyboardType: 1
+    Keyboard Input Mapper:
+      Parameters:
+        HasAssociatedDisplay: false
+        OrientationAware: false
+        HandlesKeyRepeat: false
+      KeyboardType: 1
+      Orientation: 0
+      KeyDowns: 0 keys currently down
+      MetaState: 0x0
+      DownTime: 0
+  Device 5: hdmi_cec_key
+    Generation: 6
+    IsExternal: false
+    HasMic:     false
+    Sources: 0x00002103
+    KeyboardType: 1
+    Keyboard Input Mapper:
+      Parameters:
+        HasAssociatedDisplay: false
+        OrientationAware: false
+        HandlesKeyRepeat: false
+      KeyboardType: 1
+      Orientation: 0
+      KeyDowns: 0 keys currently down
+      MetaState: 0x0
+      DownTime: 0
+  Device 6: rk805 pwrkey
+    Generation: 4
+    IsExternal: false
+    HasMic:     false
+    Sources: 0x00002103
+    KeyboardType: 1
+    Keyboard Input Mapper:
+      Parameters:
+        HasAssociatedDisplay: false
+        OrientationAware: false
+        HandlesKeyRepeat: false
+      KeyboardType: 1
+      Orientation: 0
+      KeyDowns: 0 keys currently down
+      MetaState: 0x0
+      DownTime: 0
+  Device 18: 电信蓝牙遥控
+    Generation: 53
+    IsExternal: true
+    HasMic:     false
+    Sources: 0x00002103
+    KeyboardType: 2
+    Keyboard Input Mapper:
+      Parameters:
+        HasAssociatedDisplay: false
+        OrientationAware: false
+        HandlesKeyRepeat: false
+      KeyboardType: 2
+      Orientation: 0
+      KeyDowns: 0 keys currently down
+      MetaState: 0x0
+      DownTime: 1430788535000
+  Device 19: 电信蓝牙遥控 Consumer Control
+    Generation: 55
+    IsExternal: true
+    HasMic:     false
+    Sources: 0x01002313
+    KeyboardType: 1
+    Motion Ranges:
+      GENERIC_1: source=0x01000010, min=0.000, max=1.000, flat=0.000, fuzz=0.000, resolution=0.000
+    Keyboard Input Mapper:
+      Parameters:
+        HasAssociatedDisplay: false
+        OrientationAware: false
+        HandlesKeyRepeat: false
+      KeyboardType: 1
+      Orientation: 0
+      KeyDowns: 0 keys currently down
+      MetaState: 0x0
+      DownTime: 0
+    Joystick Input Mapper:
+      Axes:
+        GENERIC_1: min=0.00000, max=1.00000, flat=0.00000, fuzz=0.00000, resolution=0.00000
+          scale=0.00150, offset=0.00000, highScale=0.00150, highOffset=0.00000
+          rawAxis=32, rawMin=0, rawMax=668, rawFlat=0, rawFuzz=0, rawResolution=0
+  Device 20: 电信蓝牙遥控 Mouse
+    Generation: 58
+    IsExternal: true
+    HasMic:     false
+    Sources: 0x00002002
+    KeyboardType: 0
+    Motion Ranges:
+      X: source=0x00002002, min=0.000, max=1919.000, flat=0.000, fuzz=0.000, resolution=0.000
+      Y: source=0x00002002, min=0.000, max=1199.000, flat=0.000, fuzz=0.000, resolution=0.000
+      PRESSURE: source=0x00002002, min=0.000, max=1.000, flat=0.000, fuzz=0.000, resolution=0.000
+      VSCROLL: source=0x00002002, min=-1.000, max=1.000, flat=0.000, fuzz=0.000, resolution=0.000
+    Cursor Input Mapper:
+      Parameters:
+        HasAssociatedDisplay: true
+        Mode: pointer
+        OrientationAware: false
+      XScale: 1.000
+      YScale: 1.000
+      XPrecision: 1.000
+      YPrecision: 1.000
+      HaveVWheel: true
+      HaveHWheel: false
+      VWheelScale: 1.000
+      HWheelScale: 1.000
+      Orientation: 0
+      ButtonState: 0x00000000
+      Down: false
+      DownTime: 0
+  Configuration:
+    ExcludedDeviceNames: []
+    VirtualKeyQuietTime: 0.0ms
+    PointerVelocityControlParameters: scale=1.000, lowThreshold=500.000, highThreshold=3000.000, acceleration=3.000
+    WheelVelocityControlParameters: scale=1.000, lowThreshold=15.000, highThreshold=50.000, acceleration=4.000
+    PointerGesture:
+      Enabled: true
+      QuietInterval: 100.0ms
+      DragMinSwitchSpeed: 50.0px/s
+      TapInterval: 150.0ms
+      TapDragInterval: 300.0ms
+      TapSlop: 20.0px
+      MultitouchSettleInterval: 100.0ms
+      MultitouchMinDistance: 15.0px
+      SwipeTransitionAngleCosine: 0.3
+      SwipeMaxWidthRatio: 0.2
+      MovementSpeedRatio: 0.8
+      ZoomSpeedRatio: 0.3
+      Viewports:
+        ViewportInternal:
+          Viewport: displayId=0, orientation=0, uniqueId='', logicalFrame=[0, 0, 1920, 1200], physicalFrame=[0, 0, 1920, 1200], deviceSize=[1920, 1200]
+        ViewportExternal:
+          Viewport: displayId=0, orientation=0, uniqueId='', logicalFrame=[0, 0, 1920, 1200], physicalFrame=[0, 0, 1920, 1200], deviceSize=[1920, 1200]
+        ViewportVirtual:
+
+Input Dispatcher State:
+  DispatchEnabled: 1
+  DispatchFrozen: 0
+  FocusedApplication: name='AppWindowToken{100e554 token=Token{60a3ca7 ActivityRecord{adde166 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity t32}}}', dispatchingTimeout=5000.000ms
+  FocusedWindow: name='Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}'
+  TouchStates: <no displays touched>
+  Windows:
+    0: name='Window{daa4fa2 u0 LeftEdgeIndicator}', displayId=0, paused=false, hasFocus=false, hasWallpaper=false, visible=true, canReceiveKeys=false, flags=0x01000318, type=0x000007e8, layer=0, frame=[20,520][32,680], scale=1.000000, touchableRegion=[20,520][32,680], inputFeatures=0x00000000, ownerPid=510, ownerUid=10010, dispatchingTimeout=5000.000ms
+    1: name='Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}', displayId=0, paused=false, hasFocus=true, hasWallpaper=false, visible=true, canReceiveKeys=true, flags=0x81810520, type=0x00000001, layer=0, frame=[0,0][1920,1200], scale=1.000000, touchableRegion=[0,0][1920,1200], inputFeatures=0x00000000, ownerPid=1754, ownerUid=1000, dispatchingTimeout=5000.000ms
+    2: name='Window{3dbf08d u0 cn.dlife.smartcloud.launcher/cn.dlife.smartcloud.launcher.MainActivityZte}', displayId=0, paused=false, hasFocus=false, hasWallpaper=false, visible=false, canReceiveKeys=false, flags=0x81810520, type=0x00000001, layer=0, frame=[0,0][1920,1200], scale=1.000000, touchableRegion=[0,0][1920,1200], inputFeatures=0x00000000, ownerPid=1237, ownerUid=1000, dispatchingTimeout=5000.000ms
+    3: name='Window{b97cbbc u0 com.android.systemui/com.android.systemui.iot.IotNetOptionActivity}', displayId=0, paused=false, hasFocus=false, hasWallpaper=false, visible=false, canReceiveKeys=false, flags=0x81810120, type=0x00000001, layer=0, frame=[0,0][1920,1200], scale=1.000000, touchableRegion=[0,0][1920,1200], inputFeatures=0x00000000, ownerPid=510, ownerUid=10010, dispatchingTimeout=5000.000ms
+  MonitoringChannels:
+    0: 'WindowManager (server)'
+  RecentQueue: length=10
+    KeyEvent, age=229100.4ms
+    KeyEvent, age=228960.5ms
+    KeyEvent, age=228920.5ms
+    KeyEvent, age=228780.5ms
+    KeyEvent, age=20419.6ms
+    KeyEvent, age=20220.0ms
+    KeyEvent, age=20120.1ms
+    KeyEvent, age=19920.1ms
+    KeyEvent, age=19800.1ms
+    KeyEvent, age=19640.0ms
+  PendingEvent: <none>
+  InboundQueue: <empty>
+  ReplacedKeys: <empty>
+  Connections:
+    0: channelName='WindowManager (server)', windowName='monitor', status=NORMAL, monitor=true, inputPublisherBlocked=false
+      OutboundQueue: <empty>
+      WaitQueue: <empty>
+    1: channelName='3dbf08d cn.dlife.smartcloud.launcher/cn.dlife.smartcloud.launcher.MainActivityZte (server)', windowName='Window{3dbf08d u0 cn.dlife.smartcloud.launcher/cn.dlife.smartcloud.launcher.MainActivityZte}', status=NORMAL, monitor=false, inputPublisherBlocked=false
+      OutboundQueue: <empty>
+      WaitQueue: <empty>
+    2: channelName='b97cbbc com.android.systemui/com.android.systemui.iot.IotNetOptionActivity (server)', windowName='Window{b97cbbc u0 com.android.systemui/com.android.systemui.iot.IotNetOptionActivity}', status=NORMAL, monitor=false, inputPublisherBlocked=false
+      OutboundQueue: <empty>
+      WaitQueue: <empty>
+    3: channelName='daa4fa2 LeftEdgeIndicator (server)', windowName='Window{daa4fa2 u0 LeftEdgeIndicator}', status=NORMAL, monitor=false, inputPublisherBlocked=false
+      OutboundQueue: <empty>
+      WaitQueue: <empty>
+    4: channelName='5599662 com.android.speaker.settings/com.android.tv.settings.MainActivity (server)', windowName='Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}', status=NORMAL, monitor=false, inputPublisherBlocked=false
+      OutboundQueue: <empty>
+      WaitQueue: <empty>
+  AppSwitch: not pending
+  Configuration:
+    KeyRepeatDelay: 50.0ms
+    KeyRepeatTimeout: 500.0ms
+
+

@@ -1,0 +1,10 @@
+07-03 17:06:10.118   173   173 D TelephonyManager: No /proc/cmdline exception=java.io.FileNotFoundException: /proc/cmdline (Permission denied)
+07-03 17:06:10.118   173   173 D TelephonyManager: /proc/cmdline=
+07-03 17:06:12.921   366   366 E TelephonyManager: IMSI error: Subscriber Info is null
+07-03 17:06:14.754   366   366 D TelephonyRegistry: systemRunning register for intents
+07-03 17:06:15.218   366   378 D TelephonyRegistry: listen oscl: hasNotifySubscriptionInfoChangedOccurred==false no callback
+07-03 17:06:16.455   366   366 D TelephonyRegistry: notifyCellLocationForSubscriber: subId=0 cellLocation=Bundle[{}]
+07-03 17:06:18.267   366   485 D TelephonyRegistry: listen oscl: hasNotifySubscriptionInfoChangedOccurred==false no callback
+07-03 17:08:19.116   366  2222 D TelephonyRegistry: listen oscl: hasNotifySubscriptionInfoChangedOccurred==false no callback
+07-03 17:08:40.055   366   595 D TelephonyRegistry: listen oscl: hasNotifySubscriptionInfoChangedOccurred==false no callback
+07-03 17:08:58.988   366  1819 D TelephonyRegistry: listen oscl: hasNotifySubscriptionInfoChangedOccurred==false no callback

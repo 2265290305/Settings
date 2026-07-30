@@ -1,0 +1,702 @@
+--------- beginning of main
+07-03 13:20:26.107   474   581 D bt_btif_config: btif_get_device_type: Device [64:6e:69:65:e0:a0] type 1
+07-03 13:20:26.129   474   581 W BluetoothRemoteDevices: Skip name update for 64:6E:69:65:E0:A0
+07-03 13:20:26.129   474   581 W BluetoothRemoteDevices: Skip class update for 64:6E:69:65:E0:A0
+07-03 13:20:26.137  1754  1754 I BlueScreen: classic found address=64:6E:69:65:E0:A0 extraName=JJ-PC stackName=JJ-PC
+07-03 13:20:26.311   883  1173 D uxSDK   : UxApplicationHandler[run() line:1 threadName:uxLoop] test-->0;test-->9
+07-03 13:20:26.311   883  1173 I uxSDK   : InitDataThread[p() line:4 threadName:uxLoop] Queue的behavior数据条数为:------> 0
+07-03 13:20:26.311   883  1173 I uxSDK   : InitDataThread[p() line:56 threadName:uxLoop] Queue的block数据条数为:------> 0
+07-03 13:20:26.312   883  1173 I uxSDK   : InitDataThread[p() line:76 threadName:uxLoop] Queue的http数据条数为:------> 0
+07-03 13:20:26.312   883  1173 I uxSDK   : InitDataThread[p() line:96 threadName:uxLoop] Queue的customEvent数据条数为:------> 0
+07-03 13:20:26.312   883  1173 I uxSDK   : InitDataThread[p() line:116 threadName:uxLoop] Queue的network数据条数为:------> 0
+07-03 13:20:26.312   883  1173 I uxSDK   : InitDataThread[p() line:136 threadName:uxLoop] Queue的traffic数据条数为:------> 0
+07-03 13:20:26.313   883  1173 W uxSDK   : InitDataThread[p() line:157 threadName:uxLoop] ------> 发送/保存 package之前检查队列，数据队列都是空!
+07-03 13:20:26.313   883  1173 D uxSDK   : UxApplicationHandler[run() line:4 threadName:uxLoop] sendPackageData
+07-03 13:20:26.313   883  1173 D uxSDK   : UxApplicationHandler[run() line:8 threadName:uxLoop] test-->0;test-->9;mSampleIntervalMillis-->40000
+07-03 13:20:26.314   883  1173 D uxSDK   : UxApplicationHandler[b() line:8 threadName:uxLoop] stop--->stop
+07-03 13:20:26.336   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:20:26.340   883   883 I #NanoPaireService#: Discovery Device Finished
+07-03 13:20:26.557   883   883 E MiniSDKConnectManager: reconnectMiniSDK times:23/100
+07-03 13:20:26.557   883   883 E huan    : MiniSDK releaseSDK
+07-03 13:20:26.560  2669  2669 E huan    : aidl.Server.onUnbind()=========
+07-03 13:20:26.560  2669  2669 E huan    : aidl.Server.onDestroy()=========
+07-03 13:20:26.561  2669  2669 E huan    : clearMiniAppActive appId:null
+07-03 13:20:26.562   883   883 W huan    : setAuth：null -> null
+07-03 13:20:26.562   883   883 I MiniSDKConnectManager: initMiniSDK:
+07-03 13:20:26.562   883   883 I MiniSDKConnectManager: initMiniSDK->mAppId:2123889504
+07-03 13:20:26.562   883   883 I MiniSDKConnectManager: initMiniSDK->mAppSecret:de7012fb99f4f9ae80812a0aae5b1d11
+07-03 13:20:26.564   883   883 E huan    : MiniSDK Signature MD5:DE7573FFB57E8EA55CE86E6CE4E41CC9
+07-03 13:20:26.564   883   883 E huan    : MiniSDK Package Name:ctc.android.smart.terminal.skill
+07-03 13:20:26.566   883   883 E huan    : MiniSDK Version Name:2.0.002
+07-03 13:20:26.566   883   883 E huan    : MiniSDK version:1.2.2 code:122
+07-03 13:20:26.566   883   883 E huan    : MiniSDK AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:26.566   883   883 E huan    : MiniSDK BUILD commit:56f8404a3c960e53f39ffd0c7eb98e06deb8578f
+07-03 13:20:26.569   883   883 E huan    : MiniSDK Channel:mainHead
+07-03 13:20:26.569   883   883 E huan    : MiniSDK connect start
+07-03 13:20:26.572   883   883 E huan    : getImplicitIntent: ServiceName target:com.ai.master.action.AIDLAIMasterService.mainHead
+07-03 13:20:26.574   883   883 E huan    : getImplicitIntent services found:[ResolveInfo{b73d654 ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService m=0x108000}]
+07-03 13:20:26.575   883   883 E huan    : packageName:ctc.android.smart.terminal.voicectrl
+07-03 13:20:26.575   883   883 E huan    : className:com.ai.master.service.AIDLAIMasterService
+07-03 13:20:26.575   883   883 E huan    : permission:com.ai.master.permission.ACCESS_SERVICE.mainHead
+07-03 13:20:26.576   883   883 E huan    : bindService: Intent { act=com.ai.master.action.AIDLAIMasterService.mainHead cmp=ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService }
+--------- beginning of system
+07-03 13:20:26.577   883   883 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.bindService:1614 android.content.ContextWrapper.bindService:698 com.ai.mini.service.a.a:72 com.ai.mini.manager.b.a:24825 com.ai.mini.manager.b.a:24792 
+07-03 13:20:26.583   883   883 E huan    : bindService command done，wait connection
+07-03 13:20:26.583  2669  2669 E huan    : aidl.Server.onCreate()========
+07-03 13:20:26.584  2669  2669 E huan    : aidl.Server.onBind()=============
+07-03 13:20:26.587   883   883 E huan    : ServiceConnection onServiceConnected
+07-03 13:20:26.587   883   883 E huan    : MiniSDK service connected
+07-03 13:20:26.587   883   883 E huan    : initMiniSDK: appId=2123889504, appSecret=de7012fb99f4f9ae80812a0aae5b1d11, packageName=ctc.android.smart.terminal.skill, signatureMD5=DE7573FFB57E8EA55CE86E6CE4E41CC9, versionName=2.0.002, miniAidlMd5=70ddc572bc66ac760e8d5bc06085cf3e, miniAidlCommitHash=686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:26.588  2669  2685 E huan    : MasterSdk SDK version:1.2.2 code:122
+07-03 13:20:26.588  2669  2685 E huan    : MasterSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:d799f85767da44b438a7a0c2b8c17b057bdc6277
+07-03 13:20:26.589  2669  2685 E huan    : MiniSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:26.590   883   883 W huan    : setAuth：2123889504 -> null
+07-03 13:20:26.590   883   883 D SkillInitializationHelper: initAiMiniSdk: -103 null masterApp未初始化完成，请重试
+07-03 13:20:28.529   474  1059 D BluetoothAdapterService: startDiscovery
+07-03 13:20:28.530   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:20:28.530   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:20:28.530   474  1054 W bt_btif : bta_dm_check_av:0
+07-03 13:20:28.557   474   581 W bt_btif : busy_level.level_flags:0x11, inquiring:1
+07-03 13:20:28.722   474   581 D bt_btif_config: btif_get_device_type: Device [18:ef:3a:80:ac:a6] type 2
+07-03 13:20:28.729  1754  1754 I BlueScreen: classic found address=18:EF:3A:80:AC:A6 extraName=null stackName=null
+07-03 13:20:28.875   371   448 D WifiScoreReport: new score 60 old score 60
+--------- beginning of events
+07-03 13:20:30.676  3154  3154 I auditd  : type=1400 audit(0.0:1314): avc: denied { read } for comm="ps" scontext=u:r:dhcp:s0 tcontext=u:r:untrusted_app_25:s0:c512,c768 tclass=file permissive=1
+07-03 13:20:30.676  3154  3154 I ps      : type=1400 audit(0.0:1314): avc: denied { read } for scontext=u:r:dhcp:s0 tcontext=u:r:untrusted_app_25:s0:c512,c768 tclass=file permissive=1
+07-03 13:20:30.683  3149  3149 I auditd  : type=1400 audit(0.0:1315): avc: denied { map } for comm="logcat" path="/dev/event-log-tags" dev="tmpfs" ino=700 scontext=u:r:shell:s0 tcontext=u:object_r:runtime_event_log_tags_file:s0 tclass=file permissive=1
+07-03 13:20:30.683  3149  3149 I logcat  : type=1400 audit(0.0:1315): avc: denied { map } for path="/dev/event-log-tags" dev="tmpfs" ino=700 scontext=u:r:shell:s0 tcontext=u:object_r:runtime_event_log_tags_file:s0 tclass=file permissive=1
+07-03 13:20:31.591   883   883 E MiniSDKConnectManager: reconnectMiniSDK times:24/100
+07-03 13:20:31.591   883   883 E huan    : MiniSDK releaseSDK
+07-03 13:20:31.595  2669  2669 E huan    : aidl.Server.onUnbind()=========
+07-03 13:20:31.596  2669  2669 E huan    : aidl.Server.onDestroy()=========
+07-03 13:20:31.596  2669  2669 E huan    : clearMiniAppActive appId:null
+07-03 13:20:31.597   883   883 W huan    : setAuth：null -> null
+07-03 13:20:31.597   883   883 I MiniSDKConnectManager: initMiniSDK:
+07-03 13:20:31.597   883   883 I MiniSDKConnectManager: initMiniSDK->mAppId:2123889504
+07-03 13:20:31.597   883   883 I MiniSDKConnectManager: initMiniSDK->mAppSecret:de7012fb99f4f9ae80812a0aae5b1d11
+07-03 13:20:31.600   883   883 E huan    : MiniSDK Signature MD5:DE7573FFB57E8EA55CE86E6CE4E41CC9
+07-03 13:20:31.601   883   883 E huan    : MiniSDK Package Name:ctc.android.smart.terminal.skill
+07-03 13:20:31.603   883   883 E huan    : MiniSDK Version Name:2.0.002
+07-03 13:20:31.604   883   883 E huan    : MiniSDK version:1.2.2 code:122
+07-03 13:20:31.604   883   883 E huan    : MiniSDK AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:31.604   883   883 E huan    : MiniSDK BUILD commit:56f8404a3c960e53f39ffd0c7eb98e06deb8578f
+07-03 13:20:31.607   883   883 E huan    : MiniSDK Channel:mainHead
+07-03 13:20:31.607   883   883 E huan    : MiniSDK connect start
+07-03 13:20:31.611   883   883 E huan    : getImplicitIntent: ServiceName target:com.ai.master.action.AIDLAIMasterService.mainHead
+07-03 13:20:31.613   883   883 E huan    : getImplicitIntent services found:[ResolveInfo{b08955a ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService m=0x108000}]
+07-03 13:20:31.613   883   883 E huan    : packageName:ctc.android.smart.terminal.voicectrl
+07-03 13:20:31.613   883   883 E huan    : className:com.ai.master.service.AIDLAIMasterService
+07-03 13:20:31.613   883   883 E huan    : permission:com.ai.master.permission.ACCESS_SERVICE.mainHead
+07-03 13:20:31.615   883   883 E huan    : bindService: Intent { act=com.ai.master.action.AIDLAIMasterService.mainHead cmp=ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService }
+07-03 13:20:31.622  2669  2669 E huan    : aidl.Server.onCreate()========
+07-03 13:20:31.622  2669  2669 E huan    : aidl.Server.onBind()=============
+07-03 13:20:31.623   883   883 E huan    : bindService command done，wait connection
+07-03 13:20:31.625   883   883 E huan    : ServiceConnection onServiceConnected
+07-03 13:20:31.626   883   883 E huan    : MiniSDK service connected
+07-03 13:20:31.626   883   883 E huan    : initMiniSDK: appId=2123889504, appSecret=de7012fb99f4f9ae80812a0aae5b1d11, packageName=ctc.android.smart.terminal.skill, signatureMD5=DE7573FFB57E8EA55CE86E6CE4E41CC9, versionName=2.0.002, miniAidlMd5=70ddc572bc66ac760e8d5bc06085cf3e, miniAidlCommitHash=686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:31.627  2669  2685 E huan    : MasterSdk SDK version:1.2.2 code:122
+07-03 13:20:31.627  2669  2685 E huan    : MasterSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:d799f85767da44b438a7a0c2b8c17b057bdc6277
+07-03 13:20:31.627  2669  2685 E huan    : MiniSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:31.628   883   883 W huan    : setAuth：2123889504 -> null
+07-03 13:20:31.629   883   883 D SkillInitializationHelper: initAiMiniSdk: -103 null masterApp未初始化完成，请重试
+07-03 13:20:31.699   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:31.726   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:31.726   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:31.733  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:31.901   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:20:32.003   474   581 D bt_btif_config: btif_get_device_type: Device [6c:40:e8:64:b3:47] type 3
+07-03 13:20:32.026   474   581 W BluetoothRemoteDevices: Skip name update for 6C:40:E8:64:B3:47
+07-03 13:20:32.035  1754  1754 I BlueScreen: classic found address=6C:40:E8:64:B3:47 extraName=vivo WATCH 3 347 stackName=vivo WATCH 3 347
+07-03 13:20:32.144   474   581 D bt_btif_config: btif_get_device_type: Device [68:8f:c9:04:f9:b6] type 1
+07-03 13:20:32.166   474   581 W BluetoothRemoteDevices: Skip name update for 68:8F:C9:04:F9:B6
+07-03 13:20:32.166   474   581 W BluetoothRemoteDevices: Skip class update for 68:8F:C9:04:F9:B6
+07-03 13:20:32.175  1754  1754 I BlueScreen: classic found address=68:8F:C9:04:F9:B6 extraName=4K PRO stackName=4K PRO
+07-03 13:20:32.339   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:32.367   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:32.368   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:32.375  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:32.980   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:33.009   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:33.009   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:33.017  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:33.122   474   581 D bt_btif_config: btif_get_device_type: Device [62:a3:f4:d4:4a:b3] type 2
+07-03 13:20:33.129  1754  1754 I BlueScreen: classic found address=62:A3:F4:D4:4A:B3 extraName=null stackName=null
+07-03 13:20:33.935   474   581 D bt_btif_config: btif_get_device_type: Device [68:8f:c9:04:f9:b6] type 1
+07-03 13:20:33.957   474   581 W BluetoothRemoteDevices: Skip name update for 68:8F:C9:04:F9:B6
+07-03 13:20:33.957   474   581 W BluetoothRemoteDevices: Skip class update for 68:8F:C9:04:F9:B6
+07-03 13:20:33.966  1754  1754 I BlueScreen: classic found address=68:8F:C9:04:F9:B6 extraName=4K PRO stackName=4K PRO
+07-03 13:20:34.471   474   581 D bt_btif_config: btif_get_device_type: Device [64:6e:69:65:e0:a0] type 1
+07-03 13:20:34.495   474   581 W BluetoothRemoteDevices: Skip name update for 64:6E:69:65:E0:A0
+07-03 13:20:34.495   474   581 W BluetoothRemoteDevices: Skip class update for 64:6E:69:65:E0:A0
+07-03 13:20:34.503  1754  1754 I BlueScreen: classic found address=64:6E:69:65:E0:A0 extraName=JJ-PC stackName=JJ-PC
+07-03 13:20:34.918   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:20:35.046  3178  3178 I auditd  : type=1400 audit(0.0:1316): avc: denied { read } for comm="ps" name="0" dev="proc" ino=42354 scontext=u:r:dhcp:s0 tcontext=u:r:shell:s0 tclass=lnk_file permissive=1
+07-03 13:20:35.046  3178  3178 I ps      : type=1400 audit(0.0:1316): avc: denied { read } for name="0" dev="proc" ino=42354 scontext=u:r:dhcp:s0 tcontext=u:r:shell:s0 tclass=lnk_file permissive=1
+07-03 13:20:36.629   883   883 E MiniSDKConnectManager: reconnectMiniSDK times:25/100
+07-03 13:20:36.630   883   883 E huan    : MiniSDK releaseSDK
+07-03 13:20:36.633  2669  2669 E huan    : aidl.Server.onUnbind()=========
+07-03 13:20:36.634  2669  2669 E huan    : aidl.Server.onDestroy()=========
+07-03 13:20:36.634  2669  2669 E huan    : clearMiniAppActive appId:null
+07-03 13:20:36.635   883   883 W huan    : setAuth：null -> null
+07-03 13:20:36.635   883   883 I MiniSDKConnectManager: initMiniSDK:
+07-03 13:20:36.635   883   883 I MiniSDKConnectManager: initMiniSDK->mAppId:2123889504
+07-03 13:20:36.635   883   883 I MiniSDKConnectManager: initMiniSDK->mAppSecret:de7012fb99f4f9ae80812a0aae5b1d11
+07-03 13:20:36.638   883   883 E huan    : MiniSDK Signature MD5:DE7573FFB57E8EA55CE86E6CE4E41CC9
+07-03 13:20:36.639   883   883 E huan    : MiniSDK Package Name:ctc.android.smart.terminal.skill
+07-03 13:20:36.641   883   883 E huan    : MiniSDK Version Name:2.0.002
+07-03 13:20:36.642   883   883 E huan    : MiniSDK version:1.2.2 code:122
+07-03 13:20:36.643   883   883 E huan    : MiniSDK AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:36.643   883   883 E huan    : MiniSDK BUILD commit:56f8404a3c960e53f39ffd0c7eb98e06deb8578f
+07-03 13:20:36.646   883   883 E huan    : MiniSDK Channel:mainHead
+07-03 13:20:36.647   883   883 E huan    : MiniSDK connect start
+07-03 13:20:36.650   883   883 E huan    : getImplicitIntent: ServiceName target:com.ai.master.action.AIDLAIMasterService.mainHead
+07-03 13:20:36.655   883   883 E huan    : getImplicitIntent services found:[ResolveInfo{b1ee34b ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService m=0x108000}]
+07-03 13:20:36.655   883   883 E huan    : packageName:ctc.android.smart.terminal.voicectrl
+07-03 13:20:36.655   883   883 E huan    : className:com.ai.master.service.AIDLAIMasterService
+07-03 13:20:36.655   883   883 E huan    : permission:com.ai.master.permission.ACCESS_SERVICE.mainHead
+07-03 13:20:36.658   883   883 E huan    : bindService: Intent { act=com.ai.master.action.AIDLAIMasterService.mainHead cmp=ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService }
+07-03 13:20:36.650   883   883 I auditd  : type=1400 audit(0.0:1317): avc: denied { read write } for comm=50726F66696C65205361766572 name="primary.prof" dev="mmcblk2p20" ino=261351 scontext=u:r:zygote:s0 tcontext=u:object_r:user_profile_data_file:s0 tclass=file permissive=1
+07-03 13:20:36.650   883   883 I ctc.android.smart.terminal.skill: type=1400 audit(0.0:1317): avc: denied { read write } for comm=50726F66696C65205361766572 name="primary.prof" dev="mmcblk2p20" ino=261351 scontext=u:r:zygote:s0 tcontext=u:object_r:user_profile_data_file:s0 tclass=file permissive=1
+07-03 13:20:36.666  2669  2669 E huan    : aidl.Server.onCreate()========
+07-03 13:20:36.667  2669  2669 E huan    : aidl.Server.onBind()=============
+07-03 13:20:36.668   883   883 E huan    : bindService command done，wait connection
+07-03 13:20:36.669   883   883 E huan    : ServiceConnection onServiceConnected
+07-03 13:20:36.669   883   883 E huan    : MiniSDK service connected
+07-03 13:20:36.669   883   883 E huan    : initMiniSDK: appId=2123889504, appSecret=de7012fb99f4f9ae80812a0aae5b1d11, packageName=ctc.android.smart.terminal.skill, signatureMD5=DE7573FFB57E8EA55CE86E6CE4E41CC9, versionName=2.0.002, miniAidlMd5=70ddc572bc66ac760e8d5bc06085cf3e, miniAidlCommitHash=686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:36.670  2669  2685 E huan    : MasterSdk SDK version:1.2.2 code:122
+07-03 13:20:36.670  2669  2685 E huan    : MasterSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:d799f85767da44b438a7a0c2b8c17b057bdc6277
+07-03 13:20:36.670  2669  2685 E huan    : MiniSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:36.671   883   883 W huan    : setAuth：2123889504 -> null
+07-03 13:20:36.671   883   883 D SkillInitializationHelper: initAiMiniSdk: -103 null masterApp未初始化完成，请重试
+07-03 13:20:36.650   883   883 I auditd  : type=1400 audit(0.0:1319): avc: denied { lock } for comm=50726F66696C65205361766572 path="/data/misc/profiles/cur/0/ctc.android.smart.terminal.skill/primary.prof" dev="mmcblk2p20" ino=261351 scontext=u:r:zygote:s0 tcontext=u:object_r:user_profile_data_file:s0 tclass=file permissive=1
+07-03 13:20:36.650   883   883 I ctc.android.smart.terminal.skill: type=1400 audit(0.0:1319): avc: denied { lock } for comm=50726F66696C65205361766572 path="/data/misc/profiles/cur/0/ctc.android.smart.terminal.skill/primary.prof" dev="mmcblk2p20" ino=261351 scontext=u:r:zygote:s0 tcontext=u:object_r:user_profile_data_file:s0 tclass=file permissive=1
+07-03 13:20:36.822   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:36.842   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:36.842   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:36.850  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:37.941   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:20:38.103   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:38.126   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:38.126   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:38.135  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:38.530   474   581 W bt_btif : busy_level.level_flags:0x13, inquiring:0
+07-03 13:20:38.607   474   581 D bt_btif_config: btif_get_device_type: Device [68:8f:c9:04:f9:b6] type 1
+07-03 13:20:38.629   474   581 W BluetoothRemoteDevices: Skip name update for 68:8F:C9:04:F9:B6
+07-03 13:20:38.630   474   581 W BluetoothRemoteDevices: Skip class update for 68:8F:C9:04:F9:B6
+07-03 13:20:38.637  1754  1754 I BlueScreen: classic found address=68:8F:C9:04:F9:B6 extraName=4K PRO stackName=4K PRO
+07-03 13:20:38.763   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:38.787   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:38.787   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:38.795  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:40.961   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:20:41.346   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:20:41.349   883   883 I #NanoPaireService#: Discovery Device Finished
+07-03 13:20:41.672   883   883 E MiniSDKConnectManager: reconnectMiniSDK times:26/100
+07-03 13:20:41.672   883   883 E huan    : MiniSDK releaseSDK
+07-03 13:20:41.676  2669  2669 E huan    : aidl.Server.onUnbind()=========
+07-03 13:20:41.676  2669  2669 E huan    : aidl.Server.onDestroy()=========
+07-03 13:20:41.677  2669  2669 E huan    : clearMiniAppActive appId:null
+07-03 13:20:41.678   883   883 W huan    : setAuth：null -> null
+07-03 13:20:41.678   883   883 I MiniSDKConnectManager: initMiniSDK:
+07-03 13:20:41.678   883   883 I MiniSDKConnectManager: initMiniSDK->mAppId:2123889504
+07-03 13:20:41.678   883   883 I MiniSDKConnectManager: initMiniSDK->mAppSecret:de7012fb99f4f9ae80812a0aae5b1d11
+07-03 13:20:41.681   883   883 E huan    : MiniSDK Signature MD5:DE7573FFB57E8EA55CE86E6CE4E41CC9
+07-03 13:20:41.682   883   883 E huan    : MiniSDK Package Name:ctc.android.smart.terminal.skill
+07-03 13:20:41.684   883   883 E huan    : MiniSDK Version Name:2.0.002
+07-03 13:20:41.684   883   883 E huan    : MiniSDK version:1.2.2 code:122
+07-03 13:20:41.685   883   883 E huan    : MiniSDK AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:41.685   883   883 E huan    : MiniSDK BUILD commit:56f8404a3c960e53f39ffd0c7eb98e06deb8578f
+07-03 13:20:41.687   883   883 E huan    : MiniSDK Channel:mainHead
+07-03 13:20:41.687   883   883 E huan    : MiniSDK connect start
+07-03 13:20:41.689   883   883 E huan    : getImplicitIntent: ServiceName target:com.ai.master.action.AIDLAIMasterService.mainHead
+07-03 13:20:41.691   883   883 E huan    : getImplicitIntent services found:[ResolveInfo{350e493 ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService m=0x108000}]
+07-03 13:20:41.692   883   883 E huan    : packageName:ctc.android.smart.terminal.voicectrl
+07-03 13:20:41.692   883   883 E huan    : className:com.ai.master.service.AIDLAIMasterService
+07-03 13:20:41.692   883   883 E huan    : permission:com.ai.master.permission.ACCESS_SERVICE.mainHead
+07-03 13:20:41.693   883   883 E huan    : bindService: Intent { act=com.ai.master.action.AIDLAIMasterService.mainHead cmp=ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService }
+07-03 13:20:41.700   883   883 E huan    : bindService command done，wait connection
+07-03 13:20:41.701  2669  2669 E huan    : aidl.Server.onCreate()========
+07-03 13:20:41.701  2669  2669 E huan    : aidl.Server.onBind()=============
+07-03 13:20:41.703   883   883 E huan    : ServiceConnection onServiceConnected
+07-03 13:20:41.704   883   883 E huan    : MiniSDK service connected
+07-03 13:20:41.704   883   883 E huan    : initMiniSDK: appId=2123889504, appSecret=de7012fb99f4f9ae80812a0aae5b1d11, packageName=ctc.android.smart.terminal.skill, signatureMD5=DE7573FFB57E8EA55CE86E6CE4E41CC9, versionName=2.0.002, miniAidlMd5=70ddc572bc66ac760e8d5bc06085cf3e, miniAidlCommitHash=686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:41.705  2669  2685 E huan    : MasterSdk SDK version:1.2.2 code:122
+07-03 13:20:41.705  2669  2685 E huan    : MasterSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:d799f85767da44b438a7a0c2b8c17b057bdc6277
+07-03 13:20:41.706  2669  2685 E huan    : MiniSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:41.706   883   883 W huan    : setAuth：2123889504 -> null
+07-03 13:20:41.706   883   883 D SkillInitializationHelper: initAiMiniSdk: -103 null masterApp未初始化完成，请重试
+07-03 13:20:43.532   474   780 D BluetoothAdapterService: startDiscovery
+07-03 13:20:43.533   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:20:43.533   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:20:43.533   474  1054 W bt_btif : bta_dm_check_av:0
+07-03 13:20:43.551   474   581 W bt_btif : busy_level.level_flags:0x11, inquiring:1
+07-03 13:20:43.579   883   883 I #NanoVoice#: Bonded2 device size:1
+07-03 13:20:43.583   883   883 I NanoVoiceService: read lack : null
+07-03 13:20:43.988   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:20:44.122   474   581 D bt_btif_config: btif_get_device_type: Device [6c:40:e8:64:b3:47] type 3
+07-03 13:20:44.146   474   581 W BluetoothRemoteDevices: Skip name update for 6C:40:E8:64:B3:47
+07-03 13:20:44.155  1754  1754 I BlueScreen: classic found address=6C:40:E8:64:B3:47 extraName=vivo WATCH 3 347 stackName=vivo WATCH 3 347
+07-03 13:20:44.786   474   581 D bt_btif_config: btif_get_device_type: Device [64:6e:69:65:e0:a0] type 1
+07-03 13:20:44.808   474   581 W BluetoothRemoteDevices: Skip name update for 64:6E:69:65:E0:A0
+07-03 13:20:44.809   474   581 W BluetoothRemoteDevices: Skip class update for 64:6E:69:65:E0:A0
+07-03 13:20:44.817  1754  1754 I BlueScreen: classic found address=64:6E:69:65:E0:A0 extraName=JJ-PC stackName=JJ-PC
+07-03 13:20:44.842   474   581 D bt_btif_config: btif_get_device_type: Device [18:ef:3a:80:ac:a6] type 2
+07-03 13:20:44.850  1754  1754 I BlueScreen: classic found address=18:EF:3A:80:AC:A6 extraName=null stackName=null
+07-03 13:20:46.417   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:46.440   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:46.440   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:46.443   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:46.449  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:46.468   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:46.468   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:46.476  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:46.489   474   581 D bt_btif_config: btif_get_device_type: Device [68:8f:c9:04:f9:b6] type 1
+07-03 13:20:46.511   474   581 W BluetoothRemoteDevices: Skip name update for 68:8F:C9:04:F9:B6
+07-03 13:20:46.512   474   581 W BluetoothRemoteDevices: Skip class update for 68:8F:C9:04:F9:B6
+07-03 13:20:46.519  1754  1754 I BlueScreen: classic found address=68:8F:C9:04:F9:B6 extraName=4K PRO stackName=4K PRO
+07-03 13:20:46.707   883   883 E MiniSDKConnectManager: reconnectMiniSDK times:27/100
+07-03 13:20:46.707   883   883 E huan    : MiniSDK releaseSDK
+07-03 13:20:46.710  2669  2669 E huan    : aidl.Server.onUnbind()=========
+07-03 13:20:46.711  2669  2669 E huan    : aidl.Server.onDestroy()=========
+07-03 13:20:46.711  2669  2669 E huan    : clearMiniAppActive appId:null
+07-03 13:20:46.712   883   883 W huan    : setAuth：null -> null
+07-03 13:20:46.713   883   883 I MiniSDKConnectManager: initMiniSDK:
+07-03 13:20:46.713   883   883 I MiniSDKConnectManager: initMiniSDK->mAppId:2123889504
+07-03 13:20:46.713   883   883 I MiniSDKConnectManager: initMiniSDK->mAppSecret:de7012fb99f4f9ae80812a0aae5b1d11
+07-03 13:20:46.716   883   883 E huan    : MiniSDK Signature MD5:DE7573FFB57E8EA55CE86E6CE4E41CC9
+07-03 13:20:46.716   883   883 E huan    : MiniSDK Package Name:ctc.android.smart.terminal.skill
+07-03 13:20:46.719   883   883 E huan    : MiniSDK Version Name:2.0.002
+07-03 13:20:46.719   883   883 E huan    : MiniSDK version:1.2.2 code:122
+07-03 13:20:46.719   883   883 E huan    : MiniSDK AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:46.720   883   883 E huan    : MiniSDK BUILD commit:56f8404a3c960e53f39ffd0c7eb98e06deb8578f
+07-03 13:20:46.721   883   883 E huan    : MiniSDK Channel:mainHead
+07-03 13:20:46.722   883   883 E huan    : MiniSDK connect start
+07-03 13:20:46.724   883   883 E huan    : getImplicitIntent: ServiceName target:com.ai.master.action.AIDLAIMasterService.mainHead
+07-03 13:20:46.725   883   883 E huan    : getImplicitIntent services found:[ResolveInfo{5795f24 ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService m=0x108000}]
+07-03 13:20:46.726   883   883 E huan    : packageName:ctc.android.smart.terminal.voicectrl
+07-03 13:20:46.726   883   883 E huan    : className:com.ai.master.service.AIDLAIMasterService
+07-03 13:20:46.726   883   883 E huan    : permission:com.ai.master.permission.ACCESS_SERVICE.mainHead
+07-03 13:20:46.727   883   883 E huan    : bindService: Intent { act=com.ai.master.action.AIDLAIMasterService.mainHead cmp=ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService }
+07-03 13:20:46.734  2669  2669 E huan    : aidl.Server.onCreate()========
+07-03 13:20:46.734  2669  2669 E huan    : aidl.Server.onBind()=============
+07-03 13:20:46.735   883   883 E huan    : bindService command done，wait connection
+07-03 13:20:46.737   883   883 E huan    : ServiceConnection onServiceConnected
+07-03 13:20:46.737   883   883 E huan    : MiniSDK service connected
+07-03 13:20:46.738   883   883 E huan    : initMiniSDK: appId=2123889504, appSecret=de7012fb99f4f9ae80812a0aae5b1d11, packageName=ctc.android.smart.terminal.skill, signatureMD5=DE7573FFB57E8EA55CE86E6CE4E41CC9, versionName=2.0.002, miniAidlMd5=70ddc572bc66ac760e8d5bc06085cf3e, miniAidlCommitHash=686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:46.739  2669  2681 E huan    : MasterSdk SDK version:1.2.2 code:122
+07-03 13:20:46.740  2669  2681 E huan    : MasterSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:d799f85767da44b438a7a0c2b8c17b057bdc6277
+07-03 13:20:46.740  2669  2681 E huan    : MiniSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:46.741   883   883 W huan    : setAuth：2123889504 -> null
+07-03 13:20:46.742   883   883 D SkillInitializationHelper: initAiMiniSdk: -103 null masterApp未初始化完成，请重试
+07-03 13:20:47.011   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:20:47.057   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:47.079   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:47.079   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:47.089  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:47.097   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:47.119   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:47.119   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:47.127  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:50.041   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:20:51.282   474   581 D bt_btif_config: btif_get_device_type: Device [74:df:2a:5f:92:82] type 2
+07-03 13:20:51.290  1754  1754 I BlueScreen: classic found address=74:DF:2A:5F:92:82 extraName=null stackName=null
+07-03 13:20:51.539   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:51.561   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:51.562   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:51.564   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:51.570  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:51.588   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:51.588   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:51.596  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:51.742   883   883 E MiniSDKConnectManager: reconnectMiniSDK times:28/100
+07-03 13:20:51.742   883   883 E huan    : MiniSDK releaseSDK
+07-03 13:20:51.744  2669  2669 E huan    : aidl.Server.onUnbind()=========
+07-03 13:20:51.745  2669  2669 E huan    : aidl.Server.onDestroy()=========
+07-03 13:20:51.745  2669  2669 E huan    : clearMiniAppActive appId:null
+07-03 13:20:51.745   883   883 W huan    : setAuth：null -> null
+07-03 13:20:51.746   883   883 I MiniSDKConnectManager: initMiniSDK:
+07-03 13:20:51.746   883   883 I MiniSDKConnectManager: initMiniSDK->mAppId:2123889504
+07-03 13:20:51.746   883   883 I MiniSDKConnectManager: initMiniSDK->mAppSecret:de7012fb99f4f9ae80812a0aae5b1d11
+07-03 13:20:51.747   883   883 E huan    : MiniSDK Signature MD5:DE7573FFB57E8EA55CE86E6CE4E41CC9
+07-03 13:20:51.748   883   883 E huan    : MiniSDK Package Name:ctc.android.smart.terminal.skill
+07-03 13:20:51.749   883   883 E huan    : MiniSDK Version Name:2.0.002
+07-03 13:20:51.750   883   883 E huan    : MiniSDK version:1.2.2 code:122
+07-03 13:20:51.750   883   883 E huan    : MiniSDK AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:51.750   883   883 E huan    : MiniSDK BUILD commit:56f8404a3c960e53f39ffd0c7eb98e06deb8578f
+07-03 13:20:51.751   883   883 E huan    : MiniSDK Channel:mainHead
+07-03 13:20:51.752   883   883 E huan    : MiniSDK connect start
+07-03 13:20:51.753   883   883 E huan    : getImplicitIntent: ServiceName target:com.ai.master.action.AIDLAIMasterService.mainHead
+07-03 13:20:51.755   883   883 E huan    : getImplicitIntent services found:[ResolveInfo{6d677ac ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService m=0x108000}]
+07-03 13:20:51.755   883   883 E huan    : packageName:ctc.android.smart.terminal.voicectrl
+07-03 13:20:51.755   883   883 E huan    : className:com.ai.master.service.AIDLAIMasterService
+07-03 13:20:51.755   883   883 E huan    : permission:com.ai.master.permission.ACCESS_SERVICE.mainHead
+07-03 13:20:51.757   883   883 E huan    : bindService: Intent { act=com.ai.master.action.AIDLAIMasterService.mainHead cmp=ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService }
+07-03 13:20:51.763   883   883 E huan    : bindService command done，wait connection
+07-03 13:20:51.764  2669  2669 E huan    : aidl.Server.onCreate()========
+07-03 13:20:51.765  2669  2669 E huan    : aidl.Server.onBind()=============
+07-03 13:20:51.768   883   883 E huan    : ServiceConnection onServiceConnected
+07-03 13:20:51.768   883   883 E huan    : MiniSDK service connected
+07-03 13:20:51.768   883   883 E huan    : initMiniSDK: appId=2123889504, appSecret=de7012fb99f4f9ae80812a0aae5b1d11, packageName=ctc.android.smart.terminal.skill, signatureMD5=DE7573FFB57E8EA55CE86E6CE4E41CC9, versionName=2.0.002, miniAidlMd5=70ddc572bc66ac760e8d5bc06085cf3e, miniAidlCommitHash=686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:51.770  2669  2681 E huan    : MasterSdk SDK version:1.2.2 code:122
+07-03 13:20:51.770  2669  2681 E huan    : MasterSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:d799f85767da44b438a7a0c2b8c17b057bdc6277
+07-03 13:20:51.771  2669  2681 E huan    : MiniSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:51.772   883   883 W huan    : setAuth：2123889504 -> null
+07-03 13:20:51.772   883   883 D SkillInitializationHelper: initAiMiniSdk: -103 null masterApp未初始化完成，请重试
+07-03 13:20:52.179   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:52.202   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:52.202   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:52.210  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:52.513   474   581 D bt_btif_config: btif_get_device_type: Device [68:8f:c9:04:f9:b6] type 1
+07-03 13:20:52.542   474   581 W BluetoothRemoteDevices: Skip name update for 68:8F:C9:04:F9:B6
+07-03 13:20:52.542   474   581 W BluetoothRemoteDevices: Skip class update for 68:8F:C9:04:F9:B6
+07-03 13:20:52.551  1754  1754 I BlueScreen: classic found address=68:8F:C9:04:F9:B6 extraName=4K PRO stackName=4K PRO
+07-03 13:20:52.860   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:52.883   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:52.883   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:52.891  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:53.065   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:20:53.460   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:20:53.483   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:20:53.484   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:20:53.492  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:53.533   474   581 W bt_btif : busy_level.level_flags:0x13, inquiring:0
+07-03 13:20:54.425   474   581 D bt_btif_config: btif_get_device_type: Device [68:8f:c9:04:f9:b6] type 1
+07-03 13:20:54.449   474   581 W BluetoothRemoteDevices: Skip name update for 68:8F:C9:04:F9:B6
+07-03 13:20:54.449   474   581 W BluetoothRemoteDevices: Skip class update for 68:8F:C9:04:F9:B6
+07-03 13:20:54.457  1754  1754 I BlueScreen: classic found address=68:8F:C9:04:F9:B6 extraName=4K PRO stackName=4K PRO
+07-03 13:20:56.088   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:20:56.350   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:20:56.355   883   883 I #NanoPaireService#: Discovery Device Finished
+07-03 13:20:56.773   883   883 E MiniSDKConnectManager: reconnectMiniSDK times:29/100
+07-03 13:20:56.773   883   883 E huan    : MiniSDK releaseSDK
+07-03 13:20:56.777  2669  2669 E huan    : aidl.Server.onUnbind()=========
+07-03 13:20:56.778  2669  2669 E huan    : aidl.Server.onDestroy()=========
+07-03 13:20:56.779  2669  2669 E huan    : clearMiniAppActive appId:null
+07-03 13:20:56.780   883   883 W huan    : setAuth：null -> null
+07-03 13:20:56.780   883   883 I MiniSDKConnectManager: initMiniSDK:
+07-03 13:20:56.780   883   883 I MiniSDKConnectManager: initMiniSDK->mAppId:2123889504
+07-03 13:20:56.780   883   883 I MiniSDKConnectManager: initMiniSDK->mAppSecret:de7012fb99f4f9ae80812a0aae5b1d11
+07-03 13:20:56.782   883   883 E huan    : MiniSDK Signature MD5:DE7573FFB57E8EA55CE86E6CE4E41CC9
+07-03 13:20:56.783   883   883 E huan    : MiniSDK Package Name:ctc.android.smart.terminal.skill
+07-03 13:20:56.785   883   883 E huan    : MiniSDK Version Name:2.0.002
+07-03 13:20:56.785   883   883 E huan    : MiniSDK version:1.2.2 code:122
+07-03 13:20:56.785   883   883 E huan    : MiniSDK AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:56.785   883   883 E huan    : MiniSDK BUILD commit:56f8404a3c960e53f39ffd0c7eb98e06deb8578f
+07-03 13:20:56.787   883   883 E huan    : MiniSDK Channel:mainHead
+07-03 13:20:56.787   883   883 E huan    : MiniSDK connect start
+07-03 13:20:56.789   883   883 E huan    : getImplicitIntent: ServiceName target:com.ai.master.action.AIDLAIMasterService.mainHead
+07-03 13:20:56.792   883   883 E huan    : getImplicitIntent services found:[ResolveInfo{1d7337 ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService m=0x108000}]
+07-03 13:20:56.792   883   883 E huan    : packageName:ctc.android.smart.terminal.voicectrl
+07-03 13:20:56.792   883   883 E huan    : className:com.ai.master.service.AIDLAIMasterService
+07-03 13:20:56.792   883   883 E huan    : permission:com.ai.master.permission.ACCESS_SERVICE.mainHead
+07-03 13:20:56.793   883   883 E huan    : bindService: Intent { act=com.ai.master.action.AIDLAIMasterService.mainHead cmp=ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService }
+07-03 13:20:56.800   883   883 E huan    : bindService command done，wait connection
+07-03 13:20:56.801  2669  2669 E huan    : aidl.Server.onCreate()========
+07-03 13:20:56.802  2669  2669 E huan    : aidl.Server.onBind()=============
+07-03 13:20:56.805   883   883 E huan    : ServiceConnection onServiceConnected
+07-03 13:20:56.805   883   883 E huan    : MiniSDK service connected
+07-03 13:20:56.806   883   883 E huan    : initMiniSDK: appId=2123889504, appSecret=de7012fb99f4f9ae80812a0aae5b1d11, packageName=ctc.android.smart.terminal.skill, signatureMD5=DE7573FFB57E8EA55CE86E6CE4E41CC9, versionName=2.0.002, miniAidlMd5=70ddc572bc66ac760e8d5bc06085cf3e, miniAidlCommitHash=686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:56.806  2669  2681 E huan    : MasterSdk SDK version:1.2.2 code:122
+07-03 13:20:56.807  2669  2681 E huan    : MasterSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:d799f85767da44b438a7a0c2b8c17b057bdc6277
+07-03 13:20:56.807  2669  2681 E huan    : MiniSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:20:56.809   883   883 W huan    : setAuth：2123889504 -> null
+07-03 13:20:56.809   883   883 D SkillInitializationHelper: initAiMiniSdk: -103 null masterApp未初始化完成，请重试
+07-03 13:20:58.540   474   780 D BluetoothAdapterService: startDiscovery
+07-03 13:20:58.541   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:20:58.541   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:20:58.541   474  1054 W bt_btif : bta_dm_check_av:0
+07-03 13:20:58.558   474   581 W bt_btif : busy_level.level_flags:0x11, inquiring:1
+07-03 13:20:58.772   474   581 D bt_btif_config: btif_get_device_type: Device [6c:40:e8:64:b3:47] type 3
+07-03 13:20:58.796   474   581 W BluetoothRemoteDevices: Skip name update for 6C:40:E8:64:B3:47
+07-03 13:20:58.800   474   581 D bt_btif_config: btif_get_device_type: Device [64:6e:69:65:e0:a0] type 1
+07-03 13:20:58.806  1754  1754 I BlueScreen: classic found address=6C:40:E8:64:B3:47 extraName=vivo WATCH 3 347 stackName=vivo WATCH 3 347
+07-03 13:20:58.824   474   581 W BluetoothRemoteDevices: Skip name update for 64:6E:69:65:E0:A0
+07-03 13:20:58.824   474   581 W BluetoothRemoteDevices: Skip class update for 64:6E:69:65:E0:A0
+07-03 13:20:58.832  1754  1754 I BlueScreen: classic found address=64:6E:69:65:E0:A0 extraName=JJ-PC stackName=JJ-PC
+07-03 13:20:59.118   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:21:00.372   474   581 D bt_btif_config: btif_get_device_type: Device [18:ef:3a:80:ac:a6] type 2
+07-03 13:21:00.379  1754  1754 I BlueScreen: classic found address=18:EF:3A:80:AC:A6 extraName=null stackName=null
+07-03 13:21:01.143   474   581 D bt_btif_config: btif_get_device_type: Device [64:6e:69:65:e0:a0] type 1
+07-03 13:21:01.164   474   581 W BluetoothRemoteDevices: Skip name update for 64:6E:69:65:E0:A0
+07-03 13:21:01.164   474   581 W BluetoothRemoteDevices: Skip class update for 64:6E:69:65:E0:A0
+07-03 13:21:01.171  1754  1754 I BlueScreen: classic found address=64:6E:69:65:E0:A0 extraName=JJ-PC stackName=JJ-PC
+07-03 13:21:01.171   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:01.192   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:01.193   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:01.199  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:21:01.599   474   581 D bt_btif_config: btif_get_device_type: Device [68:8f:c9:04:f9:b6] type 1
+07-03 13:21:01.623   474   581 W BluetoothRemoteDevices: Skip name update for 68:8F:C9:04:F9:B6
+07-03 13:21:01.623   474   581 W BluetoothRemoteDevices: Skip class update for 68:8F:C9:04:F9:B6
+07-03 13:21:01.630  1754  1754 I BlueScreen: classic found address=68:8F:C9:04:F9:B6 extraName=4K PRO stackName=4K PRO
+07-03 13:21:01.784   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:01.806   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:01.806   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:01.812   883   883 E MiniSDKConnectManager: reconnectMiniSDK times:30/100
+07-03 13:21:01.812   883   883 E huan    : MiniSDK releaseSDK
+07-03 13:21:01.816  2669  2669 E huan    : aidl.Server.onUnbind()=========
+07-03 13:21:01.816  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:21:01.817   883   883 W huan    : setAuth：null -> null
+07-03 13:21:01.818   883   883 I MiniSDKConnectManager: initMiniSDK:
+07-03 13:21:01.818   883   883 I MiniSDKConnectManager: initMiniSDK->mAppId:2123889504
+07-03 13:21:01.818   883   883 I MiniSDKConnectManager: initMiniSDK->mAppSecret:de7012fb99f4f9ae80812a0aae5b1d11
+07-03 13:21:01.818  2669  2669 E huan    : aidl.Server.onDestroy()=========
+07-03 13:21:01.821   883   883 E huan    : MiniSDK Signature MD5:DE7573FFB57E8EA55CE86E6CE4E41CC9
+07-03 13:21:01.821   883   883 E huan    : MiniSDK Package Name:ctc.android.smart.terminal.skill
+07-03 13:21:01.822  2669  2669 E huan    : clearMiniAppActive appId:null
+07-03 13:21:01.823   883   883 E huan    : MiniSDK Version Name:2.0.002
+07-03 13:21:01.823   883   883 E huan    : MiniSDK version:1.2.2 code:122
+07-03 13:21:01.823   883   883 E huan    : MiniSDK AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:21:01.823   883   883 E huan    : MiniSDK BUILD commit:56f8404a3c960e53f39ffd0c7eb98e06deb8578f
+07-03 13:21:01.825   883   883 E huan    : MiniSDK Channel:mainHead
+07-03 13:21:01.825   883   883 E huan    : MiniSDK connect start
+07-03 13:21:01.828   883   883 E huan    : getImplicitIntent: ServiceName target:com.ai.master.action.AIDLAIMasterService.mainHead
+07-03 13:21:01.830   883   883 E huan    : getImplicitIntent services found:[ResolveInfo{1a7f164 ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService m=0x108000}]
+07-03 13:21:01.831   883   883 E huan    : packageName:ctc.android.smart.terminal.voicectrl
+07-03 13:21:01.831   883   883 E huan    : className:com.ai.master.service.AIDLAIMasterService
+07-03 13:21:01.831   883   883 E huan    : permission:com.ai.master.permission.ACCESS_SERVICE.mainHead
+07-03 13:21:01.832   883   883 E huan    : bindService: Intent { act=com.ai.master.action.AIDLAIMasterService.mainHead cmp=ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService }
+07-03 13:21:01.840   883   883 E huan    : bindService command done，wait connection
+07-03 13:21:01.840  2669  2669 E huan    : aidl.Server.onCreate()========
+07-03 13:21:01.841  2669  2669 E huan    : aidl.Server.onBind()=============
+07-03 13:21:01.845   883   883 E huan    : ServiceConnection onServiceConnected
+07-03 13:21:01.845   883   883 E huan    : MiniSDK service connected
+07-03 13:21:01.845   883   883 E huan    : initMiniSDK: appId=2123889504, appSecret=de7012fb99f4f9ae80812a0aae5b1d11, packageName=ctc.android.smart.terminal.skill, signatureMD5=DE7573FFB57E8EA55CE86E6CE4E41CC9, versionName=2.0.002, miniAidlMd5=70ddc572bc66ac760e8d5bc06085cf3e, miniAidlCommitHash=686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:21:01.846  2669  2681 E huan    : MasterSdk SDK version:1.2.2 code:122
+07-03 13:21:01.846  2669  2681 E huan    : MasterSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:d799f85767da44b438a7a0c2b8c17b057bdc6277
+07-03 13:21:01.847  2669  2681 E huan    : MiniSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:21:01.848   883   883 W huan    : setAuth：2123889504 -> null
+07-03 13:21:01.848   883   883 D SkillInitializationHelper: initAiMiniSdk: -103 null masterApp未初始化完成，请重试
+07-03 13:21:02.138   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:21:02.424   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:02.449   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:02.449   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:02.457  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:20:56.794   883   883 I chatty  : uid=1000(system) ctc.android.smart.terminal.skill identical 6 lines
+07-03 13:21:01.833   883   883 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.bindService:1614 android.content.ContextWrapper.bindService:698 com.ai.mini.service.a.a:72 com.ai.mini.manager.b.a:24825 com.ai.mini.manager.b.a:24792 
+07-03 13:21:02.623   232   317 E storaged: getDiskStats failed with result NOT_SUPPORTED and size 0
+07-03 13:21:03.064   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:03.087   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:03.087   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:03.095  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:21:03.273  3334  3334 I auditd  : type=1400 audit(0.0:1321): avc: denied { getattr } for comm="ps" path="/proc/491" dev="proc" ino=20326 scontext=u:r:dhcp:s0 tcontext=u:r:untrusted_app_25:s0:c512,c768 tclass=dir permissive=1
+07-03 13:21:03.273  3334  3334 I ps      : type=1400 audit(0.0:1321): avc: denied { getattr } for path="/proc/491" dev="proc" ino=20326 scontext=u:r:dhcp:s0 tcontext=u:r:untrusted_app_25:s0:c512,c768 tclass=dir permissive=1
+07-03 13:21:04.586   474   581 D bt_btif_config: btif_get_device_type: Device [64:6e:69:65:e0:a0] type 1
+07-03 13:21:04.609   474   581 W BluetoothRemoteDevices: Skip name update for 64:6E:69:65:E0:A0
+07-03 13:21:04.610   474   581 W BluetoothRemoteDevices: Skip class update for 64:6E:69:65:E0:A0
+07-03 13:21:04.618  1754  1754 I BlueScreen: classic found address=64:6E:69:65:E0:A0 extraName=JJ-PC stackName=JJ-PC
+07-03 13:21:04.760   474   581 D bt_btif_config: btif_get_device_type: Device [68:8f:c9:04:f9:b6] type 1
+07-03 13:21:04.782   474   581 W BluetoothRemoteDevices: Skip name update for 68:8F:C9:04:F9:B6
+07-03 13:21:04.782   474   581 W BluetoothRemoteDevices: Skip class update for 68:8F:C9:04:F9:B6
+07-03 13:21:04.789  1754  1754 I BlueScreen: classic found address=68:8F:C9:04:F9:B6 extraName=4K PRO stackName=4K PRO
+07-03 13:21:05.158   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:21:05.884   474   581 D bt_btif_config: btif_get_device_type: Device [62:a3:f4:d4:4a:b3] type 2
+07-03 13:21:05.893  1754  1754 I BlueScreen: classic found address=62:A3:F4:D4:4A:B3 extraName=null stackName=null
+07-03 13:21:06.256   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:06.280   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:06.281   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:06.284   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:06.289  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:21:06.305   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:06.306   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:06.313  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:21:06.849   883   883 E MiniSDKConnectManager: reconnectMiniSDK times:31/100
+07-03 13:21:06.849   883   883 E huan    : MiniSDK releaseSDK
+07-03 13:21:06.852  2669  2669 E huan    : aidl.Server.onUnbind()=========
+07-03 13:21:06.853  2669  2669 E huan    : aidl.Server.onDestroy()=========
+07-03 13:21:06.853  2669  2669 E huan    : clearMiniAppActive appId:null
+07-03 13:21:06.854   883   883 W huan    : setAuth：null -> null
+07-03 13:21:06.854   883   883 I MiniSDKConnectManager: initMiniSDK:
+07-03 13:21:06.854   883   883 I MiniSDKConnectManager: initMiniSDK->mAppId:2123889504
+07-03 13:21:06.854   883   883 I MiniSDKConnectManager: initMiniSDK->mAppSecret:de7012fb99f4f9ae80812a0aae5b1d11
+07-03 13:21:06.857   883   883 E huan    : MiniSDK Signature MD5:DE7573FFB57E8EA55CE86E6CE4E41CC9
+07-03 13:21:06.857   883   883 E huan    : MiniSDK Package Name:ctc.android.smart.terminal.skill
+07-03 13:21:06.859   883   883 E huan    : MiniSDK Version Name:2.0.002
+07-03 13:21:06.860   883   883 E huan    : MiniSDK version:1.2.2 code:122
+07-03 13:21:06.860   883   883 E huan    : MiniSDK AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:21:06.860   883   883 E huan    : MiniSDK BUILD commit:56f8404a3c960e53f39ffd0c7eb98e06deb8578f
+07-03 13:21:06.862   883   883 E huan    : MiniSDK Channel:mainHead
+07-03 13:21:06.862   883   883 E huan    : MiniSDK connect start
+07-03 13:21:06.864   883   883 E huan    : getImplicitIntent: ServiceName target:com.ai.master.action.AIDLAIMasterService.mainHead
+07-03 13:21:06.866   883   883 E huan    : getImplicitIntent services found:[ResolveInfo{541c1cb ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService m=0x108000}]
+07-03 13:21:06.867   883   883 E huan    : packageName:ctc.android.smart.terminal.voicectrl
+07-03 13:21:06.867   883   883 E huan    : className:com.ai.master.service.AIDLAIMasterService
+07-03 13:21:06.867   883   883 E huan    : permission:com.ai.master.permission.ACCESS_SERVICE.mainHead
+07-03 13:21:06.868   883   883 E huan    : bindService: Intent { act=com.ai.master.action.AIDLAIMasterService.mainHead cmp=ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService }
+07-03 13:21:06.869   883   883 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.bindService:1614 android.content.ContextWrapper.bindService:698 com.ai.mini.service.a.a:72 com.ai.mini.manager.b.a:24825 com.ai.mini.manager.b.a:24792 
+07-03 13:21:06.877   883   883 E huan    : bindService command done，wait connection
+07-03 13:21:06.877  2669  2669 E huan    : aidl.Server.onCreate()========
+07-03 13:21:06.878  2669  2669 E huan    : aidl.Server.onBind()=============
+07-03 13:21:06.880   883   883 E huan    : ServiceConnection onServiceConnected
+07-03 13:21:06.881   883   883 E huan    : MiniSDK service connected
+07-03 13:21:06.881   883   883 E huan    : initMiniSDK: appId=2123889504, appSecret=de7012fb99f4f9ae80812a0aae5b1d11, packageName=ctc.android.smart.terminal.skill, signatureMD5=DE7573FFB57E8EA55CE86E6CE4E41CC9, versionName=2.0.002, miniAidlMd5=70ddc572bc66ac760e8d5bc06085cf3e, miniAidlCommitHash=686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:21:06.882  2669  2681 E huan    : MasterSdk SDK version:1.2.2 code:122
+07-03 13:21:06.883  2669  2681 E huan    : MasterSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:d799f85767da44b438a7a0c2b8c17b057bdc6277
+07-03 13:21:06.883  2669  2681 E huan    : MiniSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:21:06.883   883   883 W huan    : setAuth：2123889504 -> null
+07-03 13:21:06.884   883   883 D SkillInitializationHelper: initAiMiniSdk: -103 null masterApp未初始化完成，请重试
+07-03 13:21:06.896   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:06.920   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:06.920   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:06.928  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:21:06.937   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:06.958   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:06.958   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:06.961   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:06.967  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:21:06.985   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:06.985   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:06.991  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:21:07.537   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:07.565   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:07.565   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:07.575  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:21:08.177   474   581 D bt_btif_config: btif_get_device_type: Device [12:11:91:a4:09:9e] type 1
+07-03 13:21:08.178   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:21:08.200   474   581 W BluetoothRemoteDevices: Skip name update for 12:11:91:A4:09:9E
+07-03 13:21:08.200   474   581 W BluetoothRemoteDevices: Skip class update for 12:11:91:A4:09:9E
+07-03 13:21:08.209  1754  1754 I BlueScreen: classic found address=12:11:91:A4:09:9E extraName=E-3511 stackName=E-3511
+07-03 13:21:08.366  3368  3368 I auditd  : type=1400 audit(0.0:1323): avc: denied { open } for comm="getprop" path="/dev/__properties__/u:object_r:bluetooth_a2dp_offload_prop:s0" dev="tmpfs" ino=1175 scontext=u:r:shell:s0 tcontext=u:object_r:bluetooth_a2dp_offload_prop:s0 tclass=file permissive=1
+07-03 13:21:08.366  3368  3368 I getprop : type=1400 audit(0.0:1323): avc: denied { open } for path="/dev/__properties__/u:object_r:bluetooth_a2dp_offload_prop:s0" dev="tmpfs" ino=1175 scontext=u:r:shell:s0 tcontext=u:object_r:bluetooth_a2dp_offload_prop:s0 tclass=file permissive=1
+07-03 13:21:08.370  3368  3368 I auditd  : type=1400 audit(0.0:1326): avc: denied { map } for comm="getprop" path="/dev/__properties__/u:object_r:ctl_bootanim_prop:s0" dev="tmpfs" ino=1181 scontext=u:r:shell:s0 tcontext=u:object_r:ctl_bootanim_prop:s0 tclass=file permissive=1
+07-03 13:21:08.370  3368  3368 I getprop : type=1400 audit(0.0:1326): avc: denied { map } for path="/dev/__properties__/u:object_r:ctl_bootanim_prop:s0" dev="tmpfs" ino=1181 scontext=u:r:shell:s0 tcontext=u:object_r:ctl_bootanim_prop:s0 tclass=file permissive=1
+07-03 13:21:08.541   474   581 W bt_btif : busy_level.level_flags:0x13, inquiring:0
+07-03 13:21:09.796  3372  3372 I auditd  : type=1400 audit(0.0:1354): avc: denied { getattr } for comm="ps" path="/proc/510" dev="proc" ino=24415 scontext=u:r:dhcp:s0 tcontext=u:r:platform_app:s0:c512,c768 tclass=dir permissive=1
+07-03 13:21:09.796  3372  3372 I ps      : type=1400 audit(0.0:1354): avc: denied { getattr } for path="/proc/510" dev="proc" ino=24415 scontext=u:r:dhcp:s0 tcontext=u:r:platform_app:s0:c512,c768 tclass=dir permissive=1
+07-03 13:21:09.796  3372  3372 I auditd  : type=1400 audit(0.0:1355): avc: denied { search } for comm="ps" name="510" dev="proc" ino=24415 scontext=u:r:dhcp:s0 tcontext=u:r:platform_app:s0:c512,c768 tclass=dir permissive=1
+07-03 13:21:09.796  3372  3372 I ps      : type=1400 audit(0.0:1355): avc: denied { search } for name="510" dev="proc" ino=24415 scontext=u:r:dhcp:s0 tcontext=u:r:platform_app:s0:c512,c768 tclass=dir permissive=1
+07-03 13:21:09.803  3372  3372 I auditd  : type=1400 audit(0.0:1356): avc: denied { getattr } for comm="ps" path="/dev/pts/4" dev="devpts" ino=7 scontext=u:r:dhcp:s0 tcontext=u:object_r:devpts:s0 tclass=chr_file permissive=1
+07-03 13:21:09.803  3372  3372 I ps      : type=1400 audit(0.0:1356): avc: denied { getattr } for path="/dev/pts/4" dev="devpts" ino=7 scontext=u:r:dhcp:s0 tcontext=u:object_r:devpts:s0 tclass=chr_file permissive=1
+07-03 13:21:09.978   474   581 D bt_btif_config: btif_get_device_type: Device [64:6e:69:65:e0:a0] type 1
+07-03 13:21:09.999   474   581 W BluetoothRemoteDevices: Skip name update for 64:6E:69:65:E0:A0
+07-03 13:21:09.999   474   581 W BluetoothRemoteDevices: Skip class update for 64:6E:69:65:E0:A0
+07-03 13:21:10.008  1754  1754 I BlueScreen: classic found address=64:6E:69:65:E0:A0 extraName=JJ-PC stackName=JJ-PC
+07-03 13:21:10.846   371   439 D WindowManager: interceptKeyTq keycode=20 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:10.847   371   438 D WindowManager: interceptKeyTi keyCode=20 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:11.044   371   439 D WindowManager: interceptKeyTq keycode=20 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:11.045   371   438 D WindowManager: interceptKeyTi keyCode=20 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:11.201   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:21:11.344   371   439 D WindowManager: interceptKeyTq keycode=21 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:11.345   371   438 D WindowManager: interceptKeyTi keyCode=21 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:11.357   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:21:11.360   883   883 I #NanoPaireService#: Discovery Device Finished
+07-03 13:21:11.544   371   439 D WindowManager: interceptKeyTq keycode=21 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:11.545   371   438 D WindowManager: interceptKeyTi keyCode=21 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:11.824   371   439 D WindowManager: interceptKeyTq keycode=20 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:11.826   371   438 D WindowManager: interceptKeyTi keyCode=20 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:11.884   883   883 E MiniSDKConnectManager: reconnectMiniSDK times:32/100
+07-03 13:21:11.884   883   883 E huan    : MiniSDK releaseSDK
+07-03 13:21:11.887  2669  2669 E huan    : aidl.Server.onUnbind()=========
+07-03 13:21:11.888  2669  2669 E huan    : aidl.Server.onDestroy()=========
+07-03 13:21:11.888  2669  2669 E huan    : clearMiniAppActive appId:null
+07-03 13:21:11.890   883   883 W huan    : setAuth：null -> null
+07-03 13:21:11.890   883   883 I MiniSDKConnectManager: initMiniSDK:
+07-03 13:21:11.890   883   883 I MiniSDKConnectManager: initMiniSDK->mAppId:2123889504
+07-03 13:21:11.890   883   883 I MiniSDKConnectManager: initMiniSDK->mAppSecret:de7012fb99f4f9ae80812a0aae5b1d11
+07-03 13:21:11.892   883   883 E huan    : MiniSDK Signature MD5:DE7573FFB57E8EA55CE86E6CE4E41CC9
+07-03 13:21:11.892   883   883 E huan    : MiniSDK Package Name:ctc.android.smart.terminal.skill
+07-03 13:21:11.893   883   883 E huan    : MiniSDK Version Name:2.0.002
+07-03 13:21:11.893   883   883 E huan    : MiniSDK version:1.2.2 code:122
+07-03 13:21:11.893   883   883 E huan    : MiniSDK AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:21:11.893   883   883 E huan    : MiniSDK BUILD commit:56f8404a3c960e53f39ffd0c7eb98e06deb8578f
+07-03 13:21:11.894   883   883 E huan    : MiniSDK Channel:mainHead
+07-03 13:21:11.894   883   883 E huan    : MiniSDK connect start
+07-03 13:21:11.896   883   883 E huan    : getImplicitIntent: ServiceName target:com.ai.master.action.AIDLAIMasterService.mainHead
+07-03 13:21:11.897   883   883 E huan    : getImplicitIntent services found:[ResolveInfo{c3a267f ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService m=0x108000}]
+07-03 13:21:11.897   883   883 E huan    : packageName:ctc.android.smart.terminal.voicectrl
+07-03 13:21:11.897   883   883 E huan    : className:com.ai.master.service.AIDLAIMasterService
+07-03 13:21:11.897   883   883 E huan    : permission:com.ai.master.permission.ACCESS_SERVICE.mainHead
+07-03 13:21:11.898   883   883 E huan    : bindService: Intent { act=com.ai.master.action.AIDLAIMasterService.mainHead cmp=ctc.android.smart.terminal.voicectrl/com.ai.master.service.AIDLAIMasterService }
+07-03 13:21:11.902   883   883 E huan    : bindService command done，wait connection
+07-03 13:21:11.902  2669  2669 E huan    : aidl.Server.onCreate()========
+07-03 13:21:11.902  2669  2669 E huan    : aidl.Server.onBind()=============
+07-03 13:21:11.905   883   883 E huan    : ServiceConnection onServiceConnected
+07-03 13:21:11.906   883   883 E huan    : MiniSDK service connected
+07-03 13:21:11.906   883   883 E huan    : initMiniSDK: appId=2123889504, appSecret=de7012fb99f4f9ae80812a0aae5b1d11, packageName=ctc.android.smart.terminal.skill, signatureMD5=DE7573FFB57E8EA55CE86E6CE4E41CC9, versionName=2.0.002, miniAidlMd5=70ddc572bc66ac760e8d5bc06085cf3e, miniAidlCommitHash=686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:21:11.906  2669  2681 E huan    : MasterSdk SDK version:1.2.2 code:122
+07-03 13:21:11.907  2669  2681 E huan    : MasterSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:d799f85767da44b438a7a0c2b8c17b057bdc6277
+07-03 13:21:11.907  2669  2681 E huan    : MiniSdk AIDL md5:70ddc572bc66ac760e8d5bc06085cf3e commit:686226e28a69768c597d3c8314b88a786dbb81fd
+07-03 13:21:11.907   883   883 W huan    : setAuth：2123889504 -> null
+07-03 13:21:11.907   883   883 D SkillInitializationHelper: initAiMiniSdk: -103 null masterApp未初始化完成，请重试
+07-03 13:21:11.984   371   439 D WindowManager: interceptKeyTq keycode=20 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:11.988   371   438 D WindowManager: interceptKeyTi keyCode=20 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:12.287  1754  1754 D BluetoothAdapter: isLeEnabled(): ON
+07-03 13:21:12.287  1754  1754 D BluetoothLeScanner: could not find callback wrapper
+07-03 13:21:12.424   371   439 D WindowManager: interceptKeyTq keycode=22 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:12.425   371   438 D WindowManager: interceptKeyTi keyCode=22 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:12.624   371   439 D WindowManager: interceptKeyTq keycode=22 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:12.625   371   438 D WindowManager: interceptKeyTi keyCode=22 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:13.144   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:13.145   371   438 D WindowManager: interceptKeyTi keyCode=111 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:11.898   883   883 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.bindService:1614 android.content.ContextWrapper.bindService:698 com.ai.mini.service.a.a:72 com.ai.mini.manager.b.a:24825 com.ai.mini.manager.b.a:24792 
+07-03 13:21:13.151   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=0, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167169
+07-03 13:21:13.151   371   438 D WindowManager: No fallback.
+07-03 13:21:13.284   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:13.285   371   438 D WindowManager: interceptKeyTi keyCode=111 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:13.289   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=1, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167168
+07-03 13:21:13.289   371   438 D WindowManager: No fallback.
+07-03 13:21:13.364   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:13.365   371   438 D WindowManager: interceptKeyTi keyCode=111 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:13.370   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=0, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167169
+07-03 13:21:13.370   371   438 D WindowManager: No fallback.
+07-03 13:21:13.464   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:13.465   371   438 D WindowManager: interceptKeyTi keyCode=111 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:13.470   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=1, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167168
+07-03 13:21:13.470   371   438 D WindowManager: No fallback.
+07-03 13:21:13.524   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:13.525   371   438 D WindowManager: interceptKeyTi keyCode=111 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:13.530   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=0, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167169
+07-03 13:21:13.530   371   438 D WindowManager: No fallback.
+07-03 13:21:13.544   474  1061 D BluetoothAdapterService: startDiscovery
+07-03 13:21:13.544   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:21:13.544   474  1054 E bt_btif : bte_scan_filt_param_cfg_evt, 1
+07-03 13:21:13.544   474  1054 W bt_btif : bta_dm_check_av:0
+07-03 13:21:13.554   474   581 W bt_btif : busy_level.level_flags:0x11, inquiring:1
+07-03 13:21:13.585   883   883 I #NanoVoice#: Bonded2 device size:1
+07-03 13:21:13.588   883   883 I NanoVoiceService: read lack : null
+07-03 13:21:13.664   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:13.665   371   438 D WindowManager: interceptKeyTi keyCode=111 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:13.668   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=1, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167168
+07-03 13:21:13.668   371   438 D WindowManager: No fallback.
+07-03 13:21:13.684   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:13.685   371   438 D WindowManager: interceptKeyTi keyCode=111 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:13.689   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=0, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167169
+07-03 13:21:13.690   371   438 D WindowManager: No fallback.
+07-03 13:21:13.824   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:13.825   371   438 D WindowManager: interceptKeyTi keyCode=111 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:13.829   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=1, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167168
+07-03 13:21:13.830   371   438 D WindowManager: No fallback.
+07-03 13:21:13.864   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:13.865   371   438 D WindowManager: interceptKeyTi keyCode=111 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:13.869   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=0, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167169
+07-03 13:21:13.870   371   438 D WindowManager: No fallback.
+07-03 13:21:13.893   474   581 D bt_btif_config: btif_get_device_type: Device [18:ef:3a:80:ac:a6] type 2
+07-03 13:21:13.932   474   581 D bt_btif_config: btif_get_device_type: Device [6c:40:e8:64:b3:47] type 3
+07-03 13:21:13.944   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:13.945   371   438 D WindowManager: interceptKeyTi keyCode=111 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:13.949   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=1, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167168
+07-03 13:21:13.949   371   438 D WindowManager: No fallback.
+07-03 13:21:13.960   474   581 W BluetoothRemoteDevices: Skip name update for 6C:40:E8:64:B3:47
+07-03 13:21:14.024   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:14.025   371   438 D WindowManager: interceptKeyTi keyCode=111 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:14.029   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=0, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167169
+07-03 13:21:14.029   371   438 D WindowManager: No fallback.
+07-03 13:21:14.104   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:14.105   371   438 D WindowManager: interceptKeyTi keyCode=111 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:14.109   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=1, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167168
+07-03 13:21:14.109   371   438 D WindowManager: No fallback.
+07-03 13:21:14.144   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:14.145   371   438 D WindowManager: interceptKeyTi keyCode=111 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:14.148   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=0, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167169
+07-03 13:21:14.148   371   438 D WindowManager: No fallback.
+07-03 13:21:14.231   371   448 D WifiScoreReport: new score 60 old score 60
+07-03 13:21:14.264   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000000
+07-03 13:21:14.265   371   438 D WindowManager: interceptKeyTi keyCode=111 down=false repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:14.268   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=1, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167168
+07-03 13:21:14.268   371   438 D WindowManager: No fallback.
+07-03 13:21:14.304   371   439 D WindowManager: interceptKeyTq keycode=111 interactive=true keyguardActive=false policyFlags=22000001
+07-03 13:21:14.305   371   438 D WindowManager: interceptKeyTi keyCode=111 down=true repeatCount=0 keyguardOn=false mHomePressed=false canceled=false
+07-03 13:21:14.309   371   438 D WindowManager: Unhandled key: win=Window{5599662 u0 com.android.speaker.settings/com.android.tv.settings.MainActivity}, action=0, flags=8, keyCode=111, scanCode=1, metaState=0, repeatCount=0, policyFlags=1644167169
+07-03 13:21:14.309   371   438 D WindowManager: No fallback.
+07-03 13:21:14.320   474   581 D bt_btif_config: btif_get_device_type: Device [64:6e:69:65:e0:a0] type 1
+07-03 13:21:14.341   474   581 W BluetoothRemoteDevices: Skip name update for 64:6E:69:65:E0:A0
+07-03 13:21:14.341   474   581 W BluetoothRemoteDevices: Skip class update for 64:6E:69:65:E0:A0
