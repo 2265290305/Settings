@@ -81,6 +81,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
+import com.cloudsteem.autobluetooth.AutoBluetoothService
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -89,8 +90,21 @@ private const val BLUE_SCREEN_TAG = "BlueScreen"
 private const val IGNORED_BLUETOOTH_PREFS = "ignored_bluetooth_devices"
 private const val IGNORED_BLUETOOTH_ADDRESSES = "ignored_addresses"
 private const val DISCONNECTED_BLUETOOTH_ADDRESSES = "disconnected_addresses"
+private const val AUTOBLUETOOTH_STATUS_ACTION =
+    "com.cloudsteem.autobluetooth.action.STATUS_CHANGED"
+private const val AUTOBLUETOOTH_STATUS_PERMISSION =
+    "com.cloudsteem.autobluetooth.permission.STATUS"
+private const val AUTOBLUETOOTH_ACTION_DISCONNECT_REMOTE =
+    "com.cloudsteem.autobluetooth.action.DISCONNECT_REMOTE"
+private const val AUTOBLUETOOTH_ACTION_FORGET_REMOTE =
+    "com.cloudsteem.autobluetooth.action.FORGET_REMOTE"
+private const val AUTOBLUETOOTH_EXTRA_CONNECTED = "connected"
+private const val AUTOBLUETOOTH_EXTRA_CONNECTING = "connecting"
+private const val AUTOBLUETOOTH_EXTRA_BOND_STATE = "bond_state"
+private const val AUTOBLUETOOTH_EXTRA_ADDRESS = "address"
+private const val AUTOBLUETOOTH_EXTRA_NAME = "name"
 
-// 电信遥控器的自动配对/连接由系统内置 AutoBluetooth 处理。本页只读取配对和连接状态，
+// 电信遥控器的自动配对/连接由 TvSettings 内置 AutoBluetoothService 处理。本页只读取配对和连接状态，
 // 不再 force-stop 厂商服务，也不对电信遥控器发起 createBond/HID connect/GATT connect。
 
 @SuppressLint("MissingPermission")
@@ -123,6 +137,22 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
     var stickyConnectedUntilMs by remember { mutableStateOf(0L) }
     // 黏滞窗口内驱动重组的 tick（否则窗口结束后 UI 不会自动刷新成“未连接”）。
     var connectStateTick by remember { mutableStateOf(0) }
+    var autoBluetoothRemoteConnected by remember { mutableStateOf(false) }
+    var autoBluetoothRemoteConnecting by remember { mutableStateOf(false) }
+    var autoBluetoothRemoteAddress by remember { mutableStateOf<String?>(null) }
+    var autoBluetoothRemoteName by remember { mutableStateOf<String?>(null) }
+    var autoBluetoothRemoteBondState by remember { mutableStateOf(BluetoothDevice.BOND_NONE) }
+
+    fun sendAutoBluetoothRemoteCommand(action: String) {
+        val intent = Intent(context, AutoBluetoothService::class.java)
+            .setAction(action)
+            .putExtra(AUTOBLUETOOTH_EXTRA_ADDRESS, autoBluetoothRemoteAddress)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            context.startForegroundService(intent)
+        } else {
+            context.startService(intent)
+        }
+    }
     // 常驻 HID_HOST profile proxy（厂商 AutoBluetooth 的 mService 同款）：页面存续期间只取一次，
     // 连接、断开、状态查询全用它；比每次临时 getProfileProxy + 2 秒后 close 稳定得多。
     var hidHostProxy by remember { mutableStateOf<BluetoothProfile?>(null) }
@@ -260,6 +290,21 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                 name.contains("电信蓝牙遥控")
     }
 
+    fun clearTelecomRemoteLocalState(device: BluetoothDevice) {
+        if (!isTelecomRemote(device)) return
+        val address = device.address
+        clearIgnoredAddress(address)
+        clearAutoReconnectBlockedAddress(address)
+        ignoredAtMs.remove(address)
+        if (manualDisconnectAddress == address) manualDisconnectAddress = null
+        if (pendingPairDevice?.address == address) pendingPairDevice = null
+        if (pendingBleConnectAddress == address) pendingBleConnectAddress = null
+        if (autoConnectingAddress == address) autoConnectingAddress = null
+        if (bleConnectingAddress == address) bleConnectingAddress = null
+        showBleDisconnectTip = false
+        cacheDeviceName(device)
+    }
+
     fun isDeviceConnectedNow(device: BluetoothDevice): Boolean {
         val address = device.address
         // 最可靠：常驻 HID proxy 的真实 profile 状态（BluetoothManager.getConnectedDevices
@@ -299,6 +344,9 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
 
     fun isDeviceConnectedForUi(device: BluetoothDevice): Boolean {
         val address = device.address
+        if (isTelecomRemote(device)) {
+            return isDeviceConnectedNow(device)
+        }
         if (isIgnoredAddress(address) || isAutoReconnectBlocked(address)) {
             return false
         }
@@ -489,6 +537,10 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             })
             // 同步已配对设备中的连接状态
             it.forEach { device ->
+                if (isTelecomRemote(device)) {
+                    cacheDeviceName(device)
+                    return@forEach
+                }
                 if (isIgnoredAddress(device.address) || isAutoReconnectBlocked(device.address)) {
                     markDisconnected(device)
                 } else if (isDeviceConnectedLive(device)) {
@@ -508,6 +560,10 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                 if (profile == BluetoothProfile.A2DP) {
                     proxy.connectedDevices.forEach { device ->
+                        if (isTelecomRemote(device)) {
+                            cacheDeviceName(device)
+                            return@forEach
+                        }
                         if (isIgnoredAddress(device.address) || isAutoReconnectBlocked(device.address)) {
                             markDisconnected(device)
                             return@forEach
@@ -527,6 +583,10 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
         Blm?.adapter?.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
                 proxy.connectedDevices.forEach { device ->
+                    if (isTelecomRemote(device)) {
+                        cacheDeviceName(device)
+                        return@forEach
+                    }
                     if (isIgnoredAddress(device.address) || isAutoReconnectBlocked(device.address)) {
                         markDisconnected(device)
                         return@forEach
@@ -541,6 +601,12 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
     }
 
     fun disconnectDevice(device: BluetoothDevice, blockAutoReconnect: Boolean = true) {
+        if (isTelecomRemote(device)) {
+            clearTelecomRemoteLocalState(device)
+            updatePairedDevices()
+            Log.i(BLUE_SCREEN_TAG, "skip SettingsC disconnect for telecom remote address=${device.address}")
+            return
+        }
         val address = device.address
         manualDisconnectAddress = address
         markDisconnected(device)
@@ -599,6 +665,11 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
     }
 
     fun cancelPairingState(device: BluetoothDevice) {
+        if (isTelecomRemote(device)) {
+            clearTelecomRemoteLocalState(device)
+            Log.i(BLUE_SCREEN_TAG, "skip SettingsC cancelBondProcess for telecom remote address=${device.address}")
+            return
+        }
         val address = device.address
         if (pendingPairDevice?.address == address || pendingBleConnectAddress == address) {
             pendingPairDevice = null
@@ -919,6 +990,12 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
     }
 
     fun forgetDevice(device: BluetoothDevice): Boolean {
+        if (isTelecomRemote(device)) {
+            clearTelecomRemoteLocalState(device)
+            updatePairedDevices()
+            Log.i(BLUE_SCREEN_TAG, "skip SettingsC forget/removeBond for telecom remote address=${device.address}")
+            return true
+        }
         val address = device.address
         addIgnoredAddress(address)
         cancelPairingState(device)
@@ -971,6 +1048,33 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
         object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 when (intent.action) {
+                    AUTOBLUETOOTH_STATUS_ACTION -> {
+                        autoBluetoothRemoteConnected =
+                            intent.getBooleanExtra(AUTOBLUETOOTH_EXTRA_CONNECTED, false)
+                        autoBluetoothRemoteConnecting =
+                            intent.getBooleanExtra(AUTOBLUETOOTH_EXTRA_CONNECTING, false)
+                        autoBluetoothRemoteAddress =
+                            intent.getStringExtra(AUTOBLUETOOTH_EXTRA_ADDRESS)
+                        autoBluetoothRemoteName =
+                            intent.getStringExtra(AUTOBLUETOOTH_EXTRA_NAME)
+                                ?.trim()
+                                ?.takeIf { it.isNotEmpty() }
+                                ?: autoBluetoothRemoteName
+                        autoBluetoothRemoteBondState =
+                            intent.getIntExtra(
+                                AUTOBLUETOOTH_EXTRA_BOND_STATE,
+                                BluetoothDevice.BOND_NONE
+                            )
+                        autoBluetoothRemoteAddress?.let { address ->
+                            autoBluetoothRemoteName?.let { name ->
+                                deviceNameCache[address] = name
+                            }
+                        }
+                        showBleDisconnectTip = false
+                        updatePairedDevices()
+                        return
+                    }
+
                     BluetoothDevice.ACTION_FOUND -> {
                         val device: BluetoothDevice? =
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
@@ -1005,6 +1109,12 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                         val device: BluetoothDevice? =
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
                         val state = intent.getIntExtra(BluetoothDevice.EXTRA_BOND_STATE, -1)
+                        if (device != null && isTelecomRemote(device)) {
+                            clearTelecomRemoteLocalState(device)
+                            updatePairedDevices()
+                            maybeAutoConnectRemote(device)
+                            return
+                        }
                         if (state == BluetoothDevice.BOND_NONE && device != null) {
                             removeDeviceFromUi(device)
                             updatePairedDevices()
@@ -1050,6 +1160,11 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                     BluetoothDevice.ACTION_ACL_CONNECTED -> {
                         val device: BluetoothDevice? =
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        if (device != null && isTelecomRemote(device)) {
+                            clearTelecomRemoteLocalState(device)
+                            cacheDeviceName(device)
+                            return
+                        }
                         if (device != null && isIgnoredAddress(device.address)) {
                             setConnectionPolicyCompat(device, allowed = false)
                             disconnectDevice(device)
@@ -1086,6 +1201,11 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                     BluetoothDevice.ACTION_ACL_DISCONNECTED -> {
                         val device: BluetoothDevice? =
                             intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                        if (device != null && isTelecomRemote(device)) {
+                            clearTelecomRemoteLocalState(device)
+                            cacheDeviceName(device)
+                            return
+                        }
                         if (device?.address == manualDisconnectAddress) {
                             manualDisconnectAddress = null
                         }
@@ -1121,7 +1241,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
     }
 
     DisposableEffect(context) {
-        val filter = IntentFilter().apply {
+        val bluetoothFilter = IntentFilter().apply {
             addAction(BluetoothDevice.ACTION_FOUND)
             addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED)
             addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED)
@@ -1130,7 +1250,38 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
             // 配对确认交给系统/厂商 AutoBluetooth，设置页不再抢 ACTION_PAIRING_REQUEST。
         }
-        context.registerReceiver(bluetoothReceiver, filter)
+        val autoBluetoothStatusFilter = IntentFilter(AUTOBLUETOOTH_STATUS_ACTION)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.registerReceiver(
+                bluetoothReceiver,
+                bluetoothFilter,
+                null,
+                mainHandler,
+                Context.RECEIVER_EXPORTED
+            )
+            context.registerReceiver(
+                bluetoothReceiver,
+                autoBluetoothStatusFilter,
+                AUTOBLUETOOTH_STATUS_PERMISSION,
+                mainHandler,
+                Context.RECEIVER_EXPORTED
+            )
+        } else {
+            @Suppress("DEPRECATION")
+            context.registerReceiver(
+                bluetoothReceiver,
+                bluetoothFilter,
+                null,
+                mainHandler
+            )
+            @Suppress("DEPRECATION")
+            context.registerReceiver(
+                bluetoothReceiver,
+                autoBluetoothStatusFilter,
+                AUTOBLUETOOTH_STATUS_PERMISSION,
+                mainHandler
+            )
+        }
         // 常驻 HID proxy：页面存续期间取一次（厂商 AutoBluetooth 的 mService 同款）。
         Blm?.adapter?.getProfileProxy(context, object : BluetoothProfile.ServiceListener {
             override fun onServiceConnected(profile: Int, proxy: BluetoothProfile) {
@@ -1154,16 +1305,12 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             btname = Blm?.adapter?.name ?: ""
             updatePairedDevices()
             updateConnectedDevice()
-            // 这里只刷新列表和状态，不主动处理已绑定遥控器。
-            startScan()
         }
     }
 
-    // 遥控器页允许扫描发现列表，但发现到电信遥控器后只刷新状态，不主动配对/连接。
-    // 配对和连接动作仍交给系统/AutoBluetooth，避免和厂商逻辑抢同一个 HID 连接。
+    // 遥控器页只轮询当前 HID/配对状态；扫描、配对和连接动作交给 AutoBluetoothService。
     LaunchedEffect(showBleRemoteDialog) {
         if (!showBleRemoteDialog) return@LaunchedEffect
-        startScan()
         while (true) {
             updatePairedDevices()
             updateConnectedDevice()
@@ -1272,7 +1419,6 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
                                         showBleRemoteDialog = true
                                         updatePairedDevices()
                                         updateConnectedDevice()
-                                        startScan()
                                     }),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -1442,56 +1588,25 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
     }
 
     if (showBleRemoteDialog || LocalInspectionMode.current) {
-        // 优先显示已配对电信遥控器；刷新按钮只做扫描发现，不对电信遥控器发起配对/连接。
-        val allDiscovered = cachedBleDevices + discoveredClassicDevices +
-                pairedDevices.filter { isTelecomRemote(it) }
-        // 只显示“电信蓝牙遥控”，过滤掉其他所有蓝牙遥控器/BLE 设备。
-        val remoteCandidates = allDiscovered
-            .filter { isTelecomRemote(it) }
-            .distinctBy { it.address }
-
-        val pairingRemoteAddress = pendingBleConnectAddress
-            ?: remoteCandidates.firstOrNull { it.bondState == BluetoothDevice.BOND_BONDING }?.address
-
-        // “已连接”只认实时连接状态（HID proxy/ACL 直查，不走本地缓存），且必须排除配对中地址。
-        val connectedRemoteAddress = remoteCandidates
-            .firstOrNull { it.address != pairingRemoteAddress && isDeviceConnectedLive(it) }
-            ?.address
-
-        // 黏滞“连接中”：底层加密握手失败会瞬断，实时状态可能闪“已连接→未连→已连接”。
-        // 若实时未连、但处于黏滞窗口内（markDisconnected 设的 5 秒），把该遥控器显示成“连接中...”
-        // 而非“未连接”，吸收抖动。connectStateTick 参与读取以便窗口到期时重组重算。
-        connectStateTick // 触发依赖：窗口过期后 tick++ 会让此处重算落回“未连接”
-        val stickyReconnectingAddress = stickyConnectedRemoteAddress?.takeIf { addr ->
-            addr != connectedRemoteAddress &&
-                    addr != pairingRemoteAddress &&
-                    stickyConnectedUntilMs > android.os.SystemClock.elapsedRealtime() &&
-                    remoteCandidates.any { it.address == addr }
-        }
-        // “连接中”地址：真正发起连接中(bleConnectingAddress) 或 处于黏滞重连窗口。
-        val effectiveConnectingAddress = bleConnectingAddress ?: stickyReconnectingAddress
-
         BleRemoteDialog(
-            devices = remoteCandidates,
-            isScanning = isScanning,
+            remoteName = autoBluetoothRemoteName ?: "电信蓝牙遥控",
+            remoteAddress = autoBluetoothRemoteAddress,
+            remoteConnected = autoBluetoothRemoteConnected,
+            remoteConnecting = autoBluetoothRemoteConnecting,
+            remoteBondState = autoBluetoothRemoteBondState,
             pairingSuccessTipVisible = showBlePairingTip,
-            // 断开提示以“当前遥控器实时状态”为准：只要有电信遥控真连着就绝不显示，
-            // 重连过程/自愈后标志位残留也不会误报“已断开”。黏滞重连中也不弹“已断开”。
-            disconnectTipVisible = showBleDisconnectTip &&
-                    connectedRemoteAddress == null && stickyReconnectingAddress == null,
-            displayName = ::displayDeviceName,
-            connectingAddress = effectiveConnectingAddress,
-            connectedAddress = connectedRemoteAddress,
-            pairingAddress = pairingRemoteAddress,
-            // 遥控器页只展示配对/连接状态，不发起连接或断开。
-            onPairRequest = { device ->
-                cacheDeviceName(device)
-                updatePairedDevices()
-            },
+            disconnectTipVisible = false,
             onRefresh = {
                 updatePairedDevices()
                 updateConnectedDevice()
-                startScan()
+            },
+            onDisconnect = {
+                sendAutoBluetoothRemoteCommand(AUTOBLUETOOTH_ACTION_DISCONNECT_REMOTE)
+                Toast.makeText(context, "正在断开连接", Toast.LENGTH_SHORT).show()
+            },
+            onForget = {
+                sendAutoBluetoothRemoteCommand(AUTOBLUETOOTH_ACTION_FORGET_REMOTE)
+                Toast.makeText(context, "正在忽略此设备", Toast.LENGTH_SHORT).show()
             },
             onDismiss = { showBleRemoteDialog = false }
         )
@@ -1508,6 +1623,7 @@ fun BlueToothScreen(modifier: Modifier = Modifier, navController: NavController)
             deviceName = displayDeviceName(device),
             isConnected = isConnected,
             showConnectAction = !isTelecomRemote(device),
+            showForgetAction = !isTelecomRemote(device),
             onDismiss = {
                 showDeviceOptionsDialog = false
                 selectedDevice = null
@@ -1639,16 +1755,16 @@ fun RenameDialog(
 
 @Composable
 fun BleRemoteDialog(
-    devices: List<BluetoothDevice>,
-    isScanning: Boolean,
+    remoteName: String,
+    remoteAddress: String?,
+    remoteConnected: Boolean,
+    remoteConnecting: Boolean,
+    remoteBondState: Int,
     pairingSuccessTipVisible: Boolean,
     disconnectTipVisible: Boolean,
-    displayName: (BluetoothDevice) -> String,
-    connectingAddress: String?,
-    connectedAddress: String?,
-    pairingAddress: String?,
-    onPairRequest: (BluetoothDevice) -> Unit,
     onRefresh: () -> Unit,
+    onDisconnect: () -> Unit,
+    onForget: () -> Unit,
     onDismiss: () -> Unit
 ) {
     // 用 Dialog(usePlatformDefaultWidth=false) 渲染到独立 window，真正全屏覆盖（含左侧导航栏），
@@ -1795,6 +1911,7 @@ fun BleRemoteDialog(
                         }
                     }
                 }
+                /*
                 Spacer(modifier = Modifier.height(24.dp))
 
                 Row(
@@ -1812,7 +1929,7 @@ fun BleRemoteDialog(
                     )
                     TextButton(onClick = onRefresh) {
                         Text(
-                            if (isScanning) "刷新中" else "刷新",
+                            "刷新",
                             color = Color(0xFF4577FF),
                             fontSize = if (compact) 16.sp else 20.sp
                         )
@@ -1820,7 +1937,80 @@ fun BleRemoteDialog(
                 }
 
                 Spacer(modifier = Modifier.height(12.dp))
-                /*
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = listPadding),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    val stateText = when {
+                        remoteConnected -> "已连接"
+                        remoteConnecting -> "连接中..."
+                        remoteBondState == BluetoothDevice.BOND_BONDING -> "配对中..."
+                        remoteBondState == BluetoothDevice.BOND_BONDED -> "连接中..."
+                        else -> "等待 AutoBluetoothService"
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(if (compact) 60.dp else 76.dp)
+                            .padding(horizontal = 24.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.bluetooth),
+                            contentDescription = "Bluetooth"
+                        )
+                        Spacer(modifier = Modifier.width(14.dp))
+                        Column {
+                            Text(
+                                remoteName,
+                                fontSize = if (compact) 18.sp else 24.sp,
+                                color = Color(0xFF1A1F27)
+                            )
+                            if (remoteAddress != null) {
+                                Text(
+                                    remoteAddress,
+                                    fontSize = if (compact) 12.sp else 16.sp,
+                                    color = Color(0xFF6C7482)
+                                )
+                            }
+                        }
+                        Spacer(Modifier.weight(1f))
+                        Text(
+                            stateText,
+                            fontSize = if (compact) 16.sp else 20.sp,
+                            color = if (remoteConnected) Color(0xFF4577FF) else Color(0xFF6C7482)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(18.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        Button(
+                            onClick = onForget,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(if (compact) 44.dp else 52.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFF0F2F5))
+                        ) {
+                            Text("忽略此设备", color = Color(0xFF3E4CFF))
+                        }
+                        Button(
+                            onClick = onDisconnect,
+                            enabled = remoteConnected || remoteConnecting ||
+                                    remoteBondState == BluetoothDevice.BOND_BONDED,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(if (compact) 44.dp else 52.dp),
+                            shape = RoundedCornerShape(24.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF3E4CFF))
+                        ) {
+                            Text("断开连接", color = Color.White)
+                        }
+                    }
+                }
+                
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1941,6 +2131,7 @@ fun ConnectedDeviceOptionsDialog(
     deviceName: String,
     isConnected: Boolean,
     showConnectAction: Boolean = true,
+    showForgetAction: Boolean = true,
     onDismiss: () -> Unit,
     onConnectDisconnect: () -> Unit,
     onForget: () -> Unit
@@ -1983,23 +2174,25 @@ fun ConnectedDeviceOptionsDialog(
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Button(
-                        onClick = onForget,
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                            .onFocusChanged { forgetFocused = it.isFocused }
-                            .border(
-                                width = if (forgetFocused) 3.dp else 0.dp,
-                                color = if (forgetFocused) focusBorderColor else Color.Transparent,
-                                shape = RoundedCornerShape(50.dp)
-                            ),
-                        shape = RoundedCornerShape(50.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = if (forgetFocused) Color(0xFFE3E7FF) else Color(0xFFF0F2F5)
-                        )
-                    ) {
-                        Text("忽略此设备", color = Color(0xFF3E4CFF))
+                    if (showForgetAction) {
+                        Button(
+                            onClick = onForget,
+                            modifier = Modifier
+                                .weight(1f)
+                                .height(48.dp)
+                                .onFocusChanged { forgetFocused = it.isFocused }
+                                .border(
+                                    width = if (forgetFocused) 3.dp else 0.dp,
+                                    color = if (forgetFocused) focusBorderColor else Color.Transparent,
+                                    shape = RoundedCornerShape(50.dp)
+                                ),
+                            shape = RoundedCornerShape(50.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (forgetFocused) Color(0xFFE3E7FF) else Color(0xFFF0F2F5)
+                            )
+                        ) {
+                            Text("忽略此设备", color = Color(0xFF3E4CFF))
+                        }
                     }
                     if (showConnectAction) {
                         Spacer(modifier = Modifier.width(16.dp))
@@ -2027,7 +2220,7 @@ fun ConnectedDeviceOptionsDialog(
                             shape = RoundedCornerShape(50.dp),
                             colors = ButtonDefaults.buttonColors(containerColor = Color.Transparent)
                         ) {
-                            Text(if (isConnected) "取消连接" else "连接设备", color = Color.White)
+                            Text(if (isConnected) "断开连接" else "连接设备", color = Color.White)
                         }
                     }
                 }

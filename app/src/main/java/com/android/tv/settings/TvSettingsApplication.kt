@@ -16,13 +16,5 @@ class TvSettingsApplication : Application() {
                 Log.e("TvSettingsApplication", "QuickDetectorSdk init failed", it)
             }
         }, "quickdetector-init").start()
-
-        // 电信遥控器配对/连接由系统 AutoBluetooth 处理；本 app 不启动本地自动连接器。
-        runCatching {
-            //BluetoothRemoteAutoConnector.start(this)
-            AutoBluetoothKeeperService.start(this)
-        }.onFailure {
-            Log.e("TvSettingsApplication", "AutoBluetooth keeper start failed", it)
-        }
     }
 }

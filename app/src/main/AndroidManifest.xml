@@ -30,6 +30,13 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission
+        android:name="com.cloudsteem.autobluetooth.permission.STATUS"
+        tools:ignore="ProtectedPermissions" />
+
+    <permission
+        android:name="com.cloudsteem.autobluetooth.permission.STATUS"
+        android:protectionLevel="signature" />
 
     <!-- OTA 本地安装（RecoverySystem）：重启进 recovery 刷机 / 写 /cache/recovery / 工厂重置 -->
     <uses-permission android:name="android.permission.REBOOT" />
@@ -59,8 +66,6 @@
         <provider android:authorities="cn.dlife.smartcloud.launcher" />
         <!-- TMC 系统升级（OTA）服务，供 RomUpgradeClient 绑定 -->
         <package android:name="com.tatv.android.TMC" />
-        <!-- 电信蓝牙遥控自动配对/连接服务 -->
-        <package android:name="com.cloudsteem.autobluetooth" />
         <intent>
             <action android:name="com.telecom.tmc.IUpgradeAidlInterface" />
         </intent>
@@ -199,26 +204,6 @@
 
 
         <service
-            android:name=".AutoBluetoothKeeperService"
-            android:enabled="true"
-            android:directBootAware="true"
-            android:exported="false"
-            android:foregroundServiceType="connectedDevice" />
-
-        <receiver
-            android:name=".AutoBluetoothBootReceiver"
-            android:directBootAware="true"
-            android:enabled="true"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
-            </intent-filter>
-        </receiver>
-
-
-        <service
             android:name=".ImageScreenSaverDreamService"
             android:exported="true"
             android:permission="android.permission.BIND_DREAM_SERVICE">
@@ -230,6 +215,23 @@
                 android:name="android.service.dream"
                 android:resource="@xml/image_screen_saver" />
         </service>
+
+        <service
+            android:name="com.cloudsteem.autobluetooth.AutoBluetoothService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="connectedDevice" />
+
+        <receiver
+            android:name="com.cloudsteem.autobluetooth.BootReceiver"
+            android:enabled="true"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+                <action android:name="com.android.speaker.settings.action.RESTART_AUTOBLUETOOTH" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
